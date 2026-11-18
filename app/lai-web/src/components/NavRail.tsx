@@ -51,34 +51,62 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   },
 ]
 
+const COLLAPSED_KEY = 'lai-web-sidebar-collapsed'
+function initialCollapsed(): boolean {
+  try {
+    const saved = localStorage.getItem(COLLAPSED_KEY)
+    if (saved !== null) return saved === 'true'
+  } catch { /* Continue without persistence when storage is unavailable. */ }
+  return window.matchMedia('(max-width: 767px)').matches
+}
+
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
   const { t } = useLanguage()
+  const [collapsed, setCollapsed] = useState(initialCollapsed)
   const [pluginExpanded, setPluginExpanded] = useState(true)
-  useEffect(() => { if ((props.page === 'superagent' || props.page === 'lai-agents')) setPluginExpanded(true) }, [props.page])
-  const pluginOpen = pluginExpanded
+  useEffect(() => {
+    try { localStorage.setItem(COLLAPSED_KEY, String(collapsed)) } catch { /* Keep the choice for this visit. */ }
+  }, [collapsed])
+  useEffect(() => {
+    if (props.page === 'superagent' || props.page === 'lai-agents') setPluginExpanded(true)
+  }, [props.page])
+  const toggleLabel = t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')
+  const alignment = collapsed ? 'justify-center' : 'justify-start'
+  const pluginActive = props.page === 'superagent' || props.page === 'lai-agents'
   return (
-    <nav aria-label={t("Primary navigation")} className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
-      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(item => renderItem(item))}
-        <div className="pt-2">
-          <button type="button" aria-label={t('Plugin')} title={t('Plugin')} aria-expanded={pluginOpen} aria-controls="plugin-navigation" onClick={() => setPluginExpanded(current => !current)} className="flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm text-fd-muted-foreground hover:bg-fd-secondary md:justify-start">
-            <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-6 6v4m-6-10H3m18 0h-3" /></svg>
-            <span className="hidden md:block">{t('Plugin')}</span><svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" className={`ml-auto hidden transition-transform md:block ${pluginOpen ? 'rotate-90' : ''}`}><path d="m6 3 5 5-5 5" /></svg>
-          </button>
-          {pluginOpen && <div id="plugin-navigation" className="mt-1 md:ml-5 md:border-l md:border-fd-border md:pl-3">
-            <button type="button" aria-label="Superagent" title="Superagent" aria-current={props.page === 'superagent' ? 'page' : undefined} onClick={() => props.onNavigate('superagent')} className={`flex min-h-9 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm md:justify-start ${props.page === 'superagent' ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="hidden md:block">Superagent</span></button>
-            <button type="button" aria-label="LAI Agents" title="LAI Agents" aria-current={props.page === 'lai-agents' ? 'page' : undefined} onClick={() => props.onNavigate('lai-agents')} className={`flex min-h-9 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm md:justify-start ${props.page === 'lai-agents' ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="hidden md:block">LAI Agents</span></button>
-          </div>}
+    <nav aria-label={t('Primary navigation')} className={`flex min-h-0 shrink-0 flex-col overflow-x-hidden border-r border-fd-border bg-fd-card py-4 transition-[width,padding] duration-200 motion-reduce:transition-none ${collapsed ? 'w-16 px-2' : 'w-52 px-4'}`}>
+      <button type="button" aria-label={toggleLabel} title={toggleLabel} aria-expanded={!collapsed} aria-controls="lai-sidebar-menu" onClick={() => setCollapsed(current => !current)} className={`mb-3 flex min-h-9 w-full shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm text-fd-muted-foreground hover:bg-fd-secondary focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment}`}>
+        <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /><path d={collapsed ? 'm13 9 3 3-3 3' : 'm16 9-3 3 3 3'} /></svg>
+        {!collapsed && <span className="whitespace-nowrap">{toggleLabel}</span>}
+      </button>
+      <div id="lai-sidebar-menu" className="fd-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(renderItem)}
+          <div className="pt-2">
+            <button type="button" aria-label={t('Plugin')} title={t('Plugin')} aria-expanded={pluginExpanded} aria-controls="plugin-navigation" onClick={() => setPluginExpanded(current => !current)} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-fd-secondary ${alignment} ${collapsed && pluginActive ? 'text-fd-primary' : 'text-fd-muted-foreground'}`}>
+              <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-6 6v4m-6-10H3m18 0h-3" /></svg>
+              {!collapsed && <><span>{t('Plugin')}</span><svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" className={`ml-auto shrink-0 transition-transform ${pluginExpanded ? 'rotate-90' : ''}`}><path d="m6 3 5 5-5 5" /></svg></>}
+            </button>
+            {pluginExpanded && <div id="plugin-navigation" className={`mt-1 space-y-1 ${collapsed ? '' : 'ml-5 border-l border-fd-border pl-3'}`}>
+              {renderPlugin('superagent', 'Superagent')}
+              {renderPlugin('lai-agents', 'LAI Agents')}
+            </div>}
+          </div>
         </div>
       </div>
-      <div className="mt-auto border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
-
+      <div className="mt-3 shrink-0 border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
     </nav>
   )
   function renderItem(item: typeof ITEMS[number]) {
     const active = props.page === item.id
-    return <button key={item.id} type="button" title={t(item.hint)} aria-label={t(item.label)} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(item.id)} className={`flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary md:justify-start ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
-      <span className="shrink-0">{item.icon(active)}</span><span className="hidden md:block">{t(item.label)}</span>
-      {item.id === 'runs' && props.runningCount > 0 && <span className="ml-auto hidden rounded bg-fd-secondary px-1.5 text-xs tabular-nums md:block">{props.runningCount}</span>}
+    return <button key={item.id} type="button" title={t(item.hint)} aria-label={t(item.label)} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(item.id)} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment} ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
+      <span className="shrink-0">{item.icon(active)}</span>{!collapsed && <span>{t(item.label)}</span>}
+      {!collapsed && item.id === 'runs' && props.runningCount > 0 && <span className="ml-auto rounded bg-fd-secondary px-1.5 text-xs tabular-nums">{props.runningCount}</span>}
+    </button>
+  }
+  function renderPlugin(id: 'superagent' | 'lai-agents', label: string) {
+    const active = props.page === id
+    return <button type="button" aria-label={label} title={label} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(id)} className={`flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment} ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
+      {collapsed ? <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{id === 'superagent' ? <><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8m-4-4v4M6 11h3l2-4 3 7 2-3h2" /></> : <><circle cx="12" cy="5" r="3" /><circle cx="5" cy="18" r="3" /><circle cx="19" cy="18" r="3" /><path d="m10 8-4 7m8-7 4 7M8 18h8" /></>}</svg> : <><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="whitespace-nowrap">{label}</span></>}
     </button>
   }
 }
