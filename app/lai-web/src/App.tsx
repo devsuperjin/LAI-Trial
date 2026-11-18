@@ -1,3 +1,4 @@
+import { useLanguage } from './i18n.tsx'
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionListEntry } from './api/gateway.ts'
 import { bootstrapWithToken, listSessions, UnauthorizedError } from './api/gateway.ts'
@@ -8,24 +9,26 @@ import type { Page } from './components/NavRail.tsx'
 import { RunsPage } from './components/RunsPage.tsx'
 import { SettingsPage } from './components/SettingsPage.tsx'
 import { TopBar } from './components/TopBar.tsx'
-import { rootRuns } from './model/runs.ts'
+import { archivedRuns } from '@lai/dsh-adapter/pipeline'
+import { rootRuns, withoutArchived } from './model/runs.ts'
 import { useInterval } from './hooks/useInterval.ts'
 
 export type AuthState = 'probing' | 'need-token' | 'ready'
 
 export function App() {
+  const { t } = useLanguage()
   const [auth, setAuth] = useState<AuthState>('probing')
   const [authError, setAuthError] = useState<string | null>(null)
   const [entries, setEntries] = useState<SessionListEntry[]>([])
   const [gatewayError, setGatewayError] = useState<string | null>(null)
   const [lastPollAt, setLastPollAt] = useState<number | null>(null)
-  const [page, setPage] = useState<Page>('pipeline')
+  const [page, setPage] = useState<Page>('dashboard')
   const [focusRunId, setFocusRunId] = useState<string | null>(null)
 
   const refresh = useCallback(async (): Promise<'ok' | 'unauthorized' | 'unreachable'> => {
     try {
-      const { items } = await listSessions()
-      setEntries(items)
+      const [{ items }, { archivedSessionIds }] = await Promise.all([listSessions(), archivedRuns()])
+      setEntries(withoutArchived(items, archivedSessionIds))
       setGatewayError(null)
       setLastPollAt(Date.now())
       setAuth('ready')
@@ -97,10 +100,10 @@ export function App() {
         ) : (
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
-            <main aria-label="页面内容" className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
+            <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
               <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
               {(page === 'pipeline' || page === 'history') && <PipelinePage view={page === 'history' ? 'history' : 'pipeline'} onSettings={() => { setPage('settings') }} />}
-              {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} />}
+              {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
               {page === 'settings' && <SettingsPage entries={entries} />}
               </div>
@@ -113,6 +116,7 @@ export function App() {
 }
 
 function TokenGate(props: { error: string | null; onSubmit: (token: string) => void }) {
+  const { t } = useLanguage()
   const [token, setToken] = useState('')
   return (
     <div className="flex w-full items-center justify-center">
@@ -120,22 +124,18 @@ function TokenGate(props: { error: string | null; onSubmit: (token: string) => v
         className="w-96 rounded-xl border border-fd-border bg-fd-card p-6"
         onSubmit={(event) => { event.preventDefault(); props.onSubmit(token.trim()) }}
       >
-        <h1 className="mb-2 text-lg font-semibold">Gateway token required</h1>
-        <p className="mb-4 text-sm text-fd-muted-foreground">
-          Paste the <code className="text-fd-foreground">--token</code> value printed by the dsh web server to authorize LAI Web.
-        </p>
+        <h1 className="mb-2 text-lg font-semibold">{t("Gateway token required")}</h1>
+        <p className="mb-4 text-sm text-fd-muted-foreground">{t("Paste the")}<code className="text-fd-foreground">{t("--token")}</code>{t("value printed by the dsh web server to authorize LAI Web.")}</p>
         <input
           autoFocus
           className="mb-3 w-full rounded-md border border-fd-border bg-fd-muted px-3 py-2 font-mono text-sm outline-none focus:border-fd-primary"
           onChange={(event) =>{  setToken(event.target.value) }}
-          placeholder="gateway access token"
+          placeholder={t("gateway access token")}
           type="password"
           value={token}
         />
         {props.error !== null && <p className="mb-3 text-sm text-fd-danger">{props.error}</p>}
-        <button className="w-full rounded-md bg-fd-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90" type="submit">
-          Connect
-        </button>
+        <button className="w-full rounded-md bg-fd-primary px-3 py-2 text-sm font-medium text-white hover:opacity-90" type="submit">{t("Connect")}</button>
       </form>
     </div>
   )

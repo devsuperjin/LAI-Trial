@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n.tsx'
 import { AnimatePresence, motion } from 'motion/react'
 import type { SessionListEntry } from '../api/gateway.ts'
 import { useState } from 'react'
@@ -34,11 +35,12 @@ export function TaskList(props: {
   selectedId: string | null
   onSelect: (sessionId: string) => void
 }) {
+  const { t } = useLanguage()
   const [filter, setFilter] = useState<Filter>('All')
   const visible = props.entries.filter(entry => matches(filter, statusOf(entry)))
 
   return (
-    <aside aria-label="Runs list" className="flex max-h-48 w-full shrink-0 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card md:max-h-none md:w-72 xl:w-80">
+    <aside aria-label={t("Runs list")} className="flex max-h-48 w-full shrink-0 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card md:max-h-none md:w-72 xl:w-80">
       <div className="flex items-center gap-1 px-3 pt-3">
         {FILTERS.map(candidate => (
           <button
@@ -50,7 +52,7 @@ export function TaskList(props: {
             {filter === candidate && (
               <motion.span className="absolute inset-0 rounded-md bg-fd-secondary" layoutId="filter-pill" transition={{ type: 'spring', stiffness: 400, damping: 30 }} />
             )}
-            <span className="relative">{candidate}</span>
+            <span className="relative">{t(candidate)}</span>
           </button>
         ))}
       </div>
@@ -79,7 +81,7 @@ export function TaskList(props: {
                 <div className="mt-1 flex items-center gap-2 pl-4 text-xs text-fd-muted-foreground">
                   <span className="truncate font-mono">{entry.sessionId}</span>
                   {tokens !== undefined && (
-                    <span className="shrink-0">{(tokens.outputTokens + tokens.cacheReadTokens + tokens.cacheWriteTokens + tokens.uncachedInputTokens).toLocaleString()} tok</span>
+                    <span className="shrink-0">{(tokens.outputTokens + tokens.cacheReadTokens + tokens.cacheWriteTokens + tokens.uncachedInputTokens).toLocaleString()}{t(" tok")}</span>
                   )}
                 </div>
               </motion.button>
@@ -87,7 +89,7 @@ export function TaskList(props: {
           })}
         </AnimatePresence>
         {visible.length === 0 && (
-          <p className="px-3 py-6 text-center text-xs text-fd-muted-foreground">no tasks match this filter</p>
+          <p className="px-3 py-6 text-center text-xs text-fd-muted-foreground">{t("no tasks match this filter")}</p>
         )}
       </div>
     </aside>

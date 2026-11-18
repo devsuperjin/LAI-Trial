@@ -19,3 +19,19 @@ export function rootRuns(entries: SessionListEntry[]): SessionListEntry[] {
   return entries.filter(entry => !entry.parentSessionId && (!entry.blank || parents.has(entry.sessionId) || running.has(entry.sessionId)))
     .map(entry => running.has(entry.sessionId) && !entry.running ? { ...entry, running: true } : entry)
 }
+
+/** An archived root also removes its descendants from aggregate run metrics. */
+export function withoutArchived(entries: SessionListEntry[], archivedIds: string[]): SessionListEntry[] {
+  const archived = new Set(archivedIds)
+  const byId = new Map(entries.map(entry => [entry.sessionId, entry]))
+  return entries.filter(entry => {
+    let current: SessionListEntry | undefined = entry
+    const visited = new Set<string>()
+    while (current && !visited.has(current.sessionId)) {
+      if (archived.has(current.sessionId) || (current.parentSessionId && archived.has(current.parentSessionId))) return false
+      visited.add(current.sessionId)
+      current = current.parentSessionId ? byId.get(current.parentSessionId) : undefined
+    }
+    return true
+  })
+}

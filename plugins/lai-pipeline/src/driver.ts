@@ -65,6 +65,13 @@ export class DshPipelineDriver implements PipelineDriver {
     }))
   }
   async execute(role: Role, context: StageContext, signal: AbortSignal): Promise<StageResult> {
+    if (role === 'monitor' && this.parent && this.ctx.workspaceRegistry.archivedSessionIds.includes(this.parent.agent.session.id)) {
+      await this.ctx.subagents.drainDescendants([this.parent.agent])
+      await this.parent.dispose()
+      await this.workspace?.detachSession(this.parent.agent.session.id)
+      this.info.clear()
+      await this.initialize()
+    }
     if (!this.parent || !this.workspace) throw new Error('Pipeline orchestrator is not available.')
     const selection = this.config.models.get()[role === 'monitor' ? 'orchestrator' : role] ?? this.ctx.agentDefaultModel.currentSelection()
     const parent = this.parent.agent

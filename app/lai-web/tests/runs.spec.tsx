@@ -27,3 +27,17 @@ it('keeps an idle parent run live while its subagent is running', () => {
   expect(rows).toEqual([{ ...parent, running: true }])
   expect(parent.running).toBe(false)
 })
+
+it('removes archived roots and their entire subtree from runs and dashboard metrics', async () => {
+  const { withoutArchived } = await import('../src/model/runs.ts')
+  const entries: SessionListEntry[] = [
+    { sessionId: 'deleted', updatedAt: 1, running: false },
+    { sessionId: 'child', parentSessionId: 'deleted', updatedAt: 2, running: false },
+    { sessionId: 'grandchild', parentSessionId: 'child', updatedAt: 3, running: false },
+    { sessionId: 'kept', updatedAt: 4, running: false },
+  ]
+  const visible = withoutArchived(entries, ['deleted'])
+  expect(visible.map(entry => entry.sessionId)).toEqual(['kept'])
+  expect(deriveDashboard(visible).totals).toMatchObject({ runs: 1, subagents: 0 })
+  expect(withoutArchived(entries.slice(1), ['deleted']).map(entry => entry.sessionId)).toEqual(['kept'])
+})

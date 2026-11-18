@@ -1,3 +1,4 @@
+import { LanguageSwitch, useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import type { AuthState } from '../App.tsx'
@@ -9,11 +10,11 @@ function authLabel(auth: AuthState): string {
 }
 
 const PAGE_TITLE: Record<Page, string> = {
-  pipeline: '流水线',
-  history: '执行记录',
+  pipeline: 'Pipeline',
+  history: 'History',
   runs: 'Runs',
   dashboard: 'Dashboard',
-  settings: '设置',
+  settings: 'Settings',
 }
 
 type Theme = 'dark' | 'light'
@@ -79,6 +80,7 @@ export function TopBar(props: {
   runningCount: number
   totalCount: number
 }) {
+  const { t } = useLanguage()
   const live = props.auth === 'ready' && props.error === null
   const right = live
     ? `Live · polled ${props.lastPollAt !== null ? new Date(props.lastPollAt).toLocaleTimeString([], { hour12: false }) : ''}`
@@ -86,21 +88,22 @@ export function TopBar(props: {
   return (
     <header className="flex h-16 shrink-0 items-center gap-4 border-b border-fd-border bg-fd-card px-4 md:px-5">
       <div className="flex w-8 shrink-0 items-center gap-3 md:w-[172px]">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-base font-semibold text-white">L</span>
-        <div className="hidden min-w-0 md:block"><p className="text-sm font-semibold tracking-wide">LAI</p><p className="text-[11px] text-fd-muted-foreground">Agent workspace</p></div>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-base font-semibold text-white">{t("L")}</span>
+        <div className="hidden min-w-0 md:block"><p className="text-sm font-semibold tracking-wide">{t("LAI")}</p><p className="text-[11px] text-fd-muted-foreground">{t("Agent workspace")}</p></div>
       </div>
-      <div className="flex min-w-0 items-center gap-3 text-sm"><span className="hidden text-fd-border sm:inline" aria-hidden>/</span><span className="truncate font-medium">{PAGE_TITLE[props.page]}</span></div>
+      <div className="flex min-w-0 items-center gap-3 text-sm"><span className="hidden text-fd-border sm:inline" aria-hidden>/</span><span className="truncate font-medium">{t(PAGE_TITLE[props.page])}</span></div>
       <div className="ml-auto flex items-center gap-3 text-xs md:gap-5 text-fd-muted-foreground">
-        <span className="hidden lg:inline">{props.runningCount} 运行中 · {props.totalCount} runs</span>
+        <span className="hidden lg:inline">{props.runningCount}{t(" running · ")}{props.totalCount}{t(" runs")}</span>
         <span title={right} className="flex items-center gap-1.5">
           <motion.span
             animate={live ? { opacity: [1, 0.4, 1] } : { opacity: 1 }}
             className={`h-2 w-2 rounded-full ${live ? 'bg-fd-success' : 'bg-fd-warning'}`}
             transition={live ? { duration: 2, repeat: Infinity } : undefined}
           />
-          {live ? '已连接' : '连接中'}
+          {t(live ? 'Connected' : 'Connecting…')}
         </span>
-        <a className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-fd-border px-2.5 py-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-secondary hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-primary" href="/dsh/" target="_blank" rel="noopener noreferrer" title="打开原版 DSH 调试界面"><span className="hidden sm:inline">原版 DSH 调试</span><span className="sm:hidden">DSH</span><span aria-hidden>↗</span></a>
+        <a className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-fd-border px-2.5 py-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-secondary hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-primary" href="/dsh/" target="_blank" rel="noopener noreferrer" title={t("Open the original DSH debugging interface")}><span className="hidden sm:inline">{t("Original DSH")}</span><span className="sm:hidden">{t("DSH")}</span><span aria-hidden>↗</span></a>
+        <LanguageSwitch />
         <ThemeToggle />
       </div>
     </header>

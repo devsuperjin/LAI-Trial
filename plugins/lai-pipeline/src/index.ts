@@ -69,6 +69,7 @@ export default class LaiPipeline extends Service {
         const send = (status: number, value: unknown): void => { res.writeHead(status, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(value)) }
         const path = new URL(req.url ?? '/', 'http://localhost').pathname
         try {
+          if (req.method === 'GET' && path === '/lai-api/pipeline/archives') { send(200, { archivedSessionIds: this.ctx.workspaceRegistry.archivedSessionIds }); return }
           if (req.method === 'GET' && path === '/lai-api/pipeline') { send(200, this.snapshot()); return }
           if (req.method !== 'POST') { send(405, { error: 'Use GET for status or POST for pipeline actions.' }); return }
           let size = 0

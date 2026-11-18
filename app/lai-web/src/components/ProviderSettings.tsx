@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { ConfigurableProvider, CredentialInfo, ModelCatalog, SettingsDescribeValue, SettingsNamespaceView, SettingsPathOp } from '../api/gateway.ts'
 import { describeCredentials, describeSettings, listConfigurableProviders, modelCatalog, mutateSettings, setCredential } from '../api/gateway.ts'
@@ -62,6 +63,7 @@ interface Snapshot {
 
 /** Provider edits use DSH's public settings and write-only credential endpoints. */
 export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
+  const { t } = useLanguage()
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
   const [editor, setEditor] = useState<ConfigurableProvider | 'add' | null>(null)
@@ -109,20 +111,20 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
   }
 
   return (
-    <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label="Model providers">
+    <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label={t("Model providers")}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-medium">Model providers</h2>
-          <p className="mt-1 text-sm text-fd-muted-foreground">Connect a provider or your own API endpoint, then choose its models below.</p>
+          <h2 className="text-base font-medium">{t("Model providers")}</h2>
+          <p className="mt-1 text-sm text-fd-muted-foreground">{t("Connect a provider or your own API endpoint, then choose its models below.")}</p>
         </div>
-        <button className={buttonClass} disabled={loading || !snapshot?.settings.writable || editor !== null} onClick={() => { setNotice(null); setEditor('add') }} type="button">Add provider</button>
+        <button className={buttonClass} disabled={loading || !snapshot?.settings.writable || editor !== null} onClick={() => { setNotice(null); setEditor('add') }} type="button">{t("Add provider")}</button>
       </div>
-      {loading && <p className="mt-4 text-sm text-fd-muted-foreground" role="status">Loading providers…</p>}
-      {failure !== null && <div className="mt-4 text-sm text-fd-danger" role="alert">{failure} <button className={buttonClass} onClick={() => { void load() }} type="button">Retry</button></div>}
+      {loading && <p className="mt-4 text-sm text-fd-muted-foreground" role="status">{t("Loading providers…")}</p>}
+      {failure !== null && <div className="mt-4 text-sm text-fd-danger" role="alert">{failure} <button className={buttonClass} onClick={() => { void load() }} type="button">{t("Retry")}</button></div>}
       {notice !== null && <p className="mt-3 text-sm text-fd-muted-foreground" role="status">{notice}</p>}
       {snapshot !== null && !loading && <>
-        {!snapshot.settings.writable && <p className="mt-3 text-sm text-fd-warning">This profile is read-only; provider changes are disabled.</p>}
-        {snapshot.credentialError && <p className="mt-3 text-xs text-fd-warning">Could not read API key status: {snapshot.credentialError}</p>}
+        {!snapshot.settings.writable && <p className="mt-3 text-sm text-fd-warning">{t("This profile is read-only; provider changes are disabled.")}</p>}
+        {snapshot.credentialError && <p className="mt-3 text-xs text-fd-warning">{t("Could not read API key status: ")}{snapshot.credentialError}</p>}
         <div className="mt-4 space-y-2">
           {configured.map(provider => <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-fd-border px-3 py-2" key={provider.provider}>
             <div className="min-w-0 flex-1">
@@ -136,9 +138,9 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
               })()}
               {snapshot.catalog.failures.filter(failure => failure.id === provider.provider).map(failure => <p className="mt-1 break-words text-xs text-fd-danger" key={failure.id}>{failure.message}</p>)}
             </div>
-            <button className={buttonClass} disabled={editor !== null} onClick={() => { setNotice(null); setEditor(provider) }} type="button">Configure {provider.displayName}</button>
+            <button className={buttonClass} disabled={editor !== null} onClick={() => { setNotice(null); setEditor(provider) }} type="button">{t("Configure ")}{provider.displayName}</button>
           </div>)}
-          {configured.length === 0 && editor === null && <p className="text-sm text-fd-muted-foreground">No providers configured. Add one to make models available.</p>}
+          {configured.length === 0 && editor === null && <p className="text-sm text-fd-muted-foreground">{t("No providers configured. Add one to make models available.")}</p>}
         </div>
         {editor !== null && <ProviderEditor
           key={editor === 'add' ? 'add' : editor.provider}
@@ -154,6 +156,7 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
 }
 
 function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: Snapshot; available: ConfigurableProvider[]; onCancel: () => void; onSaved: () => Promise<void> }) {
+  const { t } = useLanguage()
   const [choice, setChoice] = useState(props.entry?.provider ?? CUSTOM)
   const [route, setRoute] = useState(props.entry?.provider ?? '')
   const selected = props.available.find(provider => provider.provider === choice)
@@ -261,49 +264,47 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
 
   return (
     <form className="mt-4 space-y-4 rounded-lg border border-fd-border bg-fd-muted/30 p-4" onSubmit={event => { event.preventDefault(); void save() }}>
-      <h3 className="text-sm font-medium">{props.entry ? `Configure ${props.entry.displayName}` : 'Add model provider'}</h3>
-      {!props.entry && <label className="block text-xs text-fd-muted-foreground">Provider
-        <select className={`${inputClass} mt-1`} value={choice} disabled={!props.snapshot.settings.writable || busy || keyPending} onChange={event => { choose(event.target.value) }}>
-          <option value={CUSTOM}>Custom API / local server</option>
+      <h3 className="text-sm font-medium">{props.entry ? `${t('Configure')} ${props.entry.displayName}` : t('Add model provider')}</h3>
+      {!props.entry && <label className="block text-xs text-fd-muted-foreground">{t("Provider")}<select className={`${inputClass} mt-1`} value={choice} disabled={!props.snapshot.settings.writable || busy || keyPending} onChange={event => { choose(event.target.value) }}>
+          <option value={CUSTOM}>{t("Custom API / local server")}</option>
           {props.available.map(provider => <option key={provider.provider} value={provider.provider}>{provider.displayName} ({provider.provider})</option>)}
         </select>
       </label>}
-      {namespace === undefined && <p className="text-sm text-fd-warning">The provider adapter is not mounted in this profile.</p>}
+      {namespace === undefined && <p className="text-sm text-fd-warning">{t("The provider adapter is not mounted in this profile.")}</p>}
       <fieldset className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2" disabled={profileDisabled}>
-        {custom && <label className="text-xs text-fd-muted-foreground">Provider ID<input className={`${inputClass} mt-1`} value={route} onChange={e => { setRoute(e.target.value) }} placeholder="my-gateway" required /></label>}
-        {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">Display name<input className={`${inputClass} mt-1`} value={displayName} onChange={e => { setDisplayName(e.target.value) }} placeholder={selected?.displayName ?? 'My gateway'} /></label>}
-        <label className="text-xs text-fd-muted-foreground">API endpoint<input className={`${inputClass} mt-1`} value={baseURL} onChange={e => { setBaseURL(e.target.value) }} placeholder={selected?.defaultBaseURL ?? (nsName === 'llm-deepseek' ? DEEPSEEK_MESSAGES_URL : 'https://api.example.com/v1')} type="url" required={declared} /></label>
-        {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">API protocol<select className={`${inputClass} mt-1`} value={api} onChange={e => { setApi(e.target.value) }}>
-          <option value="">Use provider defaults</option>
-          <option value="openai-completions">OpenAI compatible (Chat Completions)</option>
-          <option value="openai-responses">OpenAI Responses</option>
-          <option value="anthropic-messages">Anthropic Messages</option>
+        {custom && <label className="text-xs text-fd-muted-foreground">{t("Provider ID")}<input className={`${inputClass} mt-1`} value={route} onChange={e => { setRoute(e.target.value) }} placeholder={t("my-gateway")} required /></label>}
+        {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">{t("Display name")}<input className={`${inputClass} mt-1`} value={displayName} onChange={e => { setDisplayName(e.target.value) }} placeholder={selected?.displayName ?? 'My gateway'} /></label>}
+        <label className="text-xs text-fd-muted-foreground">{t("API endpoint")}<input className={`${inputClass} mt-1`} value={baseURL} onChange={e => { setBaseURL(e.target.value) }} placeholder={selected?.defaultBaseURL ?? (nsName === 'llm-deepseek' ? DEEPSEEK_MESSAGES_URL : 'https://api.example.com/v1')} type="url" required={declared} /></label>
+        {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">{t("API protocol")}<select className={`${inputClass} mt-1`} value={api} onChange={e => { setApi(e.target.value) }}>
+          <option value="">{t("Use provider defaults")}</option>
+          <option value="openai-completions">{t("OpenAI compatible (Chat Completions)")}</option>
+          <option value="openai-responses">{t("OpenAI Responses")}</option>
+          <option value="anthropic-messages">{t("Anthropic Messages")}</option>
           {api && !['openai-completions', 'openai-responses', 'anthropic-messages'].includes(api) && <option value={api}>{api}</option>}
         </select></label>}
       </fieldset>
-      {nsName === 'llm-deepseek' && <p className="text-xs text-fd-muted-foreground">The built-in DeepSeek provider uses Anthropic Messages, not Chat Completions. Official endpoint: <code>{DEEPSEEK_MESSAGES_URL}</code>. A custom OpenAI-compatible server needs a separate custom provider.</p>}
-      <label className="block text-xs text-fd-muted-foreground">API key
-        <input className={`${inputClass} mt-1`} type="password" autoComplete="new-password" value={apiKey} onChange={event => { setApiKey(event.target.value) }} disabled={disabled || credential?.writable === false} placeholder={credential?.configured ? 'Configured — leave blank to keep existing key' : 'Enter API key, or leave blank for native authentication'} />
+      {nsName === 'llm-deepseek' && <p className="text-xs text-fd-muted-foreground">{t("The built-in DeepSeek provider uses Anthropic Messages, not Chat Completions. Official endpoint: ")}<code>{DEEPSEEK_MESSAGES_URL}</code>{t(". A custom OpenAI-compatible server needs a separate custom provider.")}</p>}
+      <label className="block text-xs text-fd-muted-foreground">{t("API key")}<input className={`${inputClass} mt-1`} type="password" autoComplete="new-password" value={apiKey} onChange={event => { setApiKey(event.target.value) }} disabled={disabled || credential?.writable === false} placeholder={credential?.configured ? 'Configured — leave blank to keep existing key' : 'Enter API key, or leave blank for native authentication'} />
       </label>
-      <p className="text-xs text-fd-muted-foreground">Keys are stored separately by DSH and never displayed here. Leaving this field blank keeps existing credentials. Local OpenAI-compatible servers may require a placeholder key.</p>
-      {credentialError && <p className="text-xs text-fd-warning" role="status">Credential status is unavailable. {credentialError}</p>}
-      {credential?.writable === false && <p className="text-xs text-fd-warning">This credential is read-only. Update it at its source.</p>}
+      <p className="text-xs text-fd-muted-foreground">{t("Keys are stored separately by DSH and never displayed here. Leaving this field blank keeps existing credentials. Local OpenAI-compatible servers may require a placeholder key.")}</p>
+      {credentialError && <p className="text-xs text-fd-warning" role="status">{t("Credential status is unavailable. ")}{credentialError}</p>}
+      {credential?.writable === false && <p className="text-xs text-fd-warning">{t("This credential is read-only. Update it at its source.")}</p>}
       <fieldset className="min-w-0 space-y-3" disabled={profileDisabled}>
-        <legend className="mb-2 text-sm font-medium">Models</legend>
-        <p className="text-xs text-fd-muted-foreground">{declared ? 'Declare the model IDs served by this endpoint.' : 'Leave the list empty to use the provider catalog. An explicit list replaces that catalog.'} Token limits are optional.</p>
+        <legend className="mb-2 text-sm font-medium">{t("Models")}</legend>
+        <p className="text-xs text-fd-muted-foreground">{declared ? 'Declare the model IDs served by this endpoint.' : 'Leave the list empty to use the provider catalog. An explicit list replaces that catalog.'}{t(" Token limits are optional.")}</p>
         {models.map((model, index) => <div className="grid min-w-0 grid-cols-1 gap-2 rounded-lg border border-fd-border p-3 sm:grid-cols-2" key={index}>
-          <label className="text-xs text-fd-muted-foreground">Model ID<input className={`${inputClass} mt-1`} value={model.id} onChange={e => { changeModel(index, 'id', e.target.value) }} required /></label>
-          <label className="text-xs text-fd-muted-foreground">Model name<input className={`${inputClass} mt-1`} value={model.name} onChange={e => { changeModel(index, 'name', e.target.value) }} /></label>
-          <label className="text-xs text-fd-muted-foreground">Context window<input className={`${inputClass} mt-1`} type="number" min="1" step="1" value={model.contextWindow} onChange={e => { changeModel(index, 'contextWindow', e.target.value) }} /></label>
-          <label className="text-xs text-fd-muted-foreground">Maximum output tokens<input className={`${inputClass} mt-1`} type="number" min="1" step="1" value={model.maxTokens} onChange={e => { changeModel(index, 'maxTokens', e.target.value) }} /></label>
-          <button className={`${buttonClass} justify-self-start`} type="button" onClick={() => { setModels(current => current.filter((_, i) => i !== index)) }}>Remove model {index + 1}</button>
+          <label className="text-xs text-fd-muted-foreground">{t("Model ID")}<input className={`${inputClass} mt-1`} value={model.id} onChange={e => { changeModel(index, 'id', e.target.value) }} required /></label>
+          <label className="text-xs text-fd-muted-foreground">{t("Model name")}<input className={`${inputClass} mt-1`} value={model.name} onChange={e => { changeModel(index, 'name', e.target.value) }} /></label>
+          <label className="text-xs text-fd-muted-foreground">{t("Context window")}<input className={`${inputClass} mt-1`} type="number" min="1" step="1" value={model.contextWindow} onChange={e => { changeModel(index, 'contextWindow', e.target.value) }} /></label>
+          <label className="text-xs text-fd-muted-foreground">{t("Maximum output tokens")}<input className={`${inputClass} mt-1`} type="number" min="1" step="1" value={model.maxTokens} onChange={e => { changeModel(index, 'maxTokens', e.target.value) }} /></label>
+          <button className={`${buttonClass} justify-self-start`} type="button" onClick={() => { setModels(current => current.filter((_, i) => i !== index)) }}>{t("Remove model ")}{index + 1}</button>
         </div>)}
-        <button className={buttonClass} type="button" onClick={() => { setModels(current => [...current, { id: '', name: '', contextWindow: '', maxTokens: '', original: {} }]) }}>Add model</button>
+        <button className={buttonClass} type="button" onClick={() => { setModels(current => [...current, { id: '', name: '', contextWindow: '', maxTokens: '', original: {} }]) }}>{t("Add model")}</button>
       </fieldset>
-      {failure !== null && <div className="space-y-1" role="alert"><p className="break-words text-sm text-fd-danger">{failure}</p>{!keyPending && <p className="text-xs text-fd-muted-foreground">If settings changed elsewhere, cancel and reopen this provider before saving again.</p>}</div>}
+      {failure !== null && <div className="space-y-1" role="alert"><p className="break-words text-sm text-fd-danger">{failure}</p>{!keyPending && <p className="text-xs text-fd-muted-foreground">{t("If settings changed elsewhere, cancel and reopen this provider before saving again.")}</p>}</div>}
       <div className="flex flex-wrap gap-2">
-        <button className="rounded-md bg-fd-primary px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40" disabled={disabled} type="submit">{busy ? 'Saving…' : keyPending ? 'Retry API key' : 'Save provider'}</button>
-        <button className={buttonClass} disabled={busy} type="button" onClick={props.onCancel}>Cancel</button>
+        <button className="rounded-md bg-fd-primary px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40" disabled={disabled} type="submit">{t(busy ? 'Saving…' : keyPending ? 'Retry API key' : 'Save provider')}</button>
+        <button className={buttonClass} disabled={busy} type="button" onClick={props.onCancel}>{t("Cancel")}</button>
       </div>
     </form>
   )

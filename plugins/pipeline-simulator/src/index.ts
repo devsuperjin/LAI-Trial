@@ -16,7 +16,7 @@ export function simulation(caseId: string): PipelineInput {
   return {
     id: randomUUID(), type: ci ? 'ci.failure' : 'code.commit',
     title: '[Simulation] 1 + 1 returns 3',
-    summary: '最小本地模拟：add(1, 1) 返回 3，期望 2。原因是 return a + b + 1 中多了 +1。主 Agent 确认失败，再让五个子 Agent 各输出几句话。复现只运行一次提供的脚本，不做额外调查、不创建远程工单。',
+    summary: 'Minimal local simulation: add(1, 1) returns 3 instead of 2 because return a + b + 1 contains an extra +1. The orchestrator confirms the failure, then delegates to five specialists. Each gives a short English answer. Run the supplied reproduction script once. No extra investigation or remote tickets.',
     repository: 'simulation/tiny-add', commit: 'simulated-extra-plus-one',
     evidence: [
       { name: 'failure.log', content: 'SIMULATION: assert add(1, 1) == 2; actual: 3; FAIL\n' },

@@ -241,3 +241,11 @@ export function describeCredentials(refs: string[]): Promise<Record<string, Cred
 export function setCredential(ref: string, value: string): Promise<void> {
   return rpc('credentials/set', { ref, value })
 }
+
+/** Recoverable deletion using DSH's durable workspace archive. Active work is refused. */
+export function archiveRun(sessionId: string): Promise<{ archivedSessionIds: string[] }> {
+  return rpc('workspace/archiveSession', { request: { sessionId } })
+}
+export function restoreRun(sessionId: string): Promise<{ archivedSessionIds: string[] }> {
+  return rpc('workspace/unarchiveSession', { request: { sessionId } })
+}

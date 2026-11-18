@@ -14,3 +14,5 @@ No broker, MQ, or shared knowledge service is required. Inputs are local fixture
 Original DSH debugging UI: `/dsh/`. User settings and session data: `.runtime/dsh` (ignored). If port 3080 is occupied, stop the existing instance before starting another.
 
 See [architecture](docs/architecture.md) and [upstream synchronization](docs/upstream-sync.md). Run `pnpm check` for local checks.
+
+LAI Web opens on Dashboard. The top-bar EN / 中文 switch saves the interface language locally. Delete run uses the native DSH archive and provides Undo; it is recoverable, and active runs must be stopped first. Archived roots and their descendants are excluded from Runs and dashboard aggregates.

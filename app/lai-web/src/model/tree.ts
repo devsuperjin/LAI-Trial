@@ -2,6 +2,7 @@ import type { PageResponse, SessionListEntry, WireEvent } from '../api/gateway.t
 import { deriveDag, record, textOf } from './dag.ts'
 export const STAGES = ['monitor', 'triage', 'reproduce', 'ticket', 'review', 'report']
 const PRESET_STAGES: Record<string, number> = { 'iqe-monitor': 1, 'iqe-triage': 2, 'iqe-reproduction': 3, 'iqe-ticket': 4, 'iqe-reviewer': 5, 'iqe-reporting': 6 }
+export const stageForPreset = (preset: string): number => PRESET_STAGES[preset] ?? 0
 const PRESET_LABELS: Record<string, string> = { 'iqe-monitor': 'Monitor', 'iqe-triage': 'Triage', 'iqe-reproduction': 'Reproduction', 'iqe-ticket': 'Ticket', 'iqe-reviewer': 'Reviewer', 'iqe-reporting': 'Reporter' }
 const HUES = ['#60a5fa', '#a78bfa', '#fbbf24', '#fb923c', '#34d399', '#f472b6']
 export const stageHue = (stage: number): string => HUES[((stage % HUES.length) + HUES.length) % HUES.length]!

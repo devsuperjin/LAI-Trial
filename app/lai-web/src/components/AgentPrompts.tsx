@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, mutateSettings } from '../api/gateway.ts'
@@ -10,6 +11,7 @@ const ROLES = [
 
 /** Edit the lai-agents plugin's prompts through ordinary DSH settings. */
 export function AgentPrompts() {
+  const { t } = useLanguage()
   const [namespace, setNamespace] = useState<SettingsNamespaceView | null>(null)
   const [writable, setWritable] = useState(false)
   const [draft, setDraft] = useState<Record<string, string>>({})
@@ -46,19 +48,19 @@ export function AgentPrompts() {
   }
   const original = record(namespace?.value.prompts)
   const dirty = ROLES.some(([id]) => draft[id] !== original[id])
-  return <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label="LAI agents">
-    <h2 className="text-base font-medium">LAI agents</h2>
-    <p className="mt-1 text-sm text-fd-muted-foreground">One orchestrator with monitoring and five specialist subagents. Prompts are stored in the independent lai-agents plugin.</p>
-    {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">The lai-agents plugin is not enabled in this profile.</p>}
+  return <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label={t("LAI agents")}>
+    <h2 className="text-base font-medium">{t("LAI agents")}</h2>
+    <p className="mt-1 text-sm text-fd-muted-foreground">{t("One orchestrator with monitoring and five specialist subagents. Prompts are stored in the independent lai-agents plugin.")}</p>
+    {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">{t("The lai-agents plugin is not enabled in this profile.")}</p>}
     {namespace && <div className="mt-4 space-y-2">{ROLES.map(([id, title]) => <details className="rounded-lg border border-fd-border p-3" key={id}>
-      <summary className="cursor-pointer text-sm font-medium">{title}</summary>
-      <textarea aria-label={`${title} prompt`} className="mt-3 min-h-40 w-full rounded-md border border-fd-border bg-fd-muted p-3 text-sm outline-none focus:border-fd-primary disabled:opacity-50" value={draft[id] ?? ''} disabled={busy || !writable} onChange={event => { setDraft(value => ({ ...value, [id]: event.target.value })) }} />
+      <summary className="cursor-pointer text-sm font-medium">{t(title)}</summary>
+      <textarea aria-label={`${t(title)} prompt`} className="mt-3 min-h-40 w-full rounded-md border border-fd-border bg-fd-muted p-3 text-sm outline-none focus:border-fd-primary disabled:opacity-50" value={draft[id] ?? ''} disabled={busy || !writable} onChange={event => { setDraft(value => ({ ...value, [id]: event.target.value })) }} />
     </details>)}</div>}
-    {error && <p className="mt-3 text-sm text-fd-danger" role="alert">{error} Discard the draft and reload if settings changed elsewhere.</p>}
+    {error && <p className="mt-3 text-sm text-fd-danger" role="alert">{error}{t(" Discard the draft and reload if settings changed elsewhere.")}</p>}
     {notice && <p className="mt-3 text-sm text-fd-success" role="status">{notice}</p>}
     <div className="mt-4 flex flex-wrap gap-2">
-      <button className="rounded-md bg-fd-primary px-4 py-2 text-sm text-white disabled:opacity-40" disabled={busy || !namespace || !writable || !dirty} onClick={() => { void save() }} type="button">{busy ? 'Loading…' : 'Save prompts'}</button>
-      <button className="rounded-md border border-fd-border px-3 py-2 text-sm disabled:opacity-40" disabled={busy} onClick={() => { setNotice(null); void load() }} type="button">Discard draft and reload</button>
+      <button className="rounded-md bg-fd-primary px-4 py-2 text-sm text-white disabled:opacity-40" disabled={busy || !namespace || !writable || !dirty} onClick={() => { void save() }} type="button">{t(busy ? 'Loading…' : 'Save prompts')}</button>
+      <button className="rounded-md border border-fd-border px-3 py-2 text-sm disabled:opacity-40" disabled={busy} onClick={() => { setNotice(null); void load() }} type="button">{t("Discard draft and reload")}</button>
     </div>
   </section>
 }

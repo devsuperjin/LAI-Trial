@@ -19,3 +19,5 @@ export function pipelineSnapshot(): Promise<PipelineSnapshot> { return request()
 export function simulatePipeline(sourceId: string, caseId: string): Promise<PipelineRun> { return request('/simulate', { sourceId, caseId }) }
 /** Cancel and drain the currently executing pipeline run. */
 export function cancelPipeline(runId: string): Promise<{ cancelled: boolean }> { return request('/cancel', { runId }) }
+
+export function archivedRuns(): Promise<{ archivedSessionIds: string[] }> { return request('/archives') }

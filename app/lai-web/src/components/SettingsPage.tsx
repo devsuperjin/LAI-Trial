@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AgentPresetDocument, AgentPresetRow, ModelCatalog, ModelSelection, SessionListEntry, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, listAgentPresets, modelCatalog, readAgentPreset, updateSettings } from '../api/gateway.ts'
@@ -55,6 +56,7 @@ function AgentCard(props: {
   saving: boolean
   onApply: (agent: AgentModelInfo, key: string) => void
 }) {
+  const { t } = useLanguage()
   const effective = effectiveModel(props.agent, props.fallback)
   const [draft, setDraft] = useState(selectionKey(effective))
   useEffect(() => { setDraft(selectionKey(effective)) }, [effective.provider, effective.model])
@@ -91,10 +93,10 @@ function AgentCard(props: {
           onClick={() => { props.onApply(props.agent, draft) }}
           type="button"
         >
-          {props.saving ? 'Saving…' : 'Apply'}
+          {t(props.saving ? 'Saving…' : 'Apply')}
         </button>
         {props.agent.inherits && (
-          <span className="text-[11px] text-fd-muted-foreground">Follows the orchestrator route</span>
+          <span className="text-[11px] text-fd-muted-foreground">{t("Follows the orchestrator route")}</span>
         )}
       </div>
     </div>
@@ -102,6 +104,7 @@ function AgentCard(props: {
 }
 
 export function SettingsPage(props: { entries: SessionListEntry[] }) {
+  const { t } = useLanguage()
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null)
   const [presets, setPresets] = useState<AgentPresetRow[]>([])
   const [orchestratorDoc, setOrchestratorDoc] = useState<AgentPresetDocument | null>(null)
@@ -205,10 +208,8 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   if (loadError !== null) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3">
-        <p className="text-sm text-fd-danger">Could not load configuration: {loadError}</p>
-        <button className="rounded-md border border-fd-border bg-fd-secondary px-3 py-1.5 text-sm hover:bg-fd-muted" onClick={() => { void load() }} type="button">
-          Retry
-        </button>
+        <p className="text-sm text-fd-danger">{t("Could not load configuration: ")}{loadError}</p>
+        <button className="rounded-md border border-fd-border bg-fd-secondary px-3 py-1.5 text-sm hover:bg-fd-muted" onClick={() => { void load() }} type="button">{t("Retry")}</button>
       </div>
     )
   }
@@ -221,15 +222,13 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
         <ProviderSettings onSaved={refreshModels} />
         <section className="rounded-xl border border-fd-border bg-fd-card p-5">
           <div className="mb-1 flex items-center gap-2">
-            <h2 className="text-base font-semibold">Default model</h2>
-            <span className="rounded-full border border-fd-success/40 bg-fd-success/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-fd-success">live</span>
+            <h2 className="text-base font-semibold">{t("Default model")}</h2>
+            <span className="rounded-full border border-fd-success/40 bg-fd-success/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-fd-success">{t("live")}</span>
           </div>
-          <p className="mb-4 text-sm text-fd-muted-foreground">
-            The route new agents use when no explicit model is pinned. Saved to the profile and applied without a restart.
-          </p>
+          <p className="mb-4 text-sm text-fd-muted-foreground">{t("The route new agents use when no explicit model is pinned. Saved to the profile and applied without a restart.")}</p>
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-64 flex-1">
-              <label className="mb-1 block text-xs text-fd-muted-foreground" htmlFor="default-model">Provider · model</label>
+              <label className="mb-1 block text-xs text-fd-muted-foreground" htmlFor="default-model">{t("Provider · model")}</label>
               <ModelSelect
                 ariaLabel="Default model"
                 disabled={!writable || savingKey !== null}
@@ -244,20 +243,20 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
               onClick={() => { void applyDefault(defaultDraft) }}
               type="button"
             >
-              {savingKey === 'default' ? 'Saving…' : 'Save default'}
+              {t(savingKey === 'default' ? 'Saving…' : 'Save default')}
             </button>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button className="rounded-md border border-fd-border px-3 py-1.5 text-xs disabled:opacity-50" disabled={catalogBusy} type="button" onClick={() => { void refreshModels().catch(() => {}) }}>{catalogBusy ? 'Refreshing…' : 'Refresh models'}</button>
-            {options.length === 0 && <p className="text-xs text-fd-warning">DSH has not advertised any available models. Check the provider's API key and model list above.</p>}
+            {options.length === 0 && <p className="text-xs text-fd-warning">{t("DSH has not advertised any available models. Check the provider's API key and model list above.")}</p>}
           </div>
           {catalogError && <p className="mt-2 text-xs text-fd-danger" role="alert">{catalogError}</p>}
           {catalog !== null && catalog.failures.length > 0 && (
             <p className="mt-3 text-xs text-fd-warning">
-              {catalog.failures.length} provider catalog{catalog.failures.length === 1 ? '' : 's'} failed to load: {catalog.failures.map(failure => `${failure.name}: ${failure.message}`).join('; ')}
+              {catalog.failures.length}{t(" provider catalog")}{catalog.failures.length === 1 ? '' : 's'}{t(" failed to load: ")}{catalog.failures.map(failure => `${failure.name}: ${failure.message}`).join('; ')}
             </p>
           )}
-          {!writable && <p className="mt-3 text-xs text-fd-warning">This profile is read-only; model changes are disabled.</p>}
+          {!writable && <p className="mt-3 text-xs text-fd-warning">{t("This profile is read-only; model changes are disabled.")}</p>}
         </section>
 
         {notice !== null && (
@@ -272,8 +271,8 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
         <AgentPrompts />
         <section>
           <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-base font-semibold">Pipeline agents</h2>
-            <span className="text-xs text-fd-muted-foreground">{agents.length} presets · {options.length} model{options.length === 1 ? '' : 's'} available</span>
+            <h2 className="text-base font-semibold">{t("Pipeline agents")}</h2>
+            <span className="text-xs text-fd-muted-foreground">{agents.length}{t(" presets · ")}{options.length}{t(" model")}{options.length === 1 ? '' : 's'}{t(" available")}</span>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {agents.map(agent => (
@@ -288,11 +287,7 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
               />
             ))}
           </div>
-          <p className="mt-3 text-xs leading-relaxed text-fd-muted-foreground">
-            Specialist agents inherit the orchestrator&apos;s model route unless their delegation tool pins an explicit
-            <span className="font-mono"> agentOptions</span> model in the composition. Applying a model here updates the shared
-            default route that the pipeline follows; pinned routes are edited in the IQE composition overlay.
-          </p>
+          <p className="mt-3 text-xs leading-relaxed text-fd-muted-foreground">{t("Specialist agents inherit the orchestrator's model route unless their delegation tool pins an explicit")}<span className="font-mono">{t(" agentOptions")}</span>{t("model in the composition. Applying a model here updates the shared default route that the pipeline follows; pinned routes are edited in the IQE composition overlay.")}</p>
         </section>
       </div>
     </div>

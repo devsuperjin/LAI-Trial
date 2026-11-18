@@ -1,17 +1,32 @@
+import { useLanguage } from '../i18n.tsx'
 import type { ReactNode } from 'react'
 
 export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
-    id: 'pipeline', label: '流水线', hint: '模拟事件与六阶段执行',
+    id: 'dashboard',
+    label: 'Dashboard',
+    hint: 'Run classification & metrics',
+    icon: active => (
+      <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
+        <rect height="7" rx="1.4" width="7" x="3.5" y="3.5" />
+        <rect height="7" rx="1.4" width="7" x="13.5" y="3.5" />
+        <rect height="7" rx="1.4" width="7" x="3.5" y="13.5" />
+        <rect height="7" rx="1.4" width="7" x="13.5" y="13.5" />
+      </svg>
+    ),
+  },
+
+  {
+    id: 'pipeline', label: 'Pipeline', hint: 'Simulate events and follow the pipeline',
     icon: () => <svg aria-hidden fill="none" height="18" width="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="4" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><rect x="17" y="15" width="5" height="5" rx="1" /><path d="M7 6.5h5V9.5M14.5 12h5V15" /></svg>,
   },
-  { id: 'history', label: '执行记录', hint: '查看流水线历史与阶段输出', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },
+  { id: 'history', label: 'History', hint: 'Browse pipeline history and stage outputs', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },
   {
     id: 'runs',
     label: 'Runs',
-    hint: '执行列表、调用过程与结果',
+    hint: 'Run list, delegation activity, and results',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
         <circle cx="5" cy="6" r="2.2" />
@@ -23,21 +38,8 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
     ),
   },
   {
-    id: 'dashboard',
-    label: '概览',
-    hint: 'Run classification & metrics',
-    icon: active => (
-      <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
-        <rect height="7" rx="1.4" width="7" x="3.5" y="3.5" />
-        <rect height="7" rx="1.4" width="7" x="13.5" y="3.5" />
-        <rect height="7" rx="1.4" width="7" x="3.5" y="13.5" />
-        <rect height="7" rx="1.4" width="7" x="13.5" y="13.5" />
-      </svg>
-    ),
-  },
-  {
     id: 'settings',
-    label: '设置',
+    label: 'Settings',
     hint: 'Per-agent model configuration',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
@@ -49,17 +51,18 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
 ]
 
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
+  const { t } = useLanguage()
   return (
-    <nav aria-label="主导航" className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
-      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'dashboard' && item.id !== 'settings').map(item => renderItem(item))}</div>
+    <nav aria-label={t("Primary navigation")} className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
+      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(item => renderItem(item))}</div>
       <div className="mt-auto border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
 
     </nav>
   )
   function renderItem(item: typeof ITEMS[number]) {
     const active = props.page === item.id
-    return <button key={item.id} type="button" title={item.hint} aria-label={item.label} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(item.id)} className={`flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary md:justify-start ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
-      <span className="shrink-0">{item.icon(active)}</span><span className="hidden md:block">{item.label}</span>
+    return <button key={item.id} type="button" title={t(item.hint)} aria-label={t(item.label)} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(item.id)} className={`flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary md:justify-start ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
+      <span className="shrink-0">{item.icon(active)}</span><span className="hidden md:block">{t(item.label)}</span>
       {item.id === 'runs' && props.runningCount > 0 && <span className="ml-auto hidden rounded bg-fd-secondary px-1.5 text-xs tabular-nums md:block">{props.runningCount}</span>}
     </button>
   }

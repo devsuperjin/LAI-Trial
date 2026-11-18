@@ -1,3 +1,4 @@
+import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import type { PageResponse, SessionListEntry, WireEvent } from '../api/gateway.ts'
@@ -114,6 +115,7 @@ function formatTime(ms: number): string {
 }
 
 export function DagView(props: { page: PageResponse; sessionId: string; running: boolean; entries: SessionListEntry[] }) {
+  const { t } = useLanguage()
   const { page, sessionId, running, entries } = props
   const controls = DEFAULT_CONTROLS
   const [childPages, setChildPages] = useState<Record<string, ChildPage | undefined>>({})
@@ -434,7 +436,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
   return (
     <div className="flex h-full flex-col">
       <div
-        aria-label="Subagent tree canvas — drag to pan, scroll to zoom"
+        aria-label={t("Subagent tree canvas — drag to pan, scroll to zoom")}
         className={`relative min-h-0 flex-1 overflow-hidden ${controls.grid ? 'fd-grid' : ''} fd-canvas`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
@@ -500,7 +502,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                 style={{ width: vertical ? geo.rootW : undefined }}
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-fd-primary/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fd-primary">task</span>
+                  <span className="rounded bg-fd-primary/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-fd-primary">{t("task")}</span>
                   <span className="min-w-0 flex-1 truncate font-mono text-xs">{tree.task.taskId}</span>
                   <span className="shrink-0 font-mono text-[10px] text-fd-muted-foreground">{formatTime(tree.task.time)}</span>
                 </div>
@@ -524,8 +526,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                     type="button"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider" style={{ background: `color-mix(in srgb, ${delegation.hue} 12%, transparent)`, color: delegation.hue }}>
-                        stage {delegation.stage}
+                      <span className="rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider" style={{ background: `color-mix(in srgb, ${delegation.hue} 12%, transparent)`, color: delegation.hue }}>{t("stage")}{delegation.stage}
                       </span>
                       <span className="min-w-0 flex-1 truncate font-mono text-xs">{delegation.toolName}</span>
                       <StatusDot status={delegation.receiptError !== null ? 'failed' : child !== undefined ? statusOf(child) : 'running'} motion={controls.motion} />
@@ -550,7 +551,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                     <span className="shrink-0 font-mono text-[10px] text-fd-muted-foreground">{formatTime(step.time)}</span>
                   </div>
                   <details className="mt-2 text-xs" onToggle={() => setMeasureTick(tick => tick + 1)}>
-                    <summary className="cursor-pointer text-fd-muted-foreground">{step.tools.length} tool calls · 查看 Turn</summary>
+                    <summary className="cursor-pointer text-fd-muted-foreground">{step.tools.length}{t(" tool calls · View turn")}</summary>
                     <div className="mt-2 space-y-2">
                       {step.tools.map(tool => <details key={tool.id} className="rounded border border-fd-border bg-fd-muted p-2" onToggle={() => setMeasureTick(tick => tick + 1)}>
                         <summary className={`cursor-pointer break-all font-mono text-[11px] ${tool.isError ? 'text-fd-danger' : 'text-fd-foreground'}`}>{tool.isError ? '✕' : '›'} {tool.name}</summary>
@@ -564,9 +565,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
               )
             })}
             {tree.task === null && visibleSteps.length === 0 && (
-              <div className="rounded-lg border border-fd-border bg-fd-card p-3 text-xs text-fd-muted-foreground" style={{ width: geo.rootW }}>
-                waiting for the first task event…
-              </div>
+              <div className="rounded-lg border border-fd-border bg-fd-card p-3 text-xs text-fd-muted-foreground" style={{ width: geo.rootW }}>{t("waiting for the first task event…")}</div>
             )}
           </div>
 
@@ -624,9 +623,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                         role="button"
                         tabIndex={0}
                         onKeyDown={(event) => { if (event.key === 'Enter' && child.sessionId !== null) void loadChild(child.sessionId) }}
-                      >
-                        Retry
-                      </span>
+                      >{t("Retry")}</span>
                     </div>
                   )}
                   {childPage?.state === 'loading' && child.kind === 'child' && (
@@ -637,15 +634,13 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                   )}
                   {child.kind === 'pending' && (
                     <div className="mt-2 flex items-center gap-2 text-xs text-fd-muted-foreground">
-                      <span className={`h-1.5 w-1.5 rounded-full bg-fd-warning ${controls.motion ? 'animate-pulse' : ''}`} />
-                      starting subagent…
-                    </div>
+                      <span className={`h-1.5 w-1.5 rounded-full bg-fd-warning ${controls.motion ? 'animate-pulse' : ''}`} />{t("starting subagent…")}</div>
                   )}
                   {model !== undefined && (
                     <>
                       <div className="mt-1.5 flex items-center gap-2 font-mono text-[10px] text-fd-muted-foreground">
-                        <span>{model.tools.length} tools{model.toolErrors > 0 ? ` · ${model.toolErrors} err` : ''}</span>
-                        {model.tokens !== null && <span>{formatTokens(model.tokens)} tok</span>}
+                        <span>{model.tools.length}{t(" tools")}{model.toolErrors > 0 ? ` · ${model.toolErrors} err` : ''}</span>
+                        {model.tokens !== null && <span>{formatTokens(model.tokens)}{t(" tok")}</span>}
                         {model.durationMs !== null && <span>{formatDuration(model.durationMs)}</span>}
                       </div>
                       {controls.showPreviews && model.finalText !== '' && (
@@ -668,11 +663,11 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                           {controls.showPreviews && tool.preview !== '' && <div className="mt-0.5 line-clamp-1 pl-4 text-[10px] text-fd-muted-foreground">{tool.preview}</div>}
                         </div>
                       ))}
-                      {model.tools.length === 0 && <div className="py-1 text-xs text-fd-muted-foreground">no tool calls yet</div>}
+                      {model.tools.length === 0 && <div className="py-1 text-xs text-fd-muted-foreground">{t("no tool calls yet")}</div>}
                     </div>
                     {model.finalText !== '' && (
                       <div className="fd-scroll mt-2 max-h-36 overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2">
-                        <div className="mb-1 text-[9px] uppercase tracking-wider text-fd-muted-foreground">final message</div>
+                        <div className="mb-1 text-[9px] uppercase tracking-wider text-fd-muted-foreground">{t("final message")}</div>
                         <p className="whitespace-pre-wrap text-xs leading-relaxed">{model.finalText}</p>
                       </div>
                     )}
@@ -691,14 +686,11 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
             <div
               className="absolute rounded-lg border border-dashed border-fd-border bg-fd-card/60 p-4 text-xs text-fd-muted-foreground"
               style={{ left: geo.pad + geo.rootW + geo.gap, top: geo.pad, width: geo.childW }}
-            >
-              No delegations yet — subagent cards appear here when the orchestrator calls a delegation tool.
-            </div>
+            >{t("No delegations yet — subagent cards appear here when the orchestrator calls a delegation tool.")}</div>
           )}
         </div>
         <div className="pointer-events-none absolute bottom-2 right-3 rounded bg-fd-card/80 px-2 py-1 font-mono text-[10px] text-fd-muted-foreground">
-          {Math.round(view.scale * 100)}% · {autoFit ? 'auto-fit on' : 'drag to pan'} · scroll to zoom
-        </div>
+          {Math.round(view.scale * 100)}% · {autoFit ? 'auto-fit on' : 'drag to pan'}{t("· scroll to zoom")}</div>
       </div>
     </div>
   )
