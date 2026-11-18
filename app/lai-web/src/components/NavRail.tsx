@@ -75,10 +75,6 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
   const pluginActive = props.page === 'superagent' || props.page === 'lai-agents'
   return (
     <nav aria-label={t('Primary navigation')} className={`flex min-h-0 shrink-0 flex-col overflow-x-hidden border-r border-fd-border bg-fd-card py-4 transition-[width,padding] duration-200 motion-reduce:transition-none ${collapsed ? 'w-16 px-2' : 'w-52 px-4'}`}>
-      <button type="button" aria-label={toggleLabel} title={toggleLabel} aria-expanded={!collapsed} aria-controls="lai-sidebar-menu" onClick={() => setCollapsed(current => !current)} className={`mb-3 flex min-h-9 w-full shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm text-fd-muted-foreground hover:bg-fd-secondary focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment}`}>
-        <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /><path d={collapsed ? 'm13 9 3 3-3 3' : 'm16 9-3 3 3 3'} /></svg>
-        {!collapsed && <span className="whitespace-nowrap">{toggleLabel}</span>}
-      </button>
       <div id="lai-sidebar-menu" className="fd-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(renderItem)}
           <div className="pt-2">
@@ -93,7 +89,12 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
           </div>
         </div>
       </div>
-      <div className="mt-3 shrink-0 border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
+      <div className={`mt-3 flex shrink-0 gap-1 border-t border-fd-border pt-3 ${collapsed ? 'flex-col' : 'items-center'}`}>
+        <div className={`min-w-0 ${collapsed ? 'w-full' : 'flex-1'}`}>{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
+      <button type="button" aria-label={toggleLabel} title={toggleLabel} aria-expanded={!collapsed} aria-controls="lai-sidebar-menu" onClick={() => setCollapsed(current => !current)} className={`flex min-h-10 shrink-0 items-center justify-center rounded-lg text-fd-muted-foreground hover:bg-fd-secondary focus-visible:outline-2 focus-visible:outline-fd-primary ${collapsed ? 'w-full' : 'w-9'}`}>
+        <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M9 4v16" /><path d={collapsed ? 'm13 9 3 3-3 3' : 'm16 9-3 3 3 3'} /></svg>
+      </button>
+      </div>
     </nav>
   )
   function renderItem(item: typeof ITEMS[number]) {
