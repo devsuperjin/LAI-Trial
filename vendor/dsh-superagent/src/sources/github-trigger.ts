@@ -79,10 +79,11 @@ export function commentTrigger(comment: GithubComment, ref: PullRef, kind: 'conv
  * Builds the trigger for a newly opened Issue's title and body.
  * The ID is the same as when Issue bodies were stored previously, so already-stored bodies are not ingested again.
  */
-export function issueTrigger(issue: Opened, agent: string): Trigger {
+export function issueTrigger(issue: Opened, agent: string, acceptOwnIssue = false): Trigger {
   const body = issue.body ?? ''
   return { id: key('github-issue', String(issue.number)), source: SOURCE,
-    threads: [{ source: SOURCE, id: String(issue.number) }], ...author(issue.user, agent), at: issue.created_at,
+    threads: [{ source: SOURCE, id: String(issue.number) }], ...author(issue.user, agent),
+    ...(acceptOwnIssue && sameName(issue.user.login, agent) ? { human: isHumanLogin(issue.user) } : {}), at: issue.created_at,
     text: `${issue.title}\n\n${body}`,
     ...(mentions(body, agent) ? { addressed: 'mention' as const } : {}),
     channel: githubChannel(issue.number, issue.html_url), url: issue.html_url, meta: { number: issue.number, isPr: false, kind: 'issue' } }

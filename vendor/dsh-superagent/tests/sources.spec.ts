@@ -1024,7 +1024,7 @@ it('reports GitHub as failing only after the configured number of consecutive fa
   expect(pollFailure(2, 3, eof)).toBeUndefined()
   expect(pollFailure(3, 3, eof)).toEqual({ state: 'error', detail: '3 consecutive failed polls; last: Error: Get "https://api.github.com/x": EOF', code: 'pollFailures', values: { count: '3', error: 'Error: Get "https://api.github.com/x": EOF' } })
   expect(githubKind.schema.parse({})).toEqual({ repository: '', cli: '', pollSeconds: 60, failuresBeforeError: 3, observeIssues: false,
-    observePulls: false, observeComments: false, observeCi: false })
+    observePulls: false, observeComments: false, observeCi: false, acceptOwnIssues: false })
 })
 describe('feishu event consumer', () => {
   let dir: string
@@ -1213,6 +1213,20 @@ describe('observing the GitHub repository', () => {
     })
     return calls
   }
+  it('accepts own new issues only when opted in, without accepting own PRs or comments', async () => {
+    const h = host()
+    observe(h, { observeIssues: true, observePulls: true, observeComments: true, acceptOwnIssues: true })
+    h.store.set('github-stream:issues', { since: at(0), started: { issues: at(0), pulls: at(0) } })
+    h.store.set('github-stream:comments', { since: at(0), started: { comments: at(0) } })
+    repository(h, {
+      issues: [issue(6, { created_at: at(1), user: { login: 'agent-bot', type: 'User' } }),
+        { ...issue(7, { created_at: at(1), user: { login: 'agent-bot', type: 'User' } }), pull_request: { url: 'x' } }],
+      comments: [{ id: 8, body: 'automated reply', created_at: at(1), updated_at: at(1), user: { login: 'agent-bot', type: 'User' }, issue_url: 'https://api.github.com/repos/acme/widgets/issues/6' }],
+    })
+    await pollRound(h)
+    expect(h.receive.mock.calls.map(([trigger]) => [trigger.meta.number, trigger.meta.kind, trigger.human])).toEqual([[6, 'issue', true]])
+    h.store.close()
+  })
   it('takes in the new Issues and PRs from when it started observing them, and asks again with the ETag while nothing is newer',
     async () => {
     const h = host()
