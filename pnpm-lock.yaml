@@ -11,12 +11,18 @@ importers:
       '@deepseek-ai/dsh':
         specifier: 0.2.2-rc.1
         version: 0.2.2-rc.1(8acbfedd0a07948df90979a3ffac0ea7)
+      '@lai/application-config':
+        specifier: workspace:*
+        version: link:config
       '@lai/dsh-agent-mq-bundle':
         specifier: workspace:*
         version: link:bundles/agent-mq-bundle
-      '@lai/dsh-web-app':
+      '@lai/dsh-web-host':
         specifier: workspace:*
-        version: link:plugins/lai-web
+        version: link:plugins/web-host
+      '@lai/lai-agents':
+        specifier: workspace:*
+        version: link:plugins/lai-agents
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: 4.1.0
@@ -73,9 +79,15 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.7(@types/react@18.3.31)
+      '@types/react-test-renderer':
+        specifier: ^18.3.1
+        version: 18.3.2
       '@vitejs/plugin-react':
         specifier: ^4.3.4
         version: 4.7.0(vite@6.4.6(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.1))
+      react-test-renderer:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
       tailwindcss:
         specifier: ^4.1.0
         version: 4.3.5
@@ -87,6 +99,46 @@ importers:
         version: 6.4.6(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.1)
 
   bundles/agent-mq-bundle:
+    dependencies:
+      '@lai/dsh-mq':
+        specifier: workspace:*
+        version: link:../../plugins/mq
+      '@lai/dsh-mq-mqtt':
+        specifier: workspace:*
+        version: link:../../plugins/mq-mqtt
+      '@lai/dsh-mq-rabbitmq':
+        specifier: workspace:*
+        version: link:../../plugins/mq-rabbitmq
+      '@lai/dsh-mq-redis':
+        specifier: workspace:*
+        version: link:../../plugins/mq-redis
+      '@lai/dsh-prompt-sections':
+        specifier: workspace:*
+        version: link:../../plugins/prompt-sections
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: 4.1.0
+        version: 4.1.0(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)
+
+  config:
+    dependencies:
+      '@lai/dsh-web-host':
+        specifier: workspace:*
+        version: link:../plugins/web-host
+      '@lai/lai-agents':
+        specifier: workspace:*
+        version: link:../plugins/lai-agents
+
+  packages/dsh-adapter:
+    devDependencies:
+      '@deepseek-ai/dsh-agent':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(d9740b81bf2b48fd86b0c38a41e906a0)
+      '@deepseek-ai/dsh-subagent':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(41d62e63d4cfb839733aee42208415b2)
+
+  plugins/lai-agents:
     dependencies:
       '@deepseek-ai/dsh-agent-preset':
         specifier: 0.2.2-rc.1
@@ -133,68 +185,22 @@ importers:
       '@deepseek-ai/dsh-tool-web':
         specifier: 0.2.2-rc.1
         version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-system-prompt@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)))(@deepseek-ai/dsh-tools@0.2.2-rc.1(71e9b8099add9aaf7bb42662f07c41a3))(@deepseek-ai/dsh-web@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)))
-      '@lai/dsh-mq':
-        specifier: workspace:*
-        version: link:../../plugins/mq
-      '@lai/dsh-mq-mqtt':
-        specifier: workspace:*
-        version: link:../../plugins/mq-mqtt
-      '@lai/dsh-mq-rabbitmq':
-        specifier: workspace:*
-        version: link:../../plugins/mq-rabbitmq
-      '@lai/dsh-mq-redis':
-        specifier: workspace:*
-        version: link:../../plugins/mq-redis
-      '@lai/dsh-prompt-sections':
-        specifier: workspace:*
-        version: link:../../plugins/prompt-sections
-    devDependencies:
-      '@deepseek-ai/cordis':
-        specifier: 4.1.0
-        version: 4.1.0(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)
-
-  packages/dsh-adapter:
-    devDependencies:
-      '@deepseek-ai/dsh-agent':
-        specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(d9740b81bf2b48fd86b0c38a41e906a0)
-      '@deepseek-ai/dsh-subagent':
-        specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(41d62e63d4cfb839733aee42208415b2)
-
-  plugins/lai-web:
-    dependencies:
-      '@deepseek-ai/dsh-app-boot':
-        specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(@deepseek-ai/cordis-plugin-group@1.1.0(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-home-paths@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-launch-environment@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
-      '@deepseek-ai/dsh-host-frontend-static':
-        specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-client-connection@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)))(@deepseek-ai/dsh-host-webserver@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
-      '@deepseek-ai/dsh-launch-environment':
-        specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
       '@deepseek-ai/schemastery':
         specifier: 3.19.0
         version: 3.19.0
-      open:
-        specifier: ^11.0.0
-        version: 11.0.4
     devDependencies:
       '@deepseek-ai/cordis':
         specifier: 4.1.0
         version: 4.1.0(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)
-      '@deepseek-ai/cordis-plugin-loader':
-        specifier: 1.1.0
-        version: 1.1.0(@deepseek-ai/cordis@4.1.0)(node-addon-require-builtin@0.1.9)
-      '@deepseek-ai/dsh-client-connection':
+      '@deepseek-ai/dsh-agent-preset-registry':
         specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
-      '@deepseek-ai/dsh-host-webserver':
+        version: 0.2.2-rc.1(7137409e0258bf069afa9a47c7e154d1)
+      '@deepseek-ai/dsh-settings':
         specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
-      '@deepseek-ai/dsh-web-app':
+        version: 0.2.2-rc.1(a36d0088b82fbb61bf41830a69b6d121)
+      '@deepseek-ai/dsh-system-prompt':
         specifier: 0.2.2-rc.1
-        version: 0.2.2-rc.1(11bca58cdca6271415b1e58e346b433e)
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
 
   plugins/mq:
     dependencies:
@@ -329,6 +335,46 @@ importers:
       '@deepseek-ai/dsh-system-prompt':
         specifier: 0.2.2-rc.1
         version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+
+  plugins/web-host:
+    dependencies:
+      '@deepseek-ai/dsh-app-boot':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis-plugin-group@1.1.0(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-home-paths@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-launch-environment@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+      '@deepseek-ai/dsh-host-frontend-static':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-client-connection@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)))(@deepseek-ai/dsh-host-webserver@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+      '@deepseek-ai/dsh-launch-environment':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
+      '@deepseek-ai/dsh-web-frontend':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
+      '@deepseek-ai/schemastery':
+        specifier: 3.19.0
+        version: 3.19.0
+      open:
+        specifier: ^11.0.0
+        version: 11.0.4
+      sirv:
+        specifier: ^3.0.2
+        version: 3.0.2
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: 4.1.0
+        version: 4.1.0(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)
+      '@deepseek-ai/cordis-plugin-loader':
+        specifier: 1.1.0
+        version: 1.1.0(@deepseek-ai/cordis@4.1.0)(node-addon-require-builtin@0.1.9)
+      '@deepseek-ai/dsh-client-connection':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+      '@deepseek-ai/dsh-host-webserver':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
+      '@deepseek-ai/dsh-web-app':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(11bca58cdca6271415b1e58e346b433e)
 
 packages:
 
@@ -3723,6 +3769,9 @@ packages:
     resolution: {integrity: sha512-aOP45mbcOKbQVvFWfQmgoOPT8R2iwbbbgl83k4CujGV9BrJhFr3qG55MFpwFs4YLabpuW3HhzUY9eQxPlDqaZw==}
     engines: {node: '>=14'}
 
+  '@polka/url@1.0.0-next.29':
+    resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
+
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
 
@@ -4074,6 +4123,9 @@ packages:
     resolution: {integrity: sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==}
     peerDependencies:
       '@types/react': ^18.0.0
+
+  '@types/react-test-renderer@18.3.2':
+    resolution: {integrity: sha512-s2/lUZPysTX2PTrVti1ct0rnu0GPmj00fhBsRsvnzms1Q8fX61/npEjF35l5EhKD/P9BHIQBTEXTXhNad4vsUQ==}
 
   '@types/react@18.3.31':
     resolution: {integrity: sha512-vfEqpXTvwT91yhmwdfouStN2hSKwTvyRs8qpLfADyrq/kxDw0hZM7Wk9Ug1FELj8hIby+S/+kQCSRFF32nv2Qw==}
@@ -4849,6 +4901,10 @@ packages:
     engines: {node: '>=16.0.0'}
     hasBin: true
 
+  mrmime@2.0.1:
+    resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
+    engines: {node: '>=10'}
+
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
@@ -4960,6 +5016,10 @@ packages:
   npm-run-path@6.0.0:
     resolution: {integrity: sha512-9qny7Z9DsQU8Ou39ERsPU4OZQlSTP47ShQzuKZ6PRXpYLtIFgl/DEBYEXKlvcEa+9tHVcK8CF81Y2V72qaZhWA==}
     engines: {node: '>=18'}
+
+  object-assign@4.1.1:
+    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
+    engines: {node: '>=0.10.0'}
 
   obug@2.2.1:
     resolution: {integrity: sha512-XrsrhT5sybtKI6wakr2SPOlGZWWYbUXZ7a0jT8/QOeAPau+1X/bSegNe5YR75oJmEZQbKningirmGOEJCIk61Q==}
@@ -5097,9 +5157,22 @@ packages:
     peerDependencies:
       react: ^18.3.1
 
+  react-is@18.3.1:
+    resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
+
+  react-shallow-renderer@16.15.0:
+    resolution: {integrity: sha512-oScf2FqQ9LFVQgA73vr86xl2NaOIX73rh+YFqcOp68CWj56tSfgtGKrEbyhCj0rSijyG9M1CYprTh39fBi5hzA==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0
+
+  react-test-renderer@18.3.1:
+    resolution: {integrity: sha512-KkAgygexHUkQqtvvx/otwxtuFu5cVjfzTCtjXLH9boS19/Nbtg84zS7wIQn39G8IlrhThBpQsMKkq5ZHZIYFXA==}
+    peerDependencies:
+      react: ^18.3.1
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -5256,6 +5329,10 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  sirv@3.0.2:
+    resolution: {integrity: sha512-2wcC/oGxHis/BoHkkPwldgiPSYcpZK3JU28WoMVv55yHJgcZ8rlXvuG9iZggz+sU1d4bRgIGASwyWqjxu3FM0g==}
+    engines: {node: '>=18'}
+
   smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
     engines: {node: '>= 6.0.0', npm: '>= 3.0.0'}
@@ -5323,6 +5400,10 @@ packages:
   toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
+
+  totalist@3.0.1:
+    resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
+    engines: {node: '>=6'}
 
   ts-algebra@2.0.0:
     resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
@@ -9866,6 +9947,8 @@ snapshots:
 
   '@opentelemetry/semantic-conventions@1.45.0': {}
 
+  '@polka/url@1.0.0-next.29': {}
+
   '@protobufjs/aspromise@1.1.2': {}
 
   '@protobufjs/base64@1.1.2': {}
@@ -10128,6 +10211,10 @@ snapshots:
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.31)':
+    dependencies:
+      '@types/react': 18.3.31
+
+  '@types/react-test-renderer@18.3.2':
     dependencies:
       '@types/react': 18.3.31
 
@@ -10913,6 +11000,8 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  mrmime@2.0.1: {}
+
   ms@2.0.0: {}
 
   ms@2.1.3: {}
@@ -11008,6 +11097,8 @@ snapshots:
     dependencies:
       path-key: 4.0.0
       unicorn-magic: 0.3.0
+
+  object-assign@4.1.1: {}
 
   obug@2.2.1: {}
 
@@ -11109,7 +11200,22 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.2
 
+  react-is@18.3.1: {}
+
   react-refresh@0.17.0: {}
+
+  react-shallow-renderer@16.15.0(react@18.3.1):
+    dependencies:
+      object-assign: 4.1.1
+      react: 18.3.1
+      react-is: 18.3.1
+
+  react-test-renderer@18.3.1(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-is: 18.3.1
+      react-shallow-renderer: 16.15.0(react@18.3.1)
+      scheduler: 0.23.2
 
   react@18.3.1:
     dependencies:
@@ -11306,6 +11412,12 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
+  sirv@3.0.2:
+    dependencies:
+      '@polka/url': 1.0.0-next.29
+      mrmime: 2.0.1
+      totalist: 3.0.1
+
   smart-buffer@4.2.0: {}
 
   socks@2.8.10:
@@ -11354,6 +11466,8 @@ snapshots:
   tinyrainbow@3.2.0: {}
 
   toidentifier@1.0.1: {}
+
+  totalist@3.0.1: {}
 
   ts-algebra@2.0.0: {}
 

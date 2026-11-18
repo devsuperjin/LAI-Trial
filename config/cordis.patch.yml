@@ -9,9 +9,13 @@
   disabled: true
 - insert:
     - id: lai-web-runtime
-      name: '@lai/dsh-web-app'
+      name: '@lai/dsh-web-host'
       inject: [webStartup]
       config:
         distIndex: !!js process.env.LAI_WEB_DIST_INDEX
         openBrowser: !!js ctx.webStartup.openBrowser
         publicUrl: !!js ctx.webStartup.publicUrl
+
+- insert:
+    - id: lai-agents
+      name: '@lai/lai-agents'

@@ -9,7 +9,7 @@ kind: "application-guide"
 
 ## 概要
 
-LAI Web 监控消息队列任务、展示运行统计与委派关系图，并配置模型路由。五个独立插件与一个 Bundle 扩展已发布的 DSH 运行时，无需修改框架源码。
+LAI Web 监控消息队列任务、展示运行统计与委派关系图，并配置模型路由。独立的 Agent、队列与 Web 托管插件及分层 Bundle 扩展已发布的 DSH 运行时，无需修改框架源码。
 
 ## 目录
 
@@ -31,14 +31,16 @@ pnpm start
 
 队列消费者默认禁用。将 `.env.example` 复制为 `.env`，填写实际绝对工作目录、模型路由和凭据，然后选择一个环境覆盖，例如 `pnpm start --patch config/development/redis.yml`。Redis、RabbitMQ、MQTT 和基于 MQTT 的 IQE 流水线各有独立配置。在 LAI Web → Settings → Model providers 中配置模型 Provider。前端直接使用 DSH 官方设置与凭据 API；在 MQ 覆盖中填写 Provider 名称前，仍需先配置对应路由。
 
+点击顶部 **Original DSH ↗**，或访问 `/dsh/`，可以使用已安装的官方前端调试。两个界面共享后端、浏览器认证、设置和会话。**Settings → LAI agents** 通过独立的 [`@lai/lai-agents` 插件](plugins/lai-agents/README.zh.md)编辑各专业角色的 Prompt。
+
 ## 项目结构
 
 ```text
 app/lai-web/             独立 React 前端
 packages/dsh-adapter/    版本兼容与浏览器 RPC
-plugins/                mq、mq-redis、mq-rabbitmq、mq-mqtt、prompt-sections
+plugins/                lai-agents、web-host、mq 及传输与提示插件
 bundles/agent-mq-bundle/ 可选能力组合
-config/                 基线版本、Profile 与部署覆盖
+config/                 应用默认值 Bundle、基线、Profile 与部署覆盖
 patches/                Core Patch 维护策略（当前无补丁）
 tests/                  协议与迁移兼容性
 .github/workflows/      生产基线与可选候选版本检查
@@ -50,6 +52,6 @@ tests/                  协议与迁移兼容性
 
 参阅[架构说明](docs/architecture.zh.md)、[上游升级与回滚](docs/upstream-sync.zh.md)以及覆盖全部 [159 个变更文件的迁移清单](docs/migration-inventory.json)。旧分支缺少四个前端模型模块，本仓库在 `app/lai-web/src/model` 中补齐，并在清单中单独记录。
 
-应用使用 `.runtime/dsh` 存放 Profile、配置与会话数据，不导入或修改既有的用户 DSH 主目录。本地 `.reference/lai` 源码检出被忽略，安装、构建与 CI 均不依赖它。
+应用使用 `.runtime/dsh` 存放 Profile、配置与会话数据。项目默认值来自 `@lai/application-config`，用户设置保留在 Profile 覆盖文件中；旧版复制的默认配置会一次性迁移并备份，Provider 设置保留。应用不导入或修改既有的用户 DSH 主目录。本地 `.reference/lai` 源码检出被忽略，安装、构建与 CI 均不依赖它。
 
 `pnpm check` 执行架构检查、构建、类型检查和测试。本地无可达服务时 Broker 测试会跳过；CI 提供三种 Broker 并要求测试运行。真实模型调用与生产部署需要单独的集成验证。

@@ -4,14 +4,17 @@
   "type": "module",
   "dependencies": {
     "@lai/dsh-agent-mq-bundle": "workspace:*",
-    "@lai/dsh-web-app": "workspace:*"
+    "@lai/dsh-web-host": "workspace:*",
+    "@lai/lai-agents": "workspace:*",
+    "@lai/application-config": "workspace:*"
   },
   "dsh": {
     "profile": {
       "bundles": [
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
-        "@lai/dsh-agent-mq-bundle"
+        "@lai/dsh-agent-mq-bundle",
+        "@lai/application-config"
       ]
     }
   }

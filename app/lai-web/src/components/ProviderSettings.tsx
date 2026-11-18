@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import type { ConfigurableProvider, CredentialInfo, SettingsDescribeValue, SettingsNamespaceView, SettingsPathOp } from '../api/gateway.ts'
-import { describeCredentials, describeSettings, listConfigurableProviders, mutateSettings, setCredential } from '../api/gateway.ts'
+import type { ConfigurableProvider, CredentialInfo, ModelCatalog, SettingsDescribeValue, SettingsNamespaceView, SettingsPathOp } from '../api/gateway.ts'
+import { describeCredentials, describeSettings, listConfigurableProviders, modelCatalog, mutateSettings, setCredential } from '../api/gateway.ts'
 import { record } from '../model/dag.ts'
 
 const CUSTOM = '__custom__'
@@ -54,6 +54,9 @@ function modelValues(models: ModelDraft[]): Record<string, unknown>[] {
 interface Snapshot {
   settings: SettingsDescribeValue
   providers: ConfigurableProvider[]
+  credentials: Record<string, CredentialInfo>
+  credentialError: string | null
+  catalog: ModelCatalog
 }
 
 /** Provider edits use DSH's public settings and write-only credential endpoints. */
@@ -64,14 +67,27 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
   const [notice, setNotice] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const load = async (): Promise<void> => {
+  const load = async (): Promise<Snapshot | null> => {
     setFailure(null)
     setLoading(true)
     try {
-      const [settings, providers] = await Promise.all([describeSettings(), listConfigurableProviders()])
-      setSnapshot({ settings, providers })
+      const [settings, providers, catalog] = await Promise.all([describeSettings(), listConfigurableProviders(), modelCatalog()])
+      const refs = [...new Set(providers.flatMap(provider => {
+        const ns = settings.namespaces.find(view => view.ns === provider.settingsNs)
+        const ref = atPath(ns?.value, provider.settingsPath).apiKeyEnv
+        return typeof ref === 'string' ? [ref] : []
+      }))]
+      let credentials: Record<string, CredentialInfo> = {}
+      let credentialError: string | null = null
+      try {
+        for (let i = 0; i < refs.length; i += 64) credentials = { ...credentials, ...await describeCredentials(refs.slice(i, i + 64)) }
+      } catch (error) { credentialError = error instanceof Error ? error.message : String(error) }
+      const next = { settings, providers, catalog, credentials, credentialError }
+      setSnapshot(next)
+      return next
     } catch (error) {
       setFailure(error instanceof Error ? error.message : String(error))
+      return null
     } finally { setLoading(false) }
   }
   useEffect(() => { void load() }, [])
@@ -83,8 +99,9 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
   })
   const saved = async (): Promise<void> => {
     setEditor(null)
-    setNotice('Provider saved. Available models have been refreshed.')
-    await load()
+    const next = await load()
+    const count = next?.catalog.groups.reduce((total, group) => total + group.models.length, 0) ?? 0
+    setNotice(count ? `Provider saved. ${count} available models loaded.` : 'Provider settings saved, but DSH reports no available models. Check the API key status and model list.')
     try { await props.onSaved() } catch (error) {
       setNotice(`Provider saved, but models could not be refreshed: ${error instanceof Error ? error.message : String(error)}. Reload Settings to refresh them.`)
     }
@@ -101,14 +118,22 @@ export function ProviderSettings(props: { onSaved: () => Promise<void> }) {
       </div>
       {loading && <p className="mt-4 text-sm text-fd-muted-foreground" role="status">Loading providers…</p>}
       {failure !== null && <div className="mt-4 text-sm text-fd-danger" role="alert">{failure} <button className={buttonClass} onClick={() => { void load() }} type="button">Retry</button></div>}
-      {notice !== null && <p className="mt-3 text-sm text-fd-success" role="status">{notice}</p>}
+      {notice !== null && <p className="mt-3 text-sm text-fd-muted-foreground" role="status">{notice}</p>}
       {snapshot !== null && !loading && <>
         {!snapshot.settings.writable && <p className="mt-3 text-sm text-fd-warning">This profile is read-only; provider changes are disabled.</p>}
+        {snapshot.credentialError && <p className="mt-3 text-xs text-fd-warning">Could not read API key status: {snapshot.credentialError}</p>}
         <div className="mt-4 space-y-2">
           {configured.map(provider => <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-fd-border px-3 py-2" key={provider.provider}>
             <div className="min-w-0 flex-1">
               <p className="break-words text-sm font-medium">{provider.displayName} <span className="font-mono text-xs text-fd-muted-foreground">{provider.provider}</span></p>
               {provider.error && <p className="mt-1 break-words text-xs text-fd-warning">{provider.error}</p>}
+              {(() => {
+                const ns = snapshot.settings.namespaces.find(item => item.ns === provider.settingsNs)
+                const ref = atPath(ns?.value, provider.settingsPath).apiKeyEnv
+                const info = typeof ref === 'string' ? snapshot.credentials[ref] : undefined
+                return info ? <p className={`mt-1 text-xs ${info.configured ? 'text-fd-success' : 'text-fd-warning'}`}>{info.configured ? 'API key configured' : 'API key not configured — enter and save a key to make models available'}</p> : null
+              })()}
+              {snapshot.catalog.failures.filter(failure => failure.id === provider.provider).map(failure => <p className="mt-1 break-words text-xs text-fd-danger" key={failure.id}>{failure.message}</p>)}
             </div>
             <button className={buttonClass} disabled={editor !== null} onClick={() => { setNotice(null); setEditor(provider) }} type="button">Configure {provider.displayName}</button>
           </div>)}
@@ -143,7 +168,7 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
   const [api, setApi] = useState(String(props.entry ? initialProfile.api ?? '' : 'openai-completions'))
   const [models, setModels] = useState<ModelDraft[]>(props.entry ? modelDrafts(initialProfile) : [])
   const [apiKey, setApiKey] = useState('')
-  const [credential, setCredential] = useState<CredentialInfo | null>(null)
+  const [credential, setCredentialInfo] = useState<CredentialInfo | null>(null)
   const [credentialError, setCredentialError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
@@ -155,10 +180,10 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
 
   useEffect(() => {
     let active = true
-    setCredential(null)
+    setCredentialInfo(null)
     setCredentialError(null)
     if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(keyRef)) {
-      void describeCredentials([keyRef]).then(result => { if (active) setCredential(result[keyRef] ?? null) }).catch(error => {
+      void describeCredentials([keyRef]).then(result => { if (active) setCredentialInfo(result[keyRef] ?? null) }).catch(error => {
         if (active) setCredentialError(error instanceof Error ? error.message : String(error))
       })
     }

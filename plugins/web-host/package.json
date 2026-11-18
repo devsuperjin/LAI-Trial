@@ -1,21 +1,31 @@
 {
-  "name": "@lai/dsh-web-app",
+  "name": "@lai/dsh-web-host",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Serve LAI Web and DSH APIs from one authenticated application server",
   "exports": {
-    ".": { "types": "./lib/index.d.ts", "default": "./lib/index.js" },
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["lib", "README.md"],
-  "scripts": { "build": "tsc -p tsconfig.json" },
+  "files": [
+    "lib",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
   "dependencies": {
     "@deepseek-ai/dsh-host-frontend-static": "0.2.2-rc.1",
     "@deepseek-ai/dsh-app-boot": "0.2.2-rc.1",
     "@deepseek-ai/dsh-launch-environment": "0.2.2-rc.1",
     "@deepseek-ai/schemastery": "3.19.0",
-    "open": "^11.0.0"
+    "open": "^11.0.0",
+    "sirv": "^3.0.2",
+    "@deepseek-ai/dsh-web-frontend": "0.2.2-rc.1"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.1.0",

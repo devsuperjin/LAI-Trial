@@ -99,6 +99,7 @@ export function TopBar(props: {
           />
           {right}
         </span>
+        <a className="shrink-0 rounded-md border border-fd-border px-2 py-1 hover:text-fd-foreground" href="/dsh/" target="_blank" rel="noopener noreferrer">Original DSH ↗</a>
         <ThemeToggle />
       </div>
     </header>

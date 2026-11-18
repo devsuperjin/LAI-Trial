@@ -24,7 +24,9 @@
   "dependencies": {
     "@deepseek-ai/dsh": "0.2.2-rc.1",
     "@lai/dsh-agent-mq-bundle": "workspace:*",
-    "@lai/dsh-web-app": "workspace:*"
+    "@lai/dsh-web-host": "workspace:*",
+    "@lai/lai-agents": "workspace:*",
+    "@lai/application-config": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3",

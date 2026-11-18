@@ -9,6 +9,7 @@ import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-web-app'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import open from 'open'
+import { mountDebugUi } from './debug-ui.ts'
 
 export const name = 'lai-web'
 export const inject = ['webServer', 'connection']
@@ -47,6 +48,7 @@ export function apply(ctx: Context, config: Config): void {
   const advertisedUrl = (): string => publicUrl ?? ctx.webServer.getOrigin()
   ctx.provide('webApp', { getAdvertisedUrl: advertisedUrl })
   ctx.plugin(FrontendStatic, { distIndex: config.distIndex })
+  mountDebugUi(ctx, config.distIndex)
 
   let active = true
   ctx.effect(() => () => { active = false }, 'LAI Web readiness lifetime')

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AgentPresetDocument, AgentPresetRow, ModelCatalog, ModelSelection, SessionListEntry, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, listAgentPresets, modelCatalog, readAgentPreset, updateSettings } from '../api/gateway.ts'
+import { AgentPrompts } from './AgentPrompts.tsx'
 import { ProviderSettings } from './ProviderSettings.tsx'
 import type { AgentModelInfo } from '../model/settings.ts'
 import { buildAgentModels, effectiveModel, selectionKey } from '../model/settings.ts'
@@ -36,8 +37,9 @@ function ModelSelect(props: {
       className="fd-scroll w-full rounded-md border border-fd-border bg-fd-muted px-2.5 py-1.5 font-mono text-xs text-fd-foreground outline-none transition-colors focus:border-fd-primary disabled:cursor-not-allowed disabled:opacity-50"
       disabled={props.disabled}
       onChange={(event) => { props.onChange(event.target.value) }}
-      value={props.value}
+      value={props.options.some(option => option.key === props.value) ? props.value : ''}
     >
+      <option disabled value="">{props.options.length ? 'Select a model' : 'No models available — check provider setup'}</option>
       {props.options.map(option => (
         <option key={option.key} value={option.key}>{option.providerName} · {option.name}</option>
       ))}
@@ -109,6 +111,8 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   const [loading, setLoading] = useState(true)
   const [savingKey, setSavingKey] = useState<string | null>(null)
   const [notice, setNotice] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null)
+  const [catalogBusy, setCatalogBusy] = useState(false)
+  const [catalogError, setCatalogError] = useState<string | null>(null)
   const [defaultDraft, setDefaultDraft] = useState<string>('')
 
   const load = useCallback(async (): Promise<void> => {
@@ -151,9 +155,16 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   }, [defaultNs])
 
   const refreshModels = async (): Promise<void> => {
-    const [nextCatalog, settings] = await Promise.all([modelCatalog(), describeSettings()])
-    setCatalog(nextCatalog)
-    setDefaultNs(settings.namespaces.find(ns => ns.ns === 'agent-default-model') ?? null)
+    setCatalogBusy(true)
+    setCatalogError(null)
+    try {
+      const [nextCatalog, settings] = await Promise.all([modelCatalog(), describeSettings()])
+      setCatalog(nextCatalog)
+      setDefaultNs(settings.namespaces.find(ns => ns.ns === 'agent-default-model') ?? null)
+    } catch (error) {
+      setCatalogError(error instanceof Error ? error.message : String(error))
+      throw error
+    } finally { setCatalogBusy(false) }
   }
 
   const applyDefault = async (key: string, role?: string): Promise<void> => {
@@ -236,9 +247,14 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
               {savingKey === 'default' ? 'Saving…' : 'Save default'}
             </button>
           </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button className="rounded-md border border-fd-border px-3 py-1.5 text-xs disabled:opacity-50" disabled={catalogBusy} type="button" onClick={() => { void refreshModels().catch(() => {}) }}>{catalogBusy ? 'Refreshing…' : 'Refresh models'}</button>
+            {options.length === 0 && <p className="text-xs text-fd-warning">DSH has not advertised any available models. Check the provider's API key and model list above.</p>}
+          </div>
+          {catalogError && <p className="mt-2 text-xs text-fd-danger" role="alert">{catalogError}</p>}
           {catalog !== null && catalog.failures.length > 0 && (
             <p className="mt-3 text-xs text-fd-warning">
-              {catalog.failures.length} provider catalog{catalog.failures.length === 1 ? '' : 's'} failed to load: {catalog.failures.map(failure => failure.id).join(', ')}
+              {catalog.failures.length} provider catalog{catalog.failures.length === 1 ? '' : 's'} failed to load: {catalog.failures.map(failure => `${failure.name}: ${failure.message}`).join('; ')}
             </p>
           )}
           {!writable && <p className="mt-3 text-xs text-fd-warning">This profile is read-only; model changes are disabled.</p>}
@@ -253,6 +269,7 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
           </div>
         )}
 
+        <AgentPrompts />
         <section>
           <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-base font-semibold">Pipeline agents</h2>

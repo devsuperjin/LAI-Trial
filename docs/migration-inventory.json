@@ -256,7 +256,11 @@
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.iqe.yml",
       "decision": "environment-overlay",
-      "target": "config/development/iqe.yml"
+      "target": "config/development/iqe.yml",
+      "additionalTargets": [
+        "plugins/lai-agents/src/definitions.ts",
+        "plugins/lai-agents/src/index.ts"
+      ]
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.mqtt.yml",

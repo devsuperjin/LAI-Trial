@@ -27,18 +27,19 @@ The application depends on published DSH packages; the framework is not copied i
 | `plugins/mq-*` | Replaceable Redis, RabbitMQ and MQTT transport implementations |
 | `plugins/prompt-sections` | Prompt sections and contexts through the public prompt service |
 | `bundles/agent-mq-bundle` | Package-owned default plugin rows, with consumers disabled |
-| `plugins/lai-web` | Mount the public DSH static frontend service over LAI assets and announce the authenticated URL |
+| `plugins/web-host` | Mount the public DSH static frontend service over LAI assets and announce the authenticated URL |
+| `plugins/lai-agents` | Six specialist presets, their coordinator and live settings-backed prompts |
 | Published DSH | Agent loop, persistence, authentication, model providers, tools and API services |
 
 Each plugin has its own package manifest, Schema, README, tests and version. Runtime service imports use published package exports. The adapter converts the old source-only `waitForTreeWork` call into the release's public `waitForChildren` call; it does not modify the runtime.
 
 ## Configuration
 
-`config/profile.json` selects the ordered official base and Web bundles, then the application Bundle. `scripts/prepare-profile.mjs` initializes only `.runtime/dsh/profiles/lai`, linking dependencies and the application patch. `scripts/run-dsh.mjs` delegates launching to the installed `dsh --profile lai` CLI. `pnpm start` builds and launches the complete application; the official `web-runtime` row is disabled and a separate `lai-web-runtime` row mounts `@lai/dsh-web-app`, which mounts DSH’s public authenticated static server over the built LAI frontend. Frontend and API share one origin.
+`config/profile.json` selects the ordered official base and Web bundles, then the MQ and application-default Bundles. `scripts/prepare-profile.mjs` initializes only `.runtime/dsh/profiles/lai`, linking dependencies while preserving an independent writable user patch. `@lai/application-config` supplies project defaults as the last application Bundle. Older copied defaults are removed once from the user patch with an ignored backup; provider and other user settings are preserved. `scripts/run-dsh.mjs` delegates launching to the installed `dsh --profile lai` CLI. `pnpm start` builds and launches the complete application; the official `web-runtime` row is disabled and a separate `lai-web-runtime` row mounts `@lai/dsh-web-host`, which mounts DSH’s public authenticated static server over the built LAI frontend. Frontend and API share one origin.
 
 Layers apply as Bundle defaults → application Profile patch → isolated home patch → ordered `--patch` environment overlays. The Profile patch disables `ui-settings-account` and `account-controller` by id. Development overlays enable one queue backend and supply deployment-specific values. Production examples use environment values and may be copied to ignored `*.local.yml` files. DSH patches replace whole configuration values; they do not deep-merge them.
 
-The IQE overlay owns the orchestrator and six specialist presets, tool selection and personas. Model and workspace defaults come from `.env`. Keep credentials and user preferences outside Bundle defaults. Redis currently exposes host/port only; deployments needing authentication or TLS require a transport extension rather than silently ignoring those requirements.
+The independent `lai-agents` plugin owns the coordinator and six specialist presets, tool selection and configurable prompts. The IQE overlay selects the orchestrator for MQ tasks and configures transport only. Model and workspace defaults come from `.env`. Keep credentials and user preferences outside Bundle defaults. Redis currently exposes host/port only; deployments needing authentication or TLS require a transport extension rather than silently ignoring those requirements.
 
 ## Compatibility
 

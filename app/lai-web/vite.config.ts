@@ -26,6 +26,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/dsh-auth/, '/'),
         headers: { origin: target },
       },
+      '/dsh': { target, changeOrigin: true, headers: { origin: target } },
     },
   },
 })

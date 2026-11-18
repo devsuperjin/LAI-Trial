@@ -1,12 +1,16 @@
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { readFile, access } from 'node:fs/promises'
+import { readFile, access, mkdtemp, rm } from 'node:fs/promises'
 import { parseDocument } from 'yaml'
-import { describe, expect, it } from 'vitest'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { afterAll, describe, expect, it } from 'vitest'
 const exec = promisify(execFile)
+const isolatedHome = await mkdtemp(join(tmpdir(), 'lai-composition-'))
+afterAll(async () => { await rm(isolatedHome, { recursive: true, force: true }) })
 const dump = async (extra: string[] = []) => {
   const result = await exec(process.execPath, ['scripts/run-dsh.mjs', '--dump-config', ...extra], {
-    env: { ...process.env, LAI_WORKSPACE: '/tmp/lai-contract-workspace', LAI_PROVIDER: 'mock', LAI_MODEL: 'fixture' }, maxBuffer: 8 * 1024 * 1024,
+    env: { ...process.env, LAI_DSH_HOME: isolatedHome, LAI_WORKSPACE: '/tmp/lai-contract-workspace', LAI_PROVIDER: 'mock', LAI_MODEL: 'fixture' }, maxBuffer: 8 * 1024 * 1024,
   })
   const document = parseDocument(result.stdout, { customTags: [{ tag: 'tag:yaml.org,2002:js', resolve: (value: string) => value }] })
   expect(document.errors).toEqual([])
@@ -19,7 +23,7 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     expect(rows.find(r => r.id === 'ui-settings-account')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'account-controller')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'web-runtime')?.disabled).toBe(true)
-    expect(rows.find(r => r.id === 'lai-web-runtime')?.name).toBe('@lai/dsh-web-app')
+    expect(rows.find(r => r.id === 'lai-web-runtime')?.name).toBe('@lai/dsh-web-host')
     expect(rows.find(r => r.id === 'lai-web-runtime')?.config?.distIndex).toBe('process.env.LAI_WEB_DIST_INDEX')
     for (const id of ['runtime', 'redis', 'mqtt', 'rabbitmq']) expect(rows.find(r => r.id === `agent-mq-${id}`)?.disabled).toBe(true)
   })
@@ -31,7 +35,7 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     expect(enabled).toEqual([backend === 'iqe' ? 'mqtt' : backend])
     if (backend === 'iqe') {
       expect(rows.find(r => r.id === 'agent-mq-runtime')?.config?.agentPreset).toBe('iqe-orchestrator')
-      expect(rows.filter(r => r.id.startsWith('preset-iqe-'))).toHaveLength(7)
+      expect(rows.find(r => r.id === 'lai-agents')?.name).toBe('@lai/lai-agents')
     }
   })
   it('accounts for every source diff file and resolves every migrated target', async () => {
@@ -41,4 +45,30 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     for (const file of inventory.files) if (file.target) await access(file.target)
     for (const file of inventory.reconstructed) await access(file)
   })
+})
+
+it('migrates copied application defaults without losing provider settings', async () => {
+  const { mkdir, writeFile } = await import('node:fs/promises')
+  const migrationHome = await mkdtemp(join(tmpdir(), 'lai-profile-migration-'))
+  const profile = join(migrationHome, 'profiles/lai')
+  try {
+    await mkdir(profile, { recursive: true })
+    await writeFile(join(profile, 'package.json'), JSON.stringify({ name: 'lai-profile', dsh: { profile: { bundles: ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', '@lai/dsh-agent-mq-bundle'] } } }))
+    await writeFile(join(profile, 'cordis.patch.yml'), [
+      '- id: web-runtime', '  disabled: true', '- insert:', '    - id: lai-web-runtime', "      name: '@lai/dsh-web-app'",
+      '- id: llm-pi-ai', '  config:', '    providers:', '      retained-gateway:', '        displayName: Retained gateway', '        apiKeyEnv: LAI_RETAINED_KEY',
+    ].join('\n'))
+    const invocation = () => exec(process.execPath, ['scripts/run-dsh.mjs', '--dump-config'], { env: { ...process.env, LAI_DSH_HOME: migrationHome }, maxBuffer: 8 * 1024 * 1024 })
+    const result = await invocation()
+    expect(result.stderr).not.toContain('name mismatch')
+    expect(result.stdout).toContain('@lai/dsh-web-host')
+    expect(result.stdout).toContain('@lai/lai-agents')
+    const patch = await readFile(join(profile, 'cordis.patch.yml'), 'utf8')
+    expect(patch).toContain('retained-gateway')
+    expect(patch).toContain('LAI_RETAINED_KEY')
+    expect(patch).not.toContain('lai-web-runtime')
+    await access(join(profile, 'cordis.patch.before-app-bundle.yml'))
+    await invocation()
+    expect(await readFile(join(profile, 'cordis.patch.yml'), 'utf8')).toBe(patch)
+  } finally { await rm(migrationHome, { recursive: true, force: true }) }
 })
