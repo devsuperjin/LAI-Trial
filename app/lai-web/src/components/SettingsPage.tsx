@@ -216,7 +216,7 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   const defaultDirty = defaultDraft !== selectionKey(fallback)
 
   return (
-    <div className="fd-scroll min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+    <div className="p-4 md:p-6">
       <div className="mx-auto max-w-5xl space-y-5">
         <ProviderSettings onSaved={refreshModels} />
         <section className="rounded-xl border border-fd-border bg-fd-card p-5">

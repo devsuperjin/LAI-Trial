@@ -55,7 +55,7 @@ export function PipelinePage(props: { onSettings: () => void; view?: 'pipeline' 
   const stage = run?.stages.find(item => item.role === selectedRole) ?? run?.stages.find(item => item.status === 'running') ?? run?.stages.findLast(item => item.status === 'completed' || item.status === 'failed') ?? run?.stages[0]
   const readyWorkers = snapshot?.workers.filter(worker => worker.state !== 'starting').length ?? 0
 
-  return <div className="fd-scroll min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
+  return <div className="p-4 md:p-6">
     <div className="mx-auto max-w-7xl space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
