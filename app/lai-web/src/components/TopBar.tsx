@@ -15,6 +15,7 @@ const PAGE_TITLE: Record<Page, string> = {
   runs: 'Runs',
   dashboard: 'Dashboard',
   settings: 'Settings',
+  superagent: 'Plugin / Superagent',
 }
 
 type Theme = 'dark' | 'light'

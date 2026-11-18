@@ -7,6 +7,7 @@ import { DashboardPage } from './components/DashboardPage.tsx'
 import { NavRail } from './components/NavRail.tsx'
 import type { Page } from './components/NavRail.tsx'
 import { RunsPage } from './components/RunsPage.tsx'
+import { SuperagentPage } from './components/SuperagentPage.tsx'
 import { SettingsPage } from './components/SettingsPage.tsx'
 import { TopBar } from './components/TopBar.tsx'
 import { archivedRuns } from '@lai/dsh-adapter/runs'
@@ -102,9 +103,10 @@ export function App() {
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
               <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
-              {(page === 'pipeline' || page === 'history') && <SuperagentTasks history={page === 'history'} onOpenRun={openRun} onSettings={() => { setPage('settings') }} />}
+              {(page === 'pipeline' || page === 'history') && <SuperagentTasks history={page === 'history'} onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
+              {page === 'superagent' && <SuperagentPage />}
               {page === 'settings' && <SettingsPage entries={entries} />}
               </div>
             </main>

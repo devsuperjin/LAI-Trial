@@ -9,7 +9,7 @@ pnpm install
 pnpm start
 ```
 
-Open the authenticated URL printed in the terminal (default port 3080). In **Settings → Superagent**, configure Sources, Policy, Eval and Execution. Configure model providers and credentials in the same Settings page.
+Open the authenticated URL printed in the terminal (default port 3080). In **Plugin → Superagent**, configure Sources, Policy, Eval and Execution. Configure model providers and credentials in the same Settings page.
 
 ```text
 GitHub / CI → Monitor (Superagent Router) → Ticket / Worker

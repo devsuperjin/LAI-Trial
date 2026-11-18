@@ -5,7 +5,6 @@ import { useLanguage } from '../i18n.tsx'
 
 const input = 'w-full rounded-md border border-fd-border bg-fd-background px-3 py-2 text-sm'
 const button = 'rounded-md border border-fd-border bg-fd-secondary px-3 py-2 text-sm disabled:opacity-40'
-const card = 'rounded-xl border border-fd-border bg-fd-card p-5'
 
 function JsonBlock({ title, block, save }: { title: string; block: ConfigBlock; save: (value: Record<string, unknown>) => Promise<void> }) {
   const { t } = useLanguage()
@@ -58,7 +57,7 @@ function SourceForm({ source, reload }: { source: SourceSettings; reload: () => 
   </div>
 }
 
-export function SuperagentSettings() {
+export function SuperagentPage() {
   const { t } = useLanguage()
   const [settings, setSettings] = useState<Settings | null>(null)
   const [state, setState] = useState<SuperagentState | null>(null)
@@ -68,7 +67,7 @@ export function SuperagentSettings() {
   const load = useCallback(async () => { const [next, status, prompt] = await Promise.all([superagentSettings(), superagentState(), superagentPrompts()]); setSettings(next); setState(status); setPrompts({ value: prompt.current.config, revision: prompt.current.revision }); setError(null) }, [])
   useEffect(() => { void load().catch(e => setError(e.message)) }, [load])
   const act = (run: () => Promise<unknown>) => { void run().then(load).catch(e => setError(e.message)) }
-  return <section className={`${card} space-y-4`}>
+  return <section className="space-y-5 p-4 md:p-6">
     <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-semibold">Superagent</h2><p className="mt-1 text-sm text-fd-muted-foreground">{t('Monitor / Router → Worker → five LAI subagents')}</p></div><button className={button} onClick={() => { void load().catch(e => setError(e.message)) }}>{t('Refresh')}</button></div>
     {error && <p role="alert" className="text-sm text-fd-danger">{error}</p>}
     {settings && state && <><div className="flex flex-wrap items-center gap-3 text-sm"><span>{state.setup.accounts?.repository ?? t('Not configured')}</span><span className="text-fd-muted-foreground">{state.setup.accounts?.agent}</span><span>{state.load.running} {t('Running')} · {state.load.queued} {t('Queued')}</span><button className={button} onClick={() => act(() => superagentAction('executor/pause', { paused: !state.paused }))}>{t(state.paused ? 'Resume processing' : 'Pause processing')}</button></div>

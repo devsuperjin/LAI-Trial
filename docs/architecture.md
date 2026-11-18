@@ -22,7 +22,7 @@ Each Worker uses the `iqe-orchestrator` preset from `@lai/lai-agents`. Its model
 
 - `plugins/superagent` (`@lai/superagent`): upstream business plugin imported from `deepseek-ai/dsh-superagent-prototype` at `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`, formerly under `vendor/`. Owns Sources, Policy, Router, Tickets, worker scheduling/workspaces, durable effects, retries and replies. Local changes include baseline compatibility, authenticated management, opt-in own-Issue intake, and LAI worker execution.
 - `plugins/lai-agents`: Worker orchestrator plus five configurable specialist presets. Reproduction can implement explicitly requested small fixes; other role constraints and task-specific limits remain in force.
-- `app/lai-web`: Tailwind Dashboard, Tasks, History, Runs and Settings. Settings exposes Superagent Sources, Policy, Eval, Execution, Prompts and Deployment alongside DSH model credentials and LAI role prompts. Complete settings editors preserve fields unsupported by the basic forms and save using revision checks.
+- `app/lai-web`: Tailwind Dashboard, Tasks, History, Runs and Settings. Plugin → Superagent is a dedicated page for Sources, Policy, Eval, Execution, Prompts and Deployment. Settings contains DSH model credentials and LAI role prompts. Complete settings editors preserve fields unsupported by the basic forms and save using revision checks.
 - `packages/dsh-adapter`: public browser RPC, Superagent HTTP protocol and DSH host compatibility reads.
 - `plugins/web-host`: authenticated LAI frontend, archived-session discovery, original DSH debug UI.
 
@@ -32,7 +32,7 @@ No MQ/broker or shared knowledge service is required. Superagent's local SQLite 
 
 ## Running and data
 
-`pnpm install` then `pnpm start` builds and starts the unified application. Open the authenticated URL printed by DSH (default port 3080). Configure Sources/Policy/Eval/Execution in Settings. Default Eval mode is observe; a source being received does not by itself authorize a task. A separate demo on port 3082 has its own state and is not overwritten or imported automatically. Do not run two watchers for the same repository unless intentionally configured.
+`pnpm install` then `pnpm start` builds and starts the unified application. Open the authenticated URL printed by DSH (default port 3080). Configure Sources/Policy/Eval/Execution in Plugin → Superagent. Default Eval mode is observe; a source being received does not by itself authorize a task. A separate demo on port 3082 has its own state and is not overwritten or imported automatically. Do not run two watchers for the same repository unless intentionally configured.
 
 DSH settings/credentials/sessions: `.runtime/dsh`. Superagent state: `.runtime/dsh/superagent` by default, overridable with `LAI_SUPERAGENT_STATE_DIR` for an explicitly selected offline state directory. Existing pipeline history and the separate demo remain untouched. Never share an active state directory between processes.
 

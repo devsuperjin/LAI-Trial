@@ -2,7 +2,6 @@ import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AgentPresetDocument, AgentPresetRow, ModelCatalog, ModelSelection, SessionListEntry, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, listAgentPresets, modelCatalog, readAgentPreset, updateSettings } from '../api/gateway.ts'
-import { SuperagentSettings } from './SuperagentSettings.tsx'
 import { AgentPrompts } from './AgentPrompts.tsx'
 import { ProviderSettings } from './ProviderSettings.tsx'
 import type { AgentModelInfo } from '../model/settings.ts'
@@ -220,7 +219,6 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   return (
     <div className="p-4 md:p-6">
       <div className="mx-auto max-w-5xl space-y-5">
-        <SuperagentSettings />
         <ProviderSettings onSaved={refreshModels} />
         <section className="rounded-xl border border-fd-border bg-fd-card p-5">
           <div className="mb-1 flex items-center gap-2">

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  'Plugin': '插件', 'Plugin / Superagent': '插件 / Superagent', 'Configure Superagent': '配置 Superagent',
   'Mode': '模式', 'off': '关闭', 'observe': '观察', 'auto': '自动', 'Timeout (seconds)': '超时（秒）', 'Concurrent Workers': 'Worker 并发数', 'Workspace prepare command': '工作区准备命令', 'Blocked commands (one per line)': '禁用命令（每行一个）', 'Inherit default model': '使用默认模型', 'Worker orchestrator': 'Worker 主 Agent',
   'Tasks': '任务', 'Monitor inputs and follow Worker tasks': '监控输入并查看 Worker 任务',
   'Monitor / Router → Worker → five LAI subagents': 'Monitor / Router → Worker → 五个 LAI 子 Agent',
@@ -16,7 +17,7 @@ const ZH: Record<string, string> = {
   'Configure off / observe / auto mode, timeout and the Router model.': '配置关闭 / 观察 / 自动模式、超时和 Router 模型。',
   'Configure Worker model, concurrency, workspace preparation and command restrictions.': '配置 Worker 模型、并发数、工作区准备和命令限制。',
   'Open Monitor / Router': '打开 Monitor / Router', 'Open Worker run': '打开 Worker Run',
-  'No tasks yet. Configure a source in Settings.': '暂无任务，请先在设置中配置事件来源。',
+  'No tasks yet. Configure a source in Plugin → Superagent.': '暂无任务，请先在 Plugin → Superagent 中配置事件来源。',
   'Select a task to view its Worker and results.': '选择任务，查看 Worker 和执行结果。', 'Routing decisions': '路由决策',
   'open': '未结束', 'working': '执行中', 'person': '等待处理', 'idle': '空闲', 'ended': '已结束', 'Previous': '上一页', 'Next': '下一页',
 
@@ -27,7 +28,7 @@ const ZH: Record<string, string> = {
   'Page content': '页面内容', 'Primary navigation': '主导航', 'Connected': '已连接', 'Connecting…': '连接中…',
   'Original DSH': '原版 DSH', 'Open the original DSH debugging interface': '打开原版 DSH 调试界面',
   'Run outcomes, agent activity, and token usage at a glance.': '查看执行结果、Agent 活动与 Token 用量。',
-  'No runs yet. Configure a Superagent source in Settings, or start a task in DSH.': '暂无执行。请到流水线页面模拟输入，或在 DSH 中启动任务。',
+  'No runs yet. Configure a source in Plugin → Superagent, or start a task in DSH.': '暂无执行。请到 Plugin → Superagent 配置事件来源，或在 DSH 中启动任务。',
   'Total runs': '累计执行', 'Completed': '已完成', 'Running': '运行中', 'Failed': '失败', 'Tokens': 'Token 用量',
   'Outcome': '执行结果', 'Success rate': '成功率', 'of settled runs': '（已结束的执行）', 'Runs by preset': '按预设统计',
   'Model usage': '模型使用情况', 'Pipeline stage activity': '流水线阶段活动', 'Tokens per run (chronological)': '每次执行的 Token 用量（按时间）',

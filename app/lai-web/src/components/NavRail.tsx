@@ -1,7 +1,8 @@
 import { useLanguage } from '../i18n.tsx'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings'
+export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings' | 'superagent'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
@@ -52,9 +53,22 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
 
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
   const { t } = useLanguage()
+  const [pluginExpanded, setPluginExpanded] = useState(true)
+  useEffect(() => { if (props.page === 'superagent') setPluginExpanded(true) }, [props.page])
+  const pluginOpen = pluginExpanded
   return (
     <nav aria-label={t("Primary navigation")} className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
-      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(item => renderItem(item))}</div>
+      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'settings').map(item => renderItem(item))}
+        <div className="pt-2">
+          <button type="button" aria-label={t('Plugin')} title={t('Plugin')} aria-expanded={pluginOpen} aria-controls="plugin-navigation" onClick={() => setPluginExpanded(current => !current)} className="flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm text-fd-muted-foreground hover:bg-fd-secondary md:justify-start">
+            <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-6 6v4m-6-10H3m18 0h-3" /></svg>
+            <span className="hidden md:block">{t('Plugin')}</span><svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" className={`ml-auto hidden transition-transform md:block ${pluginOpen ? 'rotate-90' : ''}`}><path d="m6 3 5 5-5 5" /></svg>
+          </button>
+          {pluginOpen && <div id="plugin-navigation" className="mt-1 md:ml-5 md:border-l md:border-fd-border md:pl-3">
+            <button type="button" aria-label="Superagent" title="Superagent" aria-current={props.page === 'superagent' ? 'page' : undefined} onClick={() => props.onNavigate('superagent')} className={`flex min-h-9 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm md:justify-start ${props.page === 'superagent' ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="hidden md:block">Superagent</span></button>
+          </div>}
+        </div>
+      </div>
       <div className="mt-auto border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
 
     </nav>
