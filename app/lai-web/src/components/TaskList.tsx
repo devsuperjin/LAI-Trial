@@ -38,7 +38,7 @@ export function TaskList(props: {
   const visible = props.entries.filter(entry => matches(filter, statusOf(entry)))
 
   return (
-    <aside className="flex w-80 shrink-0 flex-col border-r border-fd-border bg-fd-muted/50">
+    <aside className="flex max-h-48 w-full shrink-0 flex-col border-b border-fd-border md:max-h-none md:w-72 md:border-b-0 md:border-r xl:w-80 bg-fd-muted/50">
       <div className="flex items-center gap-1 px-3 pt-3">
         {FILTERS.map(candidate => (
           <button

@@ -82,7 +82,7 @@ export function App() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full min-w-0 flex-col overflow-hidden">
       <TopBar
         auth={auth}
         error={gatewayError}
@@ -97,12 +97,14 @@ export function App() {
         ) : (
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
-            <div className="flex min-w-0 flex-1 flex-col">
+            <main aria-label="页面内容" className="flex min-h-0 min-w-0 flex-1 flex-col bg-fd-background p-3 md:p-5 lg:p-6">
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card">
               {(page === 'pipeline' || page === 'history') && <PipelinePage view={page === 'history' ? 'history' : 'pipeline'} onSettings={() => { setPage('settings') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
               {page === 'settings' && <SettingsPage entries={entries} />}
-            </div>
+              </div>
+            </main>
           </>
         )}
       </div>

@@ -104,7 +104,7 @@ export function DashboardPage(props: { entries: SessionListEntry[]; onOpenRun: (
   }
 
   return (
-    <div className="fd-scroll min-h-0 flex-1 overflow-y-auto p-5">
+    <div className="fd-scroll min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <StatCard hue="var(--color-fd-primary)" label="Total runs" sub={`${totals.subagents} subagents`} value={String(totals.runs)} />

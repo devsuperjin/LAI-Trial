@@ -21,3 +21,17 @@ it('groups assistant steps and tool results into their owning turns', () => {
   expect(tree.steps[0]?.tools[0]).toMatchObject({ name: 'read_file', result: 'failure evidence', isError: false })
   expect(tree.steps[1]).toMatchObject({ turn: 2, isError: true })
 })
+
+it('matches native callId receipts to the reproduction child without a stage-zero duplicate', () => {
+  const events: WireEvent[] = [
+    { seq: 1, time: 1, type: 'tool/call', data: { callId: 'native-call', name: 'reproduce', arguments: { description: 'Reproduce' } } },
+    { seq: 2, time: 2, type: 'tool/result', data: { message: { toolCallId: 'native-call', content: [{ type: 'text', text: 'started subagent repro-child' }] } } },
+  ]
+  const tree = deriveTree({ records: events.map(event => ({ type: 'event', event })), hasMore: false, cursor: null }, [
+    { sessionId: 'repro-child', parentSessionId: 'parent', running: false, updatedAt: 2, projections: { kind: 'cached', values: { agentPreset: 'iqe-reproduction', title: 'You are the IQE reproduction agent' } } },
+  ], 'parent')
+  expect(tree.children).toHaveLength(1)
+  expect(tree.children[0]).toMatchObject({ stage: 3, delegation: { id: 'native-call', toolName: 'reproduce' } })
+  expect(tree.delegations[0]?.settled).toContain('repro-child')
+  expect(tree.delegations.every(delegation => tree.children.some(child => child.delegation?.id === delegation.id))).toBe(true)
+})

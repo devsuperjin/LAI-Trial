@@ -50,12 +50,10 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
 
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
   return (
-    <nav aria-label="主导航" className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card p-2 md:w-52 md:p-4">
-      <div className="mb-8 flex h-10 items-center gap-3 px-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-sm font-semibold text-white">L</span><div className="hidden md:block"><p className="text-sm font-semibold">LAI</p><p className="text-[11px] text-fd-muted-foreground">Agent workspace</p></div></div>
-      <p className="mb-2 hidden px-3 text-[10px] font-medium uppercase tracking-widest text-fd-muted-foreground md:block">工作空间</p>
+    <nav aria-label="主导航" className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
       <div className="space-y-1">{ITEMS.filter(item => item.id !== 'dashboard' && item.id !== 'settings').map(item => renderItem(item))}</div>
       <div className="mt-auto border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
-      <a className="mt-2 hidden px-3 py-2 text-xs text-fd-muted-foreground hover:text-fd-foreground md:block" href="/dsh/" target="_blank" rel="noopener noreferrer">原版 DSH 调试 ↗</a>
+
     </nav>
   )
   function renderItem(item: typeof ITEMS[number]) {

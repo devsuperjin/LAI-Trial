@@ -1,6 +1,8 @@
 import type { PageResponse, SessionListEntry, WireEvent } from '../api/gateway.ts'
 import { deriveDag, record, textOf } from './dag.ts'
 export const STAGES = ['monitor', 'triage', 'reproduce', 'ticket', 'review', 'report']
+const PRESET_STAGES: Record<string, number> = { 'iqe-monitor': 1, 'iqe-triage': 2, 'iqe-reproduction': 3, 'iqe-ticket': 4, 'iqe-reviewer': 5, 'iqe-reporting': 6 }
+const PRESET_LABELS: Record<string, string> = { 'iqe-monitor': 'Monitor', 'iqe-triage': 'Triage', 'iqe-reproduction': 'Reproduction', 'iqe-ticket': 'Ticket', 'iqe-reviewer': 'Reviewer', 'iqe-reporting': 'Reporter' }
 const HUES = ['#60a5fa', '#a78bfa', '#fbbf24', '#fb923c', '#34d399', '#f472b6']
 export const stageHue = (stage: number): string => HUES[((stage % HUES.length) + HUES.length) % HUES.length]!
 export const truncate = (value: string, max: number): string => value.length > max ? value.slice(0, Math.max(0, max - 1)) + '…' : value
@@ -12,13 +14,13 @@ export interface ChildModel { label: string | null; preset: string | null; statu
 export function summarizeChild(events: WireEvent[], entry: SessionListEntry): ChildModel {
   const dag = deriveDag(events)
   const tools = events.filter(e => e.type === 'tool/call').map(e => {
-    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
+    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === (e.data.callId ?? e.data.id))
     return { name: String(e.data.name ?? 'tool'), time: e.time, preview: JSON.stringify(e.data.arguments ?? {}), isError: record(result?.data.message).isError === true }
   })
   const values = entry.projections?.values
   const usage = values?.tokenUsage
   const route = values?.modelSelection?.lastUsed
-  return { label: values?.title ?? values?.subagent?.label ?? null, preset: values?.agentPreset ?? null, status: entry.running ? 'running' : dag.turnEnd === 'completed' ? 'completed' : 'failed', tools, toolErrors: tools.filter(t => t.isError).length, tokens: usage ? Object.values(usage).reduce((a, b) => a + b, 0) : null, durationMs: values?.subagentTiming?.settledMs ?? null, model: route ? `${route.provider}/${route.model}` : null, finalText: textOf(record(events.findLast(e => e.type === 'assistant/message')?.data.message).content) }
+  return { label: PRESET_LABELS[values?.agentPreset ?? ''] ?? values?.subagent?.label ?? values?.title ?? null, preset: values?.agentPreset ?? null, status: entry.running ? 'running' : dag.turnEnd === 'completed' ? 'completed' : 'failed', tools, toolErrors: tools.filter(t => t.isError).length, tokens: usage ? Object.values(usage).reduce((a, b) => a + b, 0) : null, durationMs: values?.subagentTiming?.settledMs ?? null, model: route ? `${route.provider}/${route.model}` : null, finalText: textOf(record(events.findLast(e => e.type === 'assistant/message')?.data.message).content) }
 }
 export function deriveTree(page: PageResponse, entries: SessionListEntry[], sessionId: string, labels: Record<string, string | null> = {}) {
   const events = page.records.map(r => r.event)
@@ -26,15 +28,15 @@ export function deriveTree(page: PageResponse, entries: SessionListEntry[], sess
   const taskEvent = events.find(e => e.type === 'user/message' && record(e.data.source).kind === 'pipeline') ?? events.find(e => e.type === 'user/message' && textOf(e.data.content).trim())
   const delegations: Delegation[] = events.filter(e => e.type === 'tool/call' && STAGES.includes(e.data.name === 'reporter' ? 'report' : String(e.data.name))).map(e => {
     const args = record(e.data.arguments)
-    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
+    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === (e.data.callId ?? e.data.id))
     const receipt = record(result?.data.message)
     const stage = STAGES.indexOf(e.data.name === 'reporter' ? 'report' : String(e.data.name)) + 1
-    return { id: String(e.data.id ?? e.seq), seq: e.seq, stage, hue: stageHue(stage - 1), toolName: String(e.data.name), name: String(args.name ?? e.data.name), description: String(args.prompt ?? args.description ?? ''), settled: result ? textOf(receipt.content) : null, receiptError: receipt.isError ? textOf(receipt.content) : null }
+    return { id: String(e.data.callId ?? e.data.id ?? e.seq), seq: e.seq, stage, hue: stageHue(stage - 1), toolName: String(e.data.name), name: String(args.name ?? e.data.name), description: String(args.prompt ?? args.description ?? ''), settled: result ? textOf(receipt.content) : null, receiptError: receipt.isError ? textOf(receipt.content) : null }
   })
   const children: TreeChild[] = entries.filter(e => e.parentSessionId === sessionId).map(entry => {
     const label = labels[entry.sessionId] ?? entry.projections?.values.subagent?.label
     const preset = entry.projections?.values.agentPreset ?? ''
-    const stage = STAGES.findIndex(name => preset.includes(name) || label?.toLowerCase().includes(name)) + 1
+    const stage = PRESET_STAGES[preset] ?? (STAGES.findIndex(name => label?.toLowerCase().includes(name)) + 1)
     // A repeated role may have several calls: match durable receipt child ids first.
     const delegation = delegations.find(d => d.settled?.includes(entry.sessionId)) ?? delegations.find(d => d.stage === stage) ?? null
     return { sessionId: entry.sessionId, delegation, stage: delegation?.stage ?? stage, hue: delegation?.hue ?? stageHue(stage - 1), running: entry.running }
@@ -58,7 +60,7 @@ export function deriveTree(page: PageResponse, entries: SessionListEntry[], sess
       const text = textOf(record(event.data.message).content)
       if (text.trim()) current.preview = text
     } else {
-      const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === event.data.id)
+      const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === (event.data.callId ?? event.data.id))
       const message = record(result?.data.message)
       const delegation = delegations.find(d => d.seq === event.seq)
       const isError = message.isError === true

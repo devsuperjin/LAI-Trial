@@ -25,9 +25,9 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
   }, [taskEntries])
 
   return (
-    <div className="flex min-h-0 flex-1">
+    <div className="flex min-h-0 flex-1 flex-col md:flex-row">
       <TaskList entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />
-      <main className="min-w-0 flex-1 overflow-hidden border-l border-fd-border">
+      <section aria-label="会话详情" className="min-h-0 min-w-0 flex-1 overflow-hidden">
         {selectedId === null ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-fd-muted-foreground">
             <svg aria-hidden className="opacity-40" fill="none" height="40" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" viewBox="0 0 24 24" width="40">
@@ -43,7 +43,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
             sessionId={selectedId}
           />
         )}
-      </main>
+      </section>
     </div>
   )
 }

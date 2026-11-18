@@ -84,9 +84,13 @@ export function TopBar(props: {
     ? `Live · polled ${props.lastPollAt !== null ? new Date(props.lastPollAt).toLocaleTimeString([], { hour12: false }) : ''}`
     : props.error ?? authLabel(props.auth)
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-fd-border bg-fd-card px-5">
-      <span className="text-sm text-fd-muted-foreground">{PAGE_TITLE[props.page]}</span>
-      <div className="ml-auto flex items-center gap-4 text-xs text-fd-muted-foreground">
+    <header className="flex h-16 shrink-0 items-center gap-4 border-b border-fd-border bg-fd-card px-4 md:px-5">
+      <div className="flex w-8 shrink-0 items-center gap-3 md:w-[172px]">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-base font-semibold text-white">L</span>
+        <div className="hidden min-w-0 md:block"><p className="text-sm font-semibold tracking-wide">LAI</p><p className="text-[11px] text-fd-muted-foreground">Agent workspace</p></div>
+      </div>
+      <div className="flex min-w-0 items-center gap-3 text-sm"><span className="hidden text-fd-border sm:inline" aria-hidden>/</span><span className="truncate font-medium">{PAGE_TITLE[props.page]}</span></div>
+      <div className="ml-auto flex items-center gap-3 text-xs md:gap-5 text-fd-muted-foreground">
         <span className="hidden lg:inline">{props.runningCount} 运行中 · {props.totalCount} 会话</span>
         <span title={right} className="flex items-center gap-1.5">
           <motion.span
@@ -96,6 +100,7 @@ export function TopBar(props: {
           />
           {live ? '已连接' : '连接中'}
         </span>
+        <a className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-fd-border px-2.5 py-1.5 text-fd-muted-foreground transition-colors hover:bg-fd-secondary hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-primary" href="/dsh/" target="_blank" rel="noopener noreferrer" title="打开原版 DSH 调试界面"><span className="hidden sm:inline">原版 DSH 调试</span><span className="sm:hidden">DSH</span><span aria-hidden>↗</span></a>
         <ThemeToggle />
       </div>
     </header>
