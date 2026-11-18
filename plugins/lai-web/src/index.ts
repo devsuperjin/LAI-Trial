@@ -49,7 +49,7 @@ export function apply(ctx: Context, config: Config): void {
   ctx.plugin(FrontendStatic, { distIndex: config.distIndex })
 
   let active = true
-  ctx.on('dispose', () => { active = false })
+  ctx.effect(() => () => { active = false }, 'LAI Web readiness lifetime')
   // Readiness waits for sibling APIs and the static frontend to finish mounting.
   const ready = ctx.get('loader')?.await() ?? Promise.resolve()
   void ready.then(async () => {

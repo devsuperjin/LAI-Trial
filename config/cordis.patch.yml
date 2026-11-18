@@ -4,11 +4,14 @@
 - id: account-controller
   disabled: true
 
-# Keep the official API and authentication stack, serving LAI's built frontend.
+# DSH patches cannot rename a plugin row: disable its frontend owner and add LAI's.
 - id: web-runtime
-  name: '@lai/dsh-web-app'
-  inject: [webStartup]
-  config:
-    distIndex: !!js process.env.LAI_WEB_DIST_INDEX
-    openBrowser: !!js ctx.webStartup.openBrowser
-    publicUrl: !!js ctx.webStartup.publicUrl
+  disabled: true
+- insert:
+    - id: lai-web-runtime
+      name: '@lai/dsh-web-app'
+      inject: [webStartup]
+      config:
+        distIndex: !!js process.env.LAI_WEB_DIST_INDEX
+        openBrowser: !!js ctx.webStartup.openBrowser
+        publicUrl: !!js ctx.webStartup.publicUrl

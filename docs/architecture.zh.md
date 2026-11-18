@@ -34,7 +34,7 @@ kind: "architecture-overview"
 
 ## 配置
 
-`config/profile.json` 按顺序选择官方 base、Web Bundle，最后叠加应用 Bundle。`scripts/prepare-profile.mjs` 仅初始化 `.runtime/dsh/profiles/lai`，链接依赖与应用覆盖文件。`scripts/run-dsh.mjs` 将启动交给已安装的 `dsh --profile lai` CLI。`pnpm start` 自动构建并启动完整应用；`web-runtime` 行替换为 `@lai/dsh-web-app`，通过 DSH 公开的认证静态服务托管 LAI 构建产物，前后端共享同一来源。
+`config/profile.json` 按顺序选择官方 base、Web Bundle，最后叠加应用 Bundle。`scripts/prepare-profile.mjs` 仅初始化 `.runtime/dsh/profiles/lai`，链接依赖与应用覆盖文件。`scripts/run-dsh.mjs` 将启动交给已安装的 `dsh --profile lai` CLI。`pnpm start` 自动构建并启动完整应用；禁用官方 `web-runtime` 行，再通过独立的 `lai-web-runtime` 行挂载 `@lai/dsh-web-app`，通过 DSH 公开的认证静态服务托管 LAI 构建产物，前后端共享同一来源。
 
 配置按 Bundle 默认值 → 应用 Profile 覆盖 → 隔离主目录覆盖 → 有序 `--patch` 环境覆盖依次叠加。Profile 按 id 禁用 `ui-settings-account` 与 `account-controller`。开发覆盖启用一种队列后端并提供部署参数。生产示例使用环境变量，可复制为被忽略的 `*.local.yml`。DSH 覆盖会替换完整配置值，不会深度合并。
 

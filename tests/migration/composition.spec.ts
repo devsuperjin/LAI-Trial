@@ -18,6 +18,9 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     const rows = await dump()
     expect(rows.find(r => r.id === 'ui-settings-account')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'account-controller')?.disabled).toBe(true)
+    expect(rows.find(r => r.id === 'web-runtime')?.disabled).toBe(true)
+    expect(rows.find(r => r.id === 'lai-web-runtime')?.name).toBe('@lai/dsh-web-app')
+    expect(rows.find(r => r.id === 'lai-web-runtime')?.config?.distIndex).toMatch(/app\/lai-web\/dist\/index\.html$/)
     for (const id of ['runtime', 'redis', 'mqtt', 'rabbitmq']) expect(rows.find(r => r.id === `agent-mq-${id}`)?.disabled).toBe(true)
   })
   it.each(['redis', 'mqtt', 'rabbitmq', 'iqe'])('composes the %s overlay without duplicate runtime rows', async (backend) => {
