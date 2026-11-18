@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { AgentPresetDocument, AgentPresetRow, ModelCatalog, ModelSelection, SessionListEntry, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, listAgentPresets, modelCatalog, readAgentPreset, updateSettings } from '../api/gateway.ts'
+import { ProviderSettings } from './ProviderSettings.tsx'
 import type { AgentModelInfo } from '../model/settings.ts'
 import { buildAgentModels, effectiveModel, selectionKey } from '../model/settings.ts'
 
@@ -149,6 +150,12 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
     }
   }, [defaultNs])
 
+  const refreshModels = async (): Promise<void> => {
+    const [nextCatalog, settings] = await Promise.all([modelCatalog(), describeSettings()])
+    setCatalog(nextCatalog)
+    setDefaultNs(settings.namespaces.find(ns => ns.ns === 'agent-default-model') ?? null)
+  }
+
   const applyDefault = async (key: string, role?: string): Promise<void> => {
     const option = options.find(item => item.key === key)
     if (option === undefined || defaultNs === null) return
@@ -200,6 +207,7 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
   return (
     <div className="fd-scroll min-h-0 flex-1 overflow-y-auto p-5">
       <div className="mx-auto max-w-5xl space-y-5">
+        <ProviderSettings onSaved={refreshModels} />
         <section className="rounded-xl border border-fd-border bg-fd-card p-5">
           <div className="mb-1 flex items-center gap-2">
             <h2 className="text-base font-semibold">Default model</h2>

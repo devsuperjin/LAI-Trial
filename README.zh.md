@@ -23,7 +23,7 @@ LAI Web 监控消息队列任务、展示运行统计与委派关系图，并配
 
 后端默认地址为 `http://127.0.0.1:3080`，LAI Web 地址为 `http://127.0.0.1:5174`。将后端打印的 token 粘贴到 LAI Web。`LAI_WEB_TARGET` 可修改开发代理地址。Vite 服务用于开发；生产部署需要实现相同的带认证同源 API 转发。
 
-队列消费者默认禁用。将 `.env.example` 复制为 `.env`，填写实际绝对工作目录、模型路由和凭据，然后选择一个环境覆盖，例如 `pnpm start:backend --patch config/development/redis.yml`。Redis、RabbitMQ、MQTT 和基于 MQTT 的 IQE 流水线各有独立配置。模型 Provider 仍由 DSH 官方设置管理，填写 Provider 名称不会自动创建该路由。
+队列消费者默认禁用。将 `.env.example` 复制为 `.env`，填写实际绝对工作目录、模型路由和凭据，然后选择一个环境覆盖，例如 `pnpm start:backend --patch config/development/redis.yml`。Redis、RabbitMQ、MQTT 和基于 MQTT 的 IQE 流水线各有独立配置。在 LAI Web → Settings → Model providers 中配置模型 Provider。前端直接使用 DSH 官方设置与凭据 API；在 MQ 覆盖中填写 Provider 名称前，仍需先配置对应路由。
 
 ## 项目结构
 

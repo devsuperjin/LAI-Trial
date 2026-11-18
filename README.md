@@ -23,7 +23,7 @@ Use Node.js >=24.9 and pnpm 11.28.5. Install with `pnpm install --frozen-lockfil
 
 The backend defaults to `http://127.0.0.1:3080`; LAI Web runs at `http://127.0.0.1:5174`. Paste the backend's printed token into LAI Web. `LAI_WEB_TARGET` changes the development proxy destination. The Vite server is a development proxy; production hosting must implement the same authenticated, same-origin API forwarding.
 
-Queue consumers are disabled by default. Copy `.env.example` to `.env`, provide the actual absolute workspace, model route and credentials, then select one overlay, for example `pnpm start:backend --patch config/development/redis.yml`. Redis, RabbitMQ, MQTT and the MQTT-based IQE pipeline have separate overlays. Model-provider configuration remains owned by official DSH settings; selecting a provider name does not create that route.
+Queue consumers are disabled by default. Copy `.env.example` to `.env`, provide the actual absolute workspace, model route and credentials, then select one overlay, for example `pnpm start:backend --patch config/development/redis.yml`. Redis, RabbitMQ, MQTT and the MQTT-based IQE pipeline have separate overlays. Configure model providers in LAI Web → Settings → Model providers. The frontend uses official DSH settings and credential APIs; selecting a provider in an MQ overlay still requires that route to be configured first.
 
 ## Project layout
 

@@ -72,7 +72,13 @@ function rpc<Result>(endpoint: string, args: unknown): Promise<Result> {
       throw new Error(`unexpected gateway response for ${rpcId}`)
     }
     const result = message.result
-    if (!result.ok) throw new Error(typeof result.error === 'string' ? result.error : 'rpc failed')
+    if (!result.ok) {
+      const failure = result.error
+      const message = typeof failure === 'string' ? failure
+        : typeof failure === 'object' && failure !== null && 'message' in failure && typeof failure.message === 'string' ? failure.message
+          : 'RPC request failed'
+      throw new Error(message)
+    }
     return result.value as Result
   })
 }
@@ -190,4 +196,48 @@ export function describeSettings(): Promise<SettingsDescribeValue> {
 
 export function updateSettings(ns: string, patch: Record<string, unknown>, expectedRevision: number): Promise<SettingsNamespaceView> {
   return rpc('settings/update', { ns, patch, expectedRevision })
+}
+
+/** A provider's editable location, reported by the running DSH adapter. */
+export interface ConfigurableProvider {
+  provider: string
+  displayName: string
+  settingsNs: string
+  settingsPath: string[]
+  declared?: boolean
+  defaultBaseURL?: string
+  nativeAuth?: { env: string[]; oauth: boolean }
+  error?: string
+}
+
+/** Credential metadata; secret values are never returned by this API. */
+export interface CredentialInfo {
+  configured: boolean
+  source?: string
+  writable: boolean
+}
+
+/** Path edits preserve unedited settings and use the namespace revision as a write fence. */
+export type SettingsPathOp =
+  | { op: 'set'; path: string[]; value: unknown }
+  | { op: 'unset'; path: string[] }
+
+/** List installed catalog providers and custom routes, including dormant providers. */
+export function listConfigurableProviders(): Promise<ConfigurableProvider[]> {
+  return rpc('llm/listConfigurableProviders', {})
+}
+
+/** Apply only the edited provider fields; reject stale revisions without overwriting them. */
+export function mutateSettings(ns: string, ops: SettingsPathOp[], expectedRevision: number): Promise<SettingsNamespaceView> {
+  return rpc('settings/mutate', { ns, ops, expectedRevision })
+}
+
+/** Read credential presence and writability without retrieving the key. */
+export function describeCredentials(refs: string[]): Promise<Record<string, CredentialInfo>> {
+  return rpc('credentials/describe', { refs })
+}
+
+/** Store a write-only key through DSH's credential service, separately from provider settings. */
+export function setCredential(ref: string, value: string): Promise<void> {
+  return rpc('credentials/set', { ref, value })
 }
