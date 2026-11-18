@@ -1,196 +1,198 @@
 # LAI Trial
 
-LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Worker 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
+**English** | [简体中文](README.zh-CN.md)
 
-项目面向 CI / GitHub 驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
+LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Worker delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
-## 项目需求与设计
+The project targets CI- and GitHub-driven engineering work: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
 
-最初的需求参考六个业务角色的 CI 验证流程：**Monitor、Triage、Reproduction、Ticket、Reviewer、Reporting**。当前实现结合了 Superagent，并调整了它们的运行方式：
+## Goals and design
 
-- **Monitor 就是 Superagent Router**，负责接收事件、判断任务是否应当执行，以及任务路由和后续讨论。
-- Router 决定执行后，通过 Superagent 创建任务及其 **Worker 会话和工作区**。
-- Worker 是执行协调者，使用 LAI 的 `iqe-orchestrator` 预设，依次调用五个专业子 Agent。
-- 五个子 Agent 是 DSH 原生的父子 Agent，调用记录、执行过程和结果可以在 lai-web 和原版 DSH 中查看。
+The original requirements drew on six business roles in a CI validation workflow: **Monitor, Triage, Reproduction, Ticket, Reviewer and Reporting**. The current implementation combines these roles with Superagent and adjusts how they run:
 
-这里的“六个 Agent”指六类业务角色。实际运行结构还包含一个 Worker 协调会话；Monitor / Router 和 Worker 是通过任务关联的独立会话，五个专业 Agent 才是 Worker 的子 Agent。
+- **Monitor is the Superagent Router.** It receives events, decides whether work should proceed, routes tasks and handles follow-up discussions.
+- When work is accepted, Superagent creates a task with its own **Worker session and workspace**.
+- The Worker coordinates execution using LAI's `iqe-orchestrator` preset and invokes the five specialists in sequence.
+- The specialists are native DSH child agents. Their calls, execution history and results are visible in both lai-web and the original DSH interface.
+
+“Six agents” describes the six business roles. The runtime also includes a Worker coordination session. Monitor / Router and Worker are separate sessions linked through a task; the five specialists are children of the Worker.
 
 ```mermaid
 flowchart TD
-    Input["GitHub 事件 / CI 状态"] --> Router["Monitor：Superagent Router"]
-    Router --> Decision{"按 Policy 判断与路由"}
-    Decision -->|不执行| Record["记录判断结果"]
-    Decision -->|执行| Task["Superagent Ticket：任务与执行工作区"]
-    Task --> Worker["LAI Worker：执行协调会话"]
-    subgraph Pipeline["Worker 内部的五阶段子 Agent 流水线"]
+    Input["GitHub events / CI status"] --> Router["Monitor: Superagent Router"]
+    Router --> Decision{"Policy evaluation and routing"}
+    Decision -->|No execution| Record["Record decision"]
+    Decision -->|Execute| Task["Superagent Ticket: task and execution workspace"]
+    Task --> Worker["LAI Worker: execution coordinator"]
+    subgraph Pipeline["Five-stage subagent pipeline inside the Worker"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
         Reproduce --> Ticket["3. Ticket"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
     Worker --> Triage
-    Reporter --> Result["Superagent 报告、任务状态及获授权的外部结果"]
+    Reporter --> Result["Superagent reports, task state and authorized external results"]
 ```
 
-### 角色分工
+### Roles
 
-| 业务角色 | 当前实现 | 主要职责 |
+| Business role | Implementation | Responsibilities |
 | --- | --- | --- |
-| Monitor | Superagent Router | 接收来源事件、执行准入判断、关联任务、调度 Worker、处理后续消息 |
-| Triage | `iqe-triage` / `triage` | 收集证据、分析失败原因、区分已知事实和待验证假设 |
-| Reproduction | `iqe-reproduction` / `reproduce` | 受控复现和验证；对明确授权的修复任务实施必要修改 |
-| Ticket | `iqe-ticket` / `ticket` | 整理问题描述、根因、复现步骤和证据，形成工单草稿或变更说明 |
-| Reviewer | `iqe-reviewer` / `review` | 独立检查分析、复现和修改结果，给出审核意见 |
-| Reporting | `iqe-reporting` / `reporter` | 汇总结果、证据、审核结论和未解决问题 |
+| Monitor | Superagent Router | Receive events, evaluate admission, associate tasks, dispatch Workers and handle follow-ups |
+| Triage | `iqe-triage` / `triage` | Gather evidence, analyze failures and separate established facts from hypotheses |
+| Reproduction | `iqe-reproduction` / `reproduce` | Reproduce and validate issues; make necessary changes for explicitly authorized fixes |
+| Ticket | `iqe-ticket` / `ticket` | Organize the problem, root cause, reproduction steps and evidence into a ticket draft or change summary |
+| Reviewer | `iqe-reviewer` / `review` | Independently inspect the diagnosis, reproduction and changes, then provide a review decision |
+| Reporting | `iqe-reporting` / `reporter` | Consolidate results, evidence, review conclusions and unresolved questions |
 
-**执行顺序固定为 `triage → reproduce → ticket → review → reporter`。** 每一步必须等待当前子 Agent 真实完成，才能进入下一步。执行约束会检查原生子会话历史，并阻止重复、越序及同时启动多个阶段；子 Agent 失败或取消后，不再启动后续阶段。只有五个阶段全部完成，Worker 才能提交 `ready` 报告。
+**Execution order is fixed: `triage → reproduce → ticket → review → reporter`.** Each stage waits for its child agent to actually finish. Runtime guards inspect native child-session history and prevent duplicate, out-of-order or concurrent stage launches. A failed or cancelled child blocks later stages. The Worker can report `ready` only after all five stages complete.
 
-Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其中一个执行阶段**，两者承担不同职责。
+A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is one execution stage** within that task.
 
-### Superagent 与 LAI 的边界
+### Component responsibilities
 
-| 部分 | 负责的能力 |
+| Component | Owns |
 | --- | --- |
-| DSH | 模型接入、会话持久化、工具、原生子 Agent、权限及插件运行环境 |
-| Superagent | Sources、Policy、Router、任务状态、Worker 生命周期、调度、重试和来源回复 |
-| LAI Agents | Worker 协调预设、五个专业角色、可配置 Prompt、串行执行约束 |
-| lai-web | 统一的任务、会话、执行过程、配置和结果查看界面 |
+| DSH | Model integration, persistent sessions, tools, native subagents, permissions and the plugin runtime |
+| Superagent | Sources, Policy, Router, task state, Worker lifecycle, scheduling, retries and replies to sources |
+| LAI Agents | Worker coordination preset, five specialist roles, configurable prompts and sequential execution guards |
+| lai-web | Unified views for tasks, sessions, execution, configuration and results |
 
-原有的 LAI 独立触发层和模拟入口已移除，事件接入与任务生命周期统一由 Superagent 管理。当前架构不依赖 MQ、外部消息 Broker 或共享知识库；本地 SQLite 和持久化执行记录用于保存应用状态。
+The former standalone LAI trigger layer and simulation entry point have been removed. Superagent owns event intake and task lifecycle. The architecture requires no MQ, external message broker or shared knowledge base; local SQLite and durable execution records store application state.
 
-## 当前能力与扩展方向
+## Current capabilities and extensions
 
-当前代码已接入 Superagent 的 GitHub 来源，可按配置接收通知、新 Issue、PR、评论及 CI 状态变化，并通过准入策略决定后续处理。任务执行采用 LAI 原生子 Agent 流水线。
+The application integrates Superagent's GitHub source. Depending on configuration, it receives notifications, new Issues, PRs, comments and CI status changes, then applies admission policy. Accepted work runs through LAI's native subagent pipeline.
 
-需要注意当前实现的边界：
+Current boundaries:
 
-- **收到事件不等于启动 Worker**：来源开关、允许的发送者、准入规则和 Eval 模式共同决定是否执行。原型默认规则主要面向文案和局部视觉修复，使用 CI 分析场景时需要配置对应规则。
-- 五个角色的职责由 Prompt 和可用工具共同实现；角色名称本身不代表已经安装了 Jarvis、LogDistiller 或其他外部工程工具。
-- 当前没有专门实现 Jenkins 连接器、通用 Commit / Push 触发器、Jira / Azure 工单提交连接器或共享知识库。后续来源应通过 Superagent 的 Source 扩展机制接入。
-- 工单草稿和报告可在任务中产生；是否创建 PR、回复 GitHub 或执行其他外部操作，取决于任务授权、配置及实际可用工具。
+- **Receiving an event does not automatically launch a Worker.** Source switches, allowed senders, admission rules and Eval mode determine what proceeds. The prototype's default rules mainly cover copy fixes and local visual fixes; CI analysis requires appropriate rules.
+- Role behavior depends on prompts and available tools. A role name does not mean Jarvis, LogDistiller or another external engineering tool is installed.
+- Dedicated Jenkins integration, general Commit / Push triggers, Jira / Azure ticket-submission connectors and a shared knowledge base are not currently implemented. Future inputs should use Superagent's Source extension mechanism.
+- Tasks can produce ticket drafts and reports. Creating PRs, replying on GitHub or taking other external actions depends on authorization, configuration and available tools.
 
-## 快速启动
+## Quick start
 
-环境要求：
+Requirements:
 
-- Node.js **24.9.0 或以上**，满足本仓库的运行要求。
-- pnpm **11.28.5**，版本声明见 `package.json`。
-- 使用 GitHub 来源时，需要可执行且已登录的 GitHub CLI（`gh`），登录账号须具备目标仓库所需权限。
-- 可用的模型 Provider 与凭据。
+- Node.js **24.9.0 or later**, as required by this repository.
+- pnpm **11.28.5**, declared in `package.json`.
+- For the GitHub source, an executable, authenticated GitHub CLI (`gh`) whose account has the required repository access.
+- A configured model provider and credentials.
 
-首次运行：
+First run:
 
 ```sh
 pnpm install
 pnpm start
 ```
 
-`pnpm start` 会构建工作区并启动统一应用，无需分别启动前端和后端。打开终端打印的带认证信息的访问地址，默认端口为 **3080**。
+`pnpm start` builds the workspace and starts the unified application. You do not need separate frontend and backend processes for normal use. Open the authenticated URL printed in the terminal. The default port is **3080**.
 
-### 首次配置
+### Initial configuration
 
-1. 在 **Settings** 配置模型 Provider、凭据和默认模型，也可以编辑 LAI 各角色的 Prompt。
-2. 打开 **Plugin → Superagent → Sources**，填写 GitHub 仓库 `owner/repo`、GitHub CLI 路径及需要接收的事件。
-3. 在 **Policy** 配置允许的发送者、任务范围和准入规则。
-4. 在 **Eval** 配置判断模式、超时和 Router 模型。默认是 `observe`；需要自动受理推断任务时，按使用场景选择 `auto`。
-5. 在 **Execution** 配置 Worker 模型、并发数、工作目录、工作区准备命令和命令限制。
-6. 在 **Tasks** 查看受理任务，在 **Runs** 查看 Router、Worker 和子 Agent 的执行过程。
+1. In **Settings**, configure model providers, credentials and the default model. LAI role prompts are editable there as well.
+2. Open **Plugin → Superagent → Sources** and configure the GitHub repository (`owner/repo`), GitHub CLI path and events to receive.
+3. In **Policy**, configure allowed senders, task scope and admission rules.
+4. In **Eval**, configure evaluation mode, timeout and the Router model. The default is `observe`; choose `auto` when the intended workflow should automatically accept inferred tasks under policy.
+5. In **Execution**, configure the Worker model, concurrency, working directory, workspace preparation command and command restrictions.
+6. Use **Tasks** to inspect accepted work and **Runs** to inspect Router, Worker and subagent execution.
 
-如果使用同一个 GitHub 账号发 Issue 和执行任务，需要同时开启新 Issue 接收和 **Receive issues opened by the agent account**。自己的评论和 PR 仍会被过滤；开关不会自动补跑此前已跳过的 Issue，接收后的 Issue 仍受 Policy 约束。
+If one GitHub account both opens Issues and executes tasks, enable new-Issue intake and **Receive issues opened by the agent account**. Own comments and PRs remain filtered. This switch does not replay previously skipped Issues, and received Issues still pass through Policy.
 
-来源轮询间隔最低为 60 秒，实际间隔还会遵循 GitHub 的要求。配置完成后，使用一个目标明确的小任务开始，便于观察路由结果和模型费用。
+The minimum polling interval is 60 seconds; longer intervals requested by GitHub take precedence. Start with a small, clearly defined task to inspect routing behavior and model costs.
 
-## 页面与配置入口
+## Pages and configuration
 
-| 页面 | 用途 |
+| Page | Purpose |
 | --- | --- |
-| Dashboard | 查看 Run 概览、状态及模型用量等统计 |
-| Tasks | 查看 Superagent 任务，打开对应 Monitor / Router 或 Worker 会话 |
-| History | 查看已结束任务及路由决策 |
-| Runs | 查看会话、Turn、工具调用、原生子 Agent 和执行结果 |
-| Plugin → Superagent | 独立的 Superagent 管理页面，包含 Sources、Policy、Eval、Execution、Prompts、Deployment |
-| Settings | 模型 Provider、凭据、默认模型及 LAI 角色配置 |
+| Dashboard | Run overview, status and model-usage statistics |
+| Tasks | Superagent tasks with links to their Monitor / Router and Worker sessions |
+| History | Ended tasks and routing decisions |
+| Runs | Sessions, turns, tool calls, native subagents and execution results |
+| Plugin → Superagent | Dedicated management page for Sources, Policy, Eval, Execution, Prompts and Deployment |
+| Settings | Model providers, credentials, default model and LAI role configuration |
 
-界面支持 EN / 中文切换。原版 DSH 调试界面保留在 **`/dsh/`**，与 lai-web 使用同一个后端。Runs 的删除操作使用 DSH 原生归档，支持 Undo；运行中的会话需要先停止。
+The interface supports English and Chinese. The original DSH debugging UI remains available at **`/dsh/`**, sharing the same backend. Deleting a Run uses native DSH archiving with Undo; running sessions must be stopped first.
 
-Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，Settings 中的 LAI Prompt 配置管理 LAI 角色定义。来源、策略和执行设置会保留版本信息，保存时检查并发修改；高级配置编辑器用于访问基础表单之外的完整字段。
+**Prompts** on the Superagent page manages its Router / Worker instructions. LAI prompt settings manage the LAI role definitions. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
 
-## 项目结构
+## Repository structure
 
 ```text
 LAI-Trial/
 ├── app/
-│   └── lai-web/                 # React + Tailwind CSS 前端
+│   └── lai-web/                 # React + Tailwind CSS frontend
 ├── config/
-│   ├── dsh-baseline.json         # 官方 DSH 版本与来源基线
-│   ├── profile.json              # 应用 Profile / Bundle 组合
-│   └── cordis.patch.yml          # 应用默认插件及环境配置
+│   ├── dsh-baseline.json         # Official DSH version and source baseline
+│   ├── profile.json              # Application Profile / Bundle composition
+│   └── cordis.patch.yml          # Default plugins and environment configuration
 ├── packages/
-│   └── dsh-adapter/              # 浏览器 RPC、Superagent API 与 DSH 版本适配
+│   └── dsh-adapter/              # Browser RPC, Superagent API and DSH compatibility
 ├── plugins/
-│   ├── superagent/               # @lai/superagent：接入、路由、任务与 Worker 生命周期
-│   │   └── src/app/lai-worker.ts # LAI 五阶段子 Agent 的执行约束
-│   ├── lai-agents/               # @lai/lai-agents：Worker 与五个专业角色预设
-│   ├── web-host/                 # 统一 Web 服务、鉴权及原版 DSH 调试入口
-│   └── prompt-sections/          # 应用 Prompt 分段扩展
-├── scripts/                      # 启动、Profile 迁移和版本 / 架构检查
-├── tests/                        # 应用契约与组合迁移测试
-├── docs/                         # 架构、迁移与维护文档
-├── .github/workflows/            # DSH 基线与候选版本兼容性检查
-└── .runtime/                     # 本地运行数据，不提交到 Git
+│   ├── superagent/               # @lai/superagent: intake, routing, tasks and Workers
+│   │   └── src/app/lai-worker.ts # Five-stage native subagent execution guards
+│   ├── lai-agents/               # @lai/lai-agents: Worker and five specialist presets
+│   ├── web-host/                 # Unified Web hosting, authentication and DSH debug UI
+│   └── prompt-sections/          # Application prompt-section extension
+├── scripts/                      # Startup, Profile migration, version and architecture checks
+├── tests/                        # Application contracts and composition migration tests
+├── docs/                         # Architecture, migration and maintenance documentation
+├── .github/workflows/            # DSH baseline and candidate compatibility checks
+└── .runtime/                     # Local runtime data, excluded from Git
 ```
 
-`plugins/superagent` 来自 Superagent 原型的业务代码，原有 MIT 许可保留。当前导入基线为 `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`；在此基础上增加了 DSH 版本适配、同账号 Issue 接收、管理 API 鉴权和 LAI Worker 流水线。它是本仓库维护的应用插件，不是对官方 DSH 框架源码的修改。
+`plugins/superagent` contains application business logic imported from the Superagent prototype, with its MIT license retained. The imported baseline is `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`. Local additions include DSH compatibility, own-Issue intake, management API authentication and the LAI Worker pipeline. This is an application plugin maintained in this repository; it does not modify official DSH framework source.
 
-### 运行数据
+### Runtime data
 
-| 路径 / 配置 | 内容 |
+| Path / setting | Contents |
 | --- | --- |
-| `.runtime/dsh` | 应用隔离的 DSH Home，保存用户配置、凭据和会话 |
-| `.runtime/dsh/superagent` | 默认 Superagent 数据库及执行状态目录 |
-| `LAI_SUPERAGENT_STATE_DIR` | 可覆盖 Superagent 状态目录，须为绝对路径 |
-| `.reference` | 忽略提交的上游源码审计目录，不参与构建、测试或运行 |
+| `.runtime/dsh` | Isolated application DSH Home: user settings, credentials and sessions |
+| `.runtime/dsh/superagent` | Default Superagent database and execution-state directory |
+| `LAI_SUPERAGENT_STATE_DIR` | Optional absolute path overriding the Superagent state directory |
+| `.reference` | Ignored upstream source checkout for auditing; never used by builds, tests or runtime |
 
-历史独立 demo 的 3082 端口及数据不属于默认启动流程，也不会自动导入统一版。已有数据迁移应在服务停止后进行，并保留备份；同一状态目录只能由一个运行实例使用。
+The historical standalone demo on port 3082 is separate from normal startup and is not automatically imported. Migrate existing data with the service stopped and backups retained. Only one running process may use a given state directory.
 
-## DSH 二次开发规范
+## DSH application development conventions
 
-本项目采用独立应用仓库的方式维护二次开发，当前官方 DSH 基线为 **`0.2.2-rc.1`**，以 [`config/dsh-baseline.json`](config/dsh-baseline.json) 为准。
+LAI maintains its extensions in an independent application repository. The current official DSH baseline is **`0.2.2-rc.1`**, recorded in [`config/dsh-baseline.json`](config/dsh-baseline.json).
 
-### 依赖与插件组合
+### Dependencies and plugin composition
 
-- 应用包统一使用 **`@lai`** 命名空间；官方 DSH 依赖和 Peer 依赖固定到基线版本。
-- 使用官方发布的导出接口，以及 **Bundle / Profile 组合和环境覆盖** 扩展功能。
-- 不复制、不直接修改官方 DSH 框架源码，不导入其私有构建路径。
-- DSH 版本差异和浏览器 RPC 协议集中在 **`packages/dsh-adapter`**，业务代码不分散处理兼容分支。
-- 保持 Superagent 对事件、路由和任务生命周期的统一所有权；新增 CI / GitHub 来源沿用其 Source 机制，不再增加平行触发层或 MQ 依赖。
+- Use the **`@lai`** namespace for application packages. Pin official DSH dependencies and peers to the baseline version.
+- Extend DSH through published exports, **Bundle / Profile composition and environment overlays**.
+- Do not copy or edit official DSH framework source or import private build paths.
+- Keep DSH version differences and the browser RPC protocol in **`packages/dsh-adapter`**.
+- Preserve Superagent's ownership of events, routing and task lifecycle. New CI / GitHub inputs should use its Source mechanism without adding a parallel trigger layer or MQ dependency.
 
-### Agent 与生命周期
+### Agents and lifecycle
 
-- 专业角色由 `plugins/lai-agents` 定义，Worker 必须调用原生子 Agent，不能用新建独立会话来替代父子关系。
-- 五阶段顺序由运行约束保证，不能仅依赖 Prompt 中的口头约定。
-- 工具、事件监听、Prompt 和服务注册通过 Cordis 生命周期管理并释放。
-- 停止或卸载时，先等待任务取消、子 Agent 停止和 Worker 清理，再释放所依赖的服务。
-- 保留原生会话、工具调用、执行回执与持久化记录，使 lai-web 和原版 DSH 能查看同一执行过程。
+- Define specialist roles in `plugins/lai-agents`. Workers must invoke native child agents; independent root sessions do not replace parent–child relationships.
+- Enforce stage order through runtime guards rather than relying only on prompt instructions.
+- Own tool, event, prompt and service registrations through Cordis lifecycle effects and dispose them correctly.
+- On shutdown or unload, await task cancellation, child termination and Worker cleanup before releasing dependencies.
+- Preserve native sessions, tool calls, execution receipts and durable records so lai-web and the original DSH interface can inspect the same execution.
 
-### 配置、数据与凭据
+### Configuration, data and credentials
 
-- 应用默认值属于仓库配置，用户覆盖值属于运行 Profile；升级和迁移不得覆盖已有模型设置、凭据或会话。
-- 使用设置接口及版本检查保存配置，避免无条件覆盖其他页面或进程的修改。
-- 凭据通过 DSH 的凭据接口维护，不写入提交的配置、源码或示例。
-- `.runtime` 与用户原有的其他 DSH 数据目录保持隔离，不将本地状态纳入 Git。
+- Store application defaults in repository configuration and user overrides in the runtime Profile. Upgrades and migrations must preserve existing model settings, credentials and sessions.
+- Save configuration through settings interfaces with revision checks to avoid overwriting concurrent changes.
+- Manage credentials through DSH's credential interface. Keep them out of committed configuration, source and examples.
+- Keep `.runtime` separate from other user DSH data and excluded from Git.
 
-### 验证与上游升级
+### Validation and upstream upgrades
 
-集成改动应运行：
+For integration changes, run:
 
 ```sh
 pnpm check
 ```
 
-这会检查架构、构建、类型和本地测试，包括 Superagent 的 Fixture 测试。流水线验证使用确定性驱动和本地数据；真实模型验证单独进行，会产生实际 API 费用。
+This checks architecture, builds, types and local tests, including Superagent fixtures. Pipeline tests use deterministic drivers and local data. Real-model validation is separate and incurs actual API costs.
 
-升级 DSH 时，在独立集成分支中选择明确版本，更新依赖和锁文件，核对公开接口及持久化格式，并在合并前完成兼容检查。仓库提供版本更新脚本：
+Upgrade DSH on a separate integration branch. Select an exact release, update dependencies and the lockfile, review public interfaces and persistence formats, and complete compatibility checks before merging. The repository provides a version-update script:
 
 ```sh
 node scripts/set-dsh-version.mjs <exact-version>
@@ -198,18 +200,18 @@ pnpm install --no-frozen-lockfile
 pnpm check
 ```
 
-同时更新基线记录，并保留旧版本代码、锁文件及匹配的数据备份。更新 Superagent 业务代码时，需要保留 LAI 的 Worker 预设、串行约束、管理 API 鉴权和同账号 Issue 配置等本地改动。
+Update the baseline record and retain the previous code, lockfile and matching data backups. When updating Superagent business logic, preserve LAI's Worker preset, sequential guards, management API authentication and own-Issue configuration.
 
-## 常用开发命令
+## Development commands
 
-| 命令 | 用途 |
+| Command | Purpose |
 | --- | --- |
-| `pnpm start` | 构建并启动统一应用 |
-| `pnpm build` | 构建全部工作区包 |
-| `pnpm start:backend` | 使用已有构建启动后端，不自动打开浏览器 |
-| `pnpm dev:web` | 单独启动前端开发服务器，需配合后端使用 |
-| `pnpm config:dump` | 查看组合后的 DSH 配置 |
-| `pnpm check:architecture` | 检查命名空间、依赖版本和导入边界 |
-| `pnpm check` | 执行完整本地检查 |
+| `pnpm start` | Build and start the unified application |
+| `pnpm build` | Build all workspace packages |
+| `pnpm start:backend` | Start the backend from existing builds without opening a browser |
+| `pnpm dev:web` | Start the frontend development server; requires a backend |
+| `pnpm config:dump` | Inspect the composed DSH configuration |
+| `pnpm check:architecture` | Check namespaces, dependency versions and import boundaries |
+| `pnpm check` | Run the complete local check suite |
 
-更详细的运行关系见 [`docs/architecture.md`](docs/architecture.md)，具体依赖与启动脚本以仓库当前配置为准。
+See [`docs/architecture.md`](docs/architecture.md) for detailed runtime relationships. Repository configuration and scripts are the source of truth for dependencies and startup behavior.
