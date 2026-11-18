@@ -1,6 +1,6 @@
 # LAI Trial
 
-Independent DSH application with one LAI orchestrator with monitoring and five specialist subagents.
+Independent DSH application with one LAI orchestrator that monitors inputs and five specialist subagents.
 
 ```sh
 pnpm install
