@@ -34,3 +34,10 @@ Default-branch upstream source is not tracked automatically; select explicit pub
 Keep the previous release commit and its lockfile; use a clean checkout of that commit and reinstall its frozen lockfile, then rebuild. Preserve `.runtime/dsh` before trying a new release. If an upgrade changes durable data, restore the matching pre-upgrade backup into the isolated home while the service is stopped; do not assume an older DSH version can read newer session generations. Do not delete or rewrite the user's original DSH home.
 
 Each application plugin has its own semantic version and package exports. Review `pnpm pack` contents before an independent publication; a source export or source-relative path is not the runtime distribution. The first migration has no framework patches to replay.
+
+
+## Superagent business integration
+
+The application imports `deepseek-ai/dsh-superagent-prototype` at commit `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`. Its former `vendor/dsh-superagent` tree now lives in `plugins/superagent` as workspace package `@lai/superagent`; its MIT license is preserved. This is application business logic, not official DSH framework source.
+
+When updating, compare against that upstream commit and preserve LAI changes: baseline-pinned peers, package-root/client module identity, authenticated management API, adapter-backed session reads, own-Issue intake opt-in, Worker preset selection and sequential native delegation guard. Keep Router admission/task lifecycle upstream-owned. Run `pnpm check`, including the imported fixture suite. Do not replace active SQLite state, DSH credentials or existing sessions during a code update.

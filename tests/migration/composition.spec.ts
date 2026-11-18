@@ -18,7 +18,7 @@ const dump = async (extra: string[] = []) => {
 }
 
 describe('out-of-tree Profile composition through the published CLI', () => {
-  it('composes LAI subagents, pipeline and simulator without a broker', async () => {
+  it('composes Superagent Router and LAI worker roles without the retired trigger layer', async () => {
     const rows = await dump()
     expect(rows.find(r => r.id === 'ui-settings-account')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'account-controller')?.disabled).toBe(true)
@@ -26,8 +26,9 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     expect(rows.find(r => r.id === 'lai-web-runtime')?.name).toBe('@lai/dsh-web-host')
     expect(rows.find(r => r.id === 'lai-web-runtime')?.config?.distIndex).toBe('process.env.LAI_WEB_DIST_INDEX')
     expect(rows.some(r => r.id.startsWith('agent-mq-'))).toBe(false)
-    expect(rows.find(r => r.id === 'lai-pipeline')?.name).toBe('@lai/lai-pipeline')
-    expect(rows.find(r => r.id === 'pipeline-simulator')?.name).toBe('@lai/pipeline-simulator')
+    expect(rows.some(r => r.id === 'lai-pipeline')).toBe(false)
+    expect(rows.find(r => r.id === 'dsh-superagent')?.name).toBe('@lai/superagent')
+    expect(rows.some(r => r.id === 'pipeline-simulator')).toBe(false)
     expect(rows.find(r => r.id === 'lai-agents')?.name).toBe('@lai/lai-agents')
   })
   it('accounts for every source diff file and resolves every migrated target', async () => {
@@ -63,4 +64,23 @@ it('migrates copied application defaults without losing provider settings', asyn
     await invocation()
     expect(await readFile(join(profile, 'cordis.patch.yml'), 'utf8')).toBe(patch)
   } finally { await rm(migrationHome, { recursive: true, force: true }) }
+})
+
+it('retires trigger overlays with a backup while retaining provider configuration and old history', async () => {
+  const { mkdir, writeFile } = await import('node:fs/promises')
+  const home = await mkdtemp(join(tmpdir(), 'lai-superagent-migration-'))
+  const profile = join(home, 'profiles/lai')
+  try {
+    await mkdir(profile, { recursive: true })
+    await mkdir(join(home, 'pipeline'), { recursive: true })
+    await writeFile(join(home, 'pipeline/history.json'), '{"retained":true}')
+    await writeFile(join(profile, 'cordis.patch.yml'), '- id: lai-pipeline\n  config:\n    historyLimit: 20\n- insert:\n    - id: pipeline-simulator\n      name: "@lai/pipeline-simulator"\n- id: llm-deepseek\n  config:\n    thinking: disabled\n')
+    await exec(process.execPath, ['scripts/run-dsh.mjs', '--dump-config'], { env: { ...process.env, LAI_DSH_HOME: home }, maxBuffer: 8 * 1024 * 1024 })
+    const migrated = await readFile(join(profile, 'cordis.patch.yml'), 'utf8')
+    expect(migrated).not.toContain('lai-pipeline')
+    expect(migrated).not.toContain('pipeline-simulator')
+    expect(migrated).toContain('llm-deepseek')
+    expect(await readFile(join(profile, 'cordis.patch.before-superagent.yml'), 'utf8')).toContain('historyLimit: 20')
+    expect(await readFile(join(home, 'pipeline/history.json'), 'utf8')).toBe('{"retained":true}')
+  } finally { await rm(home, { recursive: true, force: true }) }
 })

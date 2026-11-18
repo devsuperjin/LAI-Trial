@@ -7,3 +7,5 @@ This library owns the browser RPC protocol (`./gateway`) and release-specific su
 See [architecture](../../docs/architecture.md) and [adapter tests](../../tests/contract/adapter.spec.ts).
 
 Provider configuration reads DSH's configurable-provider directory and writes minimal path edits using `settings/mutate`. Namespace revisions fence concurrent writes. API keys use the separate write-only `credentials/set` API; credential reads expose only presence, source and writability. The gateway propagates DSH refusal messages to the editor.
+
+The `./superagent` export owns the authenticated same-origin Superagent management protocol. `./runs` reads archived roots for LAI run filtering. `./host` contains baseline-specific cold session event reads through published DSH persistence APIs; browser code must not import it.

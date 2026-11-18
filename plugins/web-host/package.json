@@ -31,13 +31,15 @@
     "@deepseek-ai/cordis": "4.1.0",
     "@deepseek-ai/dsh-host-webserver": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-connection": "0.2.2-rc.1",
-    "@deepseek-ai/dsh-web-app": "0.2.2-rc.1"
+    "@deepseek-ai/dsh-web-app": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-workspace": "0.2.2-rc.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "4.1.0",
     "@deepseek-ai/dsh-host-webserver": "0.2.2-rc.1",
     "@deepseek-ai/dsh-client-connection": "0.2.2-rc.1",
     "@deepseek-ai/dsh-web-app": "0.2.2-rc.1",
-    "@deepseek-ai/cordis-plugin-loader": "1.1.0"
+    "@deepseek-ai/cordis-plugin-loader": "1.1.0",
+    "@deepseek-ai/dsh-workspace": "0.2.2-rc.1"
   }
 }

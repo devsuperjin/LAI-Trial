@@ -1,6 +1,6 @@
 # @lai/lai-agents
 
-One `iqe-orchestrator` handles monitoring and dispatch. Its five delegation tools are `triage`, `reproduce`, `ticket`, `review`, `reporter`, using the existing five `iqe-*` specialist presets. There is no separate Monitor preset or delegation tool.
+Superagent Router is the Monitor. Each accepted task runs in a separate Worker using `iqe-orchestrator`. Its five delegation tools are `triage`, `reproduce`, `ticket`, `review`, `reporter`, using the existing five `iqe-*` specialist presets. There is no separate Monitor preset or delegation tool.
 
 Configure prompts through LAI Web Settings or `lai-agents.config.prompts`: `orchestrator`, `triage`, `reproduce`, `ticket`, `review`, `report`. Each prompt is resolved through the public DSH system prompt service at the next assembly. Existing custom prompts for retained roles are preserved.
 

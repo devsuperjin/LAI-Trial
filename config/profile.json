@@ -6,14 +6,14 @@
     "@lai/dsh-web-host": "workspace:*",
     "@lai/lai-agents": "workspace:*",
     "@lai/application-config": "workspace:*",
-    "@lai/lai-pipeline": "workspace:*",
-    "@lai/pipeline-simulator": "workspace:*"
+    "@lai/superagent": "workspace:*"
   },
   "dsh": {
     "profile": {
       "bundles": [
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
+        "@lai/superagent",
         "@lai/application-config"
       ]
     }

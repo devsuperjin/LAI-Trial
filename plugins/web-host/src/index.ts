@@ -7,12 +7,13 @@ import { launchedThroughSsh, launchEnvironmentOf } from '@deepseek-ai/dsh-launch
 import type {} from '@deepseek-ai/dsh-client-connection'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-web-app'
+import type {} from '@deepseek-ai/dsh-workspace'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
 import open from 'open'
 import { mountDebugUi } from './debug-ui.ts'
 
 export const name = 'lai-web'
-export const inject = ['webServer', 'connection']
+export const inject = ['webServer', 'connection', 'workspaceRegistry']
 
 /** Built frontend location and the ordinary DSH Web launch options. */
 export interface Config {
@@ -49,6 +50,12 @@ export function apply(ctx: Context, config: Config): void {
   ctx.provide('webApp', { getAdvertisedUrl: advertisedUrl })
   ctx.plugin(FrontendStatic, { distIndex: config.distIndex })
   mountDebugUi(ctx, config.distIndex)
+  ctx.effect(() => ctx.webServer.register({ kind: 'exact', path: '/lai-api/runs/archives', handler: (req, res) => {
+    const rejection = ctx.connection.requestRejection(req)
+    if (rejection !== undefined) { res.writeHead(rejection); res.end(); return }
+    res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' })
+    res.end(JSON.stringify({ archivedSessionIds: ctx.workspaceRegistry.archivedSessionIds }))
+  } }), 'LAI archived session discovery')
 
   let active = true
   ctx.effect(() => () => { active = false }, 'LAI Web readiness lifetime')

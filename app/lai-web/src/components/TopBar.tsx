@@ -10,7 +10,7 @@ function authLabel(auth: AuthState): string {
 }
 
 const PAGE_TITLE: Record<Page, string> = {
-  pipeline: 'Pipeline',
+  pipeline: 'Tasks',
   history: 'History',
   runs: 'Runs',
   dashboard: 'Dashboard',

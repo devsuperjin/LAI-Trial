@@ -105,7 +105,7 @@ export function DashboardPage(props: { entries: SessionListEntry[]; onOpenRun: (
     <div className="p-4 md:p-6">
       <div className="mx-auto max-w-6xl space-y-5">
         <div><h1 className="text-xl font-medium">{t("Dashboard")}</h1><p className="mt-1 text-sm text-fd-muted-foreground">{t("Run outcomes, agent activity, and token usage at a glance.")}</p></div>
-        {totals.runs === 0 && <p className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm text-fd-muted-foreground">{t("No runs yet. Open Pipeline to simulate an input, or start a task in DSH.")}</p>}
+        {totals.runs === 0 && <p className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm text-fd-muted-foreground">{t("No runs yet. Configure a Superagent source in Settings, or start a task in DSH.")}</p>}
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <StatCard hue="var(--color-fd-primary)" label={t("Total runs")} sub={`${totals.subagents} subagents`} value={String(totals.runs)} />
           <StatCard hue={STATUS_HUE.completed} label={t("Completed")} value={String(totals.completed)} />

@@ -12,9 +12,17 @@
       "types": "./lib/subagents.d.ts",
       "default": "./lib/subagents.js"
     },
-    "./pipeline": {
-      "types": "./lib/pipeline.d.ts",
-      "default": "./lib/pipeline.js"
+    "./host": {
+      "types": "./lib/host.d.ts",
+      "default": "./lib/host.js"
+    },
+    "./superagent": {
+      "types": "./lib/superagent.d.ts",
+      "default": "./lib/superagent.js"
+    },
+    "./runs": {
+      "types": "./lib/runs.d.ts",
+      "default": "./lib/runs.js"
     }
   },
   "files": [
@@ -26,13 +34,17 @@
   },
   "peerDependencies": {
     "@deepseek-ai/dsh-agent": "0.2.2-rc.1",
-    "@deepseek-ai/dsh-subagent": "0.2.2-rc.1"
+    "@deepseek-ai/dsh-subagent": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-session-persistence": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.2-rc.1"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent": "0.2.2-rc.1",
-    "@deepseek-ai/dsh-subagent": "0.2.2-rc.1"
+    "@deepseek-ai/dsh-subagent": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-session": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-session-persistence": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-api-session-controller": "0.2.2-rc.1"
   },
-  "dependencies": {
-    "@lai/lai-pipeline": "workspace:*"
-  }
+  "dependencies": {}
 }

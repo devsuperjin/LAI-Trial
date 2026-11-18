@@ -5,7 +5,7 @@ import { describeSettings, mutateSettings } from '../api/gateway.ts'
 import { record } from '../model/dag.ts'
 
 const ROLES = [
-  ['orchestrator', 'Orchestrator / Monitor'], ['triage', 'Triage'], ['reproduce', 'Reproduction'],
+  ['orchestrator', 'Worker orchestrator'], ['triage', 'Triage'], ['reproduce', 'Reproduction'],
   ['ticket', 'Ticket'], ['review', 'Review'], ['report', 'Reporter'],
 ] as const
 
@@ -50,7 +50,7 @@ export function AgentPrompts() {
   const dirty = ROLES.some(([id]) => draft[id] !== original[id])
   return <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label={t("LAI agents")}>
     <h2 className="text-base font-medium">{t("LAI agents")}</h2>
-    <p className="mt-1 text-sm text-fd-muted-foreground">{t("One orchestrator with monitoring and five specialist subagents. Prompts are stored in the independent lai-agents plugin.")}</p>
+    <p className="mt-1 text-sm text-fd-muted-foreground">{t("A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured above. Prompts are stored in the independent lai-agents plugin.")}</p>
     {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">{t("The lai-agents plugin is not enabled in this profile.")}</p>}
     {namespace && <div className="mt-4 space-y-2">{ROLES.map(([id, title]) => <details className="rounded-lg border border-fd-border p-3" key={id}>
       <summary className="cursor-pointer text-sm font-medium">{t(title)}</summary>

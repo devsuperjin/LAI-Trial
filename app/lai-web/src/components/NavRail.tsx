@@ -19,7 +19,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   },
 
   {
-    id: 'pipeline', label: 'Pipeline', hint: 'Simulate events and follow the pipeline',
+    id: 'pipeline', label: 'Tasks', hint: 'Monitor inputs and follow Worker tasks',
     icon: () => <svg aria-hidden fill="none" height="18" width="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="4" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><rect x="17" y="15" width="5" height="5" rx="1" /><path d="M7 6.5h5V9.5M14.5 12h5V15" /></svg>,
   },
   { id: 'history', label: 'History', hint: 'Browse pipeline history and stage outputs', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },

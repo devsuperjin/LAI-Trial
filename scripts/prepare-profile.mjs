@@ -65,6 +65,19 @@ export async function prepareProfile() {
     try { await copyFile(patch, resolve(profile, 'cordis.patch.before-pipeline.yml'), constants.COPYFILE_EXCL) } catch (error) { if (error.code !== 'EEXIST') throw error }
     await writeFile(patch, document.toString())
   }
+  // Retire the former trigger engine while preserving its history and a copy of user overlays.
+  {
+    const document = parseDocument(await readFile(patch, 'utf8'), { customTags: [{ tag: 'tag:yaml.org,2002:js', resolve: value => value }] })
+    if (document.errors.length || !isSeq(document.contents)) throw new Error('Cannot migrate the LAI trigger overlay; original configuration preserved.')
+    const retired = row => isMap(row) && ['lai-pipeline', 'pipeline-simulator'].includes(String(row.get('id') ?? ''))
+    const before = document.toString()
+    for (const row of document.contents.items) if (isMap(row) && isSeq(row.get('insert', true))) row.get('insert', true).items = row.get('insert', true).items.filter(item => !retired(item))
+    document.contents.items = document.contents.items.filter(row => !retired(row) && !(isMap(row) && isSeq(row.get('insert', true)) && row.get('insert', true).items.length === 0 && row.items.length === 1))
+    if (document.toString() !== before) {
+      try { await copyFile(patch, resolve(profile, 'cordis.patch.before-superagent.yml'), constants.COPYFILE_EXCL) } catch (error) { if (error.code !== 'EEXIST') throw error }
+      await writeFile(patch, document.toString())
+    }
+  }
   const manifest = {
     ...previous, ...template,
     dependencies: { ...previous.dependencies, ...template.dependencies },
@@ -73,6 +86,8 @@ export async function prepareProfile() {
       bundles: [...new Set([...template.dsh.profile.bundles, ...(previous.dsh?.profile?.bundles ?? []).filter(name => name !== retiredBundle)])],
     } },
   }
+  delete manifest.dependencies['@lai/pipeline-simulator']
+  delete manifest.dependencies['@lai/lai-pipeline']
   delete manifest.dependencies[retiredBundle]
   await writeFile(resolve(profile, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
   const modules = resolve(profile, 'node_modules')

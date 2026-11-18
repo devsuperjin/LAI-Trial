@@ -11,7 +11,7 @@
   "scripts": {
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "typecheck": "pnpm -r --if-present run typecheck",
-    "test": "vitest run",
+    "test": "vitest run && pnpm --filter @lai/superagent test",
     "test:unit": "vitest run",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check": "pnpm check:architecture && pnpm build && pnpm typecheck && pnpm test",
@@ -26,8 +26,7 @@
     "@lai/dsh-web-host": "workspace:*",
     "@lai/lai-agents": "workspace:*",
     "@lai/application-config": "workspace:*",
-    "@lai/lai-pipeline": "workspace:*",
-    "@lai/pipeline-simulator": "workspace:*"
+    "@lai/superagent": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3",

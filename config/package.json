@@ -15,7 +15,6 @@
   "dependencies": {
     "@lai/dsh-web-host": "workspace:*",
     "@lai/lai-agents": "workspace:*",
-    "@lai/lai-pipeline": "workspace:*",
-    "@lai/pipeline-simulator": "workspace:*"
+    "@lai/superagent": "workspace:*"
   }
 }
