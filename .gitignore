@@ -9,3 +9,4 @@ dist/
 !.env.example
 config/production/*.local.yml
 *.tgz
+.DS_Store
