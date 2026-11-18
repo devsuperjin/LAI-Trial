@@ -7,6 +7,7 @@ import { DashboardPage } from './components/DashboardPage.tsx'
 import { NavRail } from './components/NavRail.tsx'
 import type { Page } from './components/NavRail.tsx'
 import { RunsPage } from './components/RunsPage.tsx'
+import { AgentPrompts } from './components/AgentPrompts.tsx'
 import { SuperagentPage } from './components/SuperagentPage.tsx'
 import { SettingsPage } from './components/SettingsPage.tsx'
 import { TopBar } from './components/TopBar.tsx'
@@ -107,7 +108,8 @@ export function App() {
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
               {page === 'superagent' && <SuperagentPage />}
-              {page === 'settings' && <SettingsPage entries={entries} />}
+              {page === 'lai-agents' && <div className="p-4 md:p-6"><AgentPrompts /></div>}
+              {page === 'settings' && <SettingsPage />}
               </div>
             </main>
           </>

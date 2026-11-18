@@ -1,0 +1,3 @@
+- insert:
+    - id: lai-agents
+      name: '@lai/lai-agents'

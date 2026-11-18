@@ -674,78 +674,78 @@
     },
     {
       "source": "packages/experimental/prompt-sections/README.md",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/README.md"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/README.zh.md",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/README.zh.md"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/de.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/de.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/en.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/en.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/es.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/es.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/fr.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/fr.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/ja.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/ja.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/pt.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/pt.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/ru.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/ru.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/locale/zh.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/locale/zh.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/package.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/package.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/src/index.ts",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/src/index.ts"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/tests/loader-composition.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/tests/loader-composition.spec.ts"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/tests/prompt-sections.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/tests/prompt-sections.spec.ts"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/experimental/prompt-sections/tsconfig.json",
-      "decision": "migrated",
-      "target": "plugins/prompt-sections/tsconfig.json"
+      "decision": "removed",
+      "reason": "Unused migrated extension removed; LAI Agents and Superagent use the public DSH prompt service directly."
     },
     {
       "source": "packages/extensions/tool-cordis/src/api-catalog.ts",

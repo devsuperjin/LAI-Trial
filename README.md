@@ -91,7 +91,7 @@ pnpm start
 
 ### Initial configuration
 
-1. In **Settings**, configure model providers, credentials and the default model. LAI role prompts are editable there as well.
+1. In **Settings**, configure model providers, credentials and the default model. Configure LAI role prompts and specialist model overrides in **Plugin → LAI Agents**.
 2. Open **Plugin → Superagent → Sources** and configure the GitHub repository (`owner/repo`), GitHub CLI path and events to receive.
 3. In **Policy**, configure allowed senders, task scope and admission rules.
 4. In **Eval**, configure evaluation mode, timeout and the Router model. The default is `observe`; choose `auto` when the intended workflow should automatically accept inferred tasks under policy.
@@ -111,11 +111,12 @@ The minimum polling interval is 60 seconds; longer intervals requested by GitHub
 | History | Ended tasks and routing decisions |
 | Runs | Sessions, turns, tool calls, native subagents and execution results |
 | Plugin → Superagent | Dedicated management page for Sources, Policy, Eval, Execution, Prompts and Deployment |
-| Settings | Model providers, credentials, default model and LAI role configuration |
+| Plugin → LAI Agents | Worker and specialist prompts, plus per-specialist model overrides |
+| Settings | Model providers, credentials and the default model |
 
 The interface supports English and Chinese. The original DSH debugging UI remains available at **`/dsh/`**, sharing the same backend. Deleting a Run uses native DSH archiving with Undo; running sessions must be stopped first.
 
-**Prompts** on the Superagent page manages its Router / Worker instructions. LAI prompt settings manage the LAI role definitions. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
+**Prompts** on the Superagent page manages its Router / Worker instructions. **Plugin → LAI Agents** manages LAI role definitions and specialist model overrides. It is an independent DSH Bundle with its own sidebar and configuration entry in the original DSH interface. Unpinned specialists inherit the Worker model; pinned routes apply to new children without changing the global default. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
 
 ## Repository structure
 
@@ -133,8 +134,7 @@ LAI-Trial/
 │   ├── superagent/               # @lai/superagent: intake, routing, tasks and Workers
 │   │   └── src/app/lai-worker.ts # Five-stage native subagent execution guards
 │   ├── lai-agents/               # @lai/lai-agents: Worker and five specialist presets
-│   ├── web-host/                 # Unified Web hosting, authentication and DSH debug UI
-│   └── prompt-sections/          # Application prompt-section extension
+│   └── web-host/                 # Unified Web hosting, authentication and DSH debug UI
 ├── scripts/                      # Startup, Profile migration, version and architecture checks
 ├── tests/                        # Application contracts and composition migration tests
 ├── docs/                         # Architecture, migration and maintenance documentation

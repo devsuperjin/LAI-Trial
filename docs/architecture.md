@@ -1,6 +1,6 @@
 # LAI architecture
 
-LAI is an independent DSH application using published packages pinned to `config/dsh-baseline.json`. No DSH framework source is copied or patched. `config/profile.json` composes official base/Web bundles, `@lai/superagent` and LAI application defaults. Writable settings and sessions remain in the isolated `.runtime/dsh` home.
+LAI is an independent DSH application using published packages pinned to `config/dsh-baseline.json`. No DSH framework source is copied or patched. `config/profile.json` composes official base/Web bundles, `@lai/lai-agents`, `@lai/superagent` and LAI application defaults. Writable settings and sessions remain in the isolated `.runtime/dsh` home.
 
 ## Execution ownership
 
@@ -21,8 +21,8 @@ Each Worker uses the `iqe-orchestrator` preset from `@lai/lai-agents`. Its model
 ## Packages
 
 - `plugins/superagent` (`@lai/superagent`): upstream business plugin imported from `deepseek-ai/dsh-superagent-prototype` at `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`, formerly under `vendor/`. Owns Sources, Policy, Router, Tickets, worker scheduling/workspaces, durable effects, retries and replies. Local changes include baseline compatibility, authenticated management, opt-in own-Issue intake, and LAI worker execution.
-- `plugins/lai-agents`: Worker orchestrator plus five configurable specialist presets. Reproduction can implement explicitly requested small fixes; other role constraints and task-specific limits remain in force.
-- `app/lai-web`: Tailwind Dashboard, Tasks, History, Runs and Settings. Plugin → Superagent is a dedicated page for Sources, Policy, Eval, Execution, Prompts and Deployment. Settings contains DSH model credentials and LAI role prompts. Complete settings editors preserve fields unsupported by the basic forms and save using revision checks.
+- `plugins/lai-agents`: independent Bundle with native DSH sidebar and plugin configuration views, Worker orchestrator plus five configurable specialist presets. Prompts and per-specialist model overrides share the stable `lai-agents` settings namespace. Overrides seed fresh children through public `agent.model.select`; existing durable selections are preserved. Reproduction can implement explicitly requested small fixes; other role constraints and task-specific limits remain in force.
+- `app/lai-web`: Tailwind Dashboard, Tasks, History, Runs and Settings. Plugin → Superagent is a dedicated page for Sources, Policy, Eval, Execution, Prompts and Deployment. Plugin → LAI Agents contains LAI role prompts and specialist model overrides; Settings contains model providers, credentials and the default model. Complete settings editors preserve fields unsupported by the basic forms and save using revision checks.
 - `packages/dsh-adapter`: public browser RPC, Superagent HTTP protocol and DSH host compatibility reads.
 - `plugins/web-host`: authenticated LAI frontend, archived-session discovery, original DSH debug UI.
 

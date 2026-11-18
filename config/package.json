@@ -15,8 +15,7 @@
   },
   "dependencies": {
     "@lai/dsh-web-host": "workspace:*",
-    "@lai/lai-agents": "workspace:*",
     "@lai/superagent": "workspace:*"
   },
-  "description": "LAI Web, specialist agent presets and application defaults for the LAI workspace."
+  "description": "LAI Web hosting and application defaults."
 }

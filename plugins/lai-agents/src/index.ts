@@ -1,4 +1,5 @@
-/** One orchestrator/monitor and five specialist presets, with settings-owned prompt text. */
+/** Independent LAI Agents bundle: Worker coordinator and five configurable native specialists. */
+import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { Context, Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-agent-preset-registry'
@@ -22,12 +23,26 @@ export interface Prompts {
   report: string
 }
 
+export const SPECIALIST_PRESETS = { triage: 'iqe-triage', reproduce: 'iqe-reproduction', ticket: 'iqe-ticket', review: 'iqe-reviewer', report: 'iqe-reporting' } as const
+export type RoleModels = Partial<Record<keyof typeof SPECIALIST_PRESETS, { provider: string; model: string } | null>>
+
+/** Select a role route for new children, preserving durable manual selections on restored sessions. */
+export function seedRoleModel(agent: Agent, models: RoleModels): void {
+  const role = (Object.keys(SPECIALIST_PRESETS) as (keyof RoleModels)[]).find(key => SPECIALIST_PRESETS[key] === agent.session.header.agentPreset)
+  const route = role && models[role]
+  if (!route || agent.session.snapshotEvents().some(event => agent.session.isOwnSeq(event.seq) && (event.type === 'request/header' || event.type === 'model/selection'))) return
+  agent.model.select(route)
+}
+
 export interface Config {
   /** Prompt templates used by the next prompt assembly in each agent scope. */
   prompts: Volatile<Prompts>
+  models?: Volatile<RoleModels>
 }
 
+const Route = z.union([z.object({ provider: z.string().min(1).required(), model: z.string().min(1).required() }), z.const(null)]).default(null)
 export const Config: z<Config> = z.object({
+  models: z.object({ triage: Route, reproduce: Route, ticket: Route, review: Route, report: Route }).default({}).volatile(),
   prompts: z.object({
     orchestrator: z.string().min(1).default(DEFAULT_PROMPTS.orchestrator),
     triage: z.string().min(1).default(DEFAULT_PROMPTS.triage),
@@ -47,6 +62,7 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   ctx.inject(['settings'], child => {
     child.effect(() => child.settings.configure({ auto: false }, ctx.fiber))
   })
+  ctx.on('agent/created', ({ agent }) => { seedRoleModel(agent, config.models?.get() ?? {}); return undefined })
   for (const role of Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]) {
     ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => config.prompts.get()[role]), `lai-agents prompt: ${role}`)
   }

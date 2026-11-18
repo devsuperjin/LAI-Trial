@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "LAI Agents",
+    "description": "配置 LAI Worker 协调者与五个专业子 Agent 的 Prompt 和模型路由。"
+  }
+}

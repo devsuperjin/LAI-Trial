@@ -30,6 +30,9 @@ describe('out-of-tree Profile composition through the published CLI', () => {
     expect(rows.find(r => r.id === 'dsh-superagent')?.name).toBe('@lai/superagent')
     expect(rows.some(r => r.id === 'pipeline-simulator')).toBe(false)
     expect(rows.find(r => r.id === 'lai-agents')?.name).toBe('@lai/lai-agents')
+    expect(rows.filter(r => r.id === 'lai-agents')).toHaveLength(1)
+    const profile = JSON.parse(await readFile('config/profile.json', 'utf8'))
+    expect(profile.dsh.profile.bundles).toContain('@lai/lai-agents')
   })
   it('accounts for every source diff file and resolves every migrated target', async () => {
     const inventory = JSON.parse(await readFile('docs/migration-inventory.json', 'utf8'))

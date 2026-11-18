@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  'Plugin / LAI Agents': '插件 / LAI Agents', 'Configure the Worker model in Plugin → Superagent → Execution.': 'Worker 模型请在 Plugin → Superagent → Execution 配置。', 'Role model': '角色模型', 'Inherit Worker model': '使用 Worker 模型', 'Save configuration': '保存配置', 'Configuration saved. Prompts apply at the next assembly; model overrides apply to new children.': '配置已保存。Prompt 下次组装时生效，模型覆盖对新建子 Agent 生效。',
   'Plugin': '插件', 'Plugin / Superagent': '插件 / Superagent', 'Configure Superagent': '配置 Superagent',
   'Mode': '模式', 'off': '关闭', 'observe': '观察', 'auto': '自动', 'Timeout (seconds)': '超时（秒）', 'Concurrent Workers': 'Worker 并发数', 'Workspace prepare command': '工作区准备命令', 'Blocked commands (one per line)': '禁用命令（每行一个）', 'Inherit default model': '使用默认模型', 'Worker orchestrator': 'Worker 主 Agent',
   'Tasks': '任务', 'Monitor inputs and follow Worker tasks': '监控输入并查看 Worker 任务',

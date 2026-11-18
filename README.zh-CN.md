@@ -91,7 +91,7 @@ pnpm start
 
 ### 首次配置
 
-1. 在 **Settings** 配置模型 Provider、凭据和默认模型，也可以编辑 LAI 各角色的 Prompt。
+1. 在 **Settings** 配置模型 Provider、凭据和默认模型，LAI 角色 Prompt 和专业子 Agent 的模型覆盖在 **Plugin → LAI Agents** 配置。
 2. 打开 **Plugin → Superagent → Sources**，填写 GitHub 仓库 `owner/repo`、GitHub CLI 路径及需要接收的事件。
 3. 在 **Policy** 配置允许的发送者、任务范围和准入规则。
 4. 在 **Eval** 配置判断模式、超时和 Router 模型。默认是 `observe`；需要自动受理推断任务时，按使用场景选择 `auto`。
@@ -111,11 +111,12 @@ pnpm start
 | History | 查看已结束任务及路由决策 |
 | Runs | 查看会话、Turn、工具调用、原生子 Agent 和执行结果 |
 | Plugin → Superagent | 独立的 Superagent 管理页面，包含 Sources、Policy、Eval、Execution、Prompts、Deployment |
-| Settings | 模型 Provider、凭据、默认模型及 LAI 角色配置 |
+| Plugin → LAI Agents | Worker 和专业角色 Prompt，以及各专业子 Agent 的模型覆盖 |
+| Settings | 模型 Provider、凭据与默认模型 |
 
 界面支持 EN / 中文切换。原版 DSH 调试界面保留在 **`/dsh/`**，与 lai-web 使用同一个后端。Runs 的删除操作使用 DSH 原生归档，支持 Undo；运行中的会话需要先停止。
 
-Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，Settings 中的 LAI Prompt 配置管理 LAI 角色定义。来源、策略和执行设置会保留版本信息，保存时检查并发修改；高级配置编辑器用于访问基础表单之外的完整字段。
+Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，**Plugin → LAI Agents** 管理角色定义和专业子 Agent 的模型覆盖。它是独立 DSH Bundle，在原版 DSH 中也有独立侧栏和配置入口。未固定模型的子 Agent 继承 Worker 模型，模型覆盖仅影响新建子 Agent，不修改全局默认模型。来源、策略和执行设置会保留版本信息，保存时检查并发修改；高级配置编辑器用于访问基础表单之外的完整字段。
 
 ## 项目结构
 
@@ -133,8 +134,7 @@ LAI-Trial/
 │   ├── superagent/               # @lai/superagent：接入、路由、任务与 Worker 生命周期
 │   │   └── src/app/lai-worker.ts # LAI 五阶段子 Agent 的执行约束
 │   ├── lai-agents/               # @lai/lai-agents：Worker 与五个专业角色预设
-│   ├── web-host/                 # 统一 Web 服务、鉴权及原版 DSH 调试入口
-│   └── prompt-sections/          # 应用 Prompt 分段扩展
+│   └── web-host/                 # 统一 Web 服务、鉴权及原版 DSH 调试入口
 ├── scripts/                      # 启动、Profile 迁移和版本 / 架构检查
 ├── tests/                        # 应用契约与组合迁移测试
 ├── docs/                         # 架构、迁移与维护文档

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "LAI Agents",
+    "description": "Configure the LAI Worker coordinator and its five specialist subagents: prompts and model routes."
+  }
+}

@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Prompt sections",
-    "description": "Add deployment-configured system-prompt sections and runtime contexts from plugin configuration."
-  }
-}

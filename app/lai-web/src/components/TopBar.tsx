@@ -16,6 +16,7 @@ const PAGE_TITLE: Record<Page, string> = {
   dashboard: 'Dashboard',
   settings: 'Settings',
   superagent: 'Plugin / Superagent',
+  'lai-agents': 'Plugin / LAI Agents',
 }
 
 type Theme = 'dark' | 'light'

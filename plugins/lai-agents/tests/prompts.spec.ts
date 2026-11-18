@@ -1,7 +1,7 @@
 import { Context } from '@deepseek-ai/cordis'
 import SystemPrompt, { renderPrompt } from '@deepseek-ai/dsh-system-prompt'
-import { expect, it } from 'vitest'
-import { apply, DEFAULT_PROMPTS, PRESETS } from '../src/index.ts'
+import { expect, it, vi } from 'vitest'
+import { apply, DEFAULT_PROMPTS, PRESETS, seedRoleModel, Config } from '../src/index.ts'
 
 it('owns six presets, reads changed role prompts, and removes its contributions', async () => {
   const ctx = new Context()
@@ -34,4 +34,30 @@ it('merges monitoring into the orchestrator and exposes exactly five delegation 
   const tools = parent.plugins!.filter(plugin => plugin.name === '@deepseek-ai/dsh-tool-subagent')
   expect(tools.map(plugin => (plugin.config as { toolName: string }).toolName)).toEqual(['triage', 'reproduce', 'ticket', 'review', 'reporter'])
   expect(parent.plugins!.some(plugin => plugin.name === '@deepseek-ai/dsh-tool-bash')).toBe(true)
+})
+
+
+it('pins only fresh specialist children and preserves restored or inherited routes', () => {
+  const select = vi.fn()
+  let own = false
+  const agent = { session: { header: { agentPreset: 'iqe-triage' }, snapshotEvents: () => [{ type: 'model/selection', seq: 1 }], isOwnSeq: () => own }, model: { select } }
+  const model = { provider: 'fixture', model: 'small' }
+  seedRoleModel(agent as never, {})
+  expect(select).not.toHaveBeenCalled()
+  seedRoleModel(agent as never, { triage: model })
+  expect(select).toHaveBeenCalledWith(model)
+  select.mockClear(); own = true
+  seedRoleModel(agent as never, { triage: model })
+  expect(select).not.toHaveBeenCalled()
+  own = false; agent.session.header.agentPreset = 'iqe-orchestrator'
+  seedRoleModel(agent as never, { triage: model })
+  expect(select).not.toHaveBeenCalled()
+})
+
+
+it('defaults every unconfigured model route to inheritance without requiring a provider', () => {
+  expect(() => Config({})).not.toThrow()
+  expect(() => Config({ models: { triage: null } })).not.toThrow()
+  expect(() => Config({ models: { triage: { provider: 'fixture', model: 'small' } } })).not.toThrow()
+  expect(() => Config({ models: { triage: { model: 'small' } } })).toThrow()
 })

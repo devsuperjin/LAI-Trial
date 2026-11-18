@@ -2,7 +2,7 @@ import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings' | 'superagent'
+export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
@@ -54,7 +54,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
   const { t } = useLanguage()
   const [pluginExpanded, setPluginExpanded] = useState(true)
-  useEffect(() => { if (props.page === 'superagent') setPluginExpanded(true) }, [props.page])
+  useEffect(() => { if ((props.page === 'superagent' || props.page === 'lai-agents')) setPluginExpanded(true) }, [props.page])
   const pluginOpen = pluginExpanded
   return (
     <nav aria-label={t("Primary navigation")} className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card px-2 py-5 md:w-52 md:px-4">
@@ -66,6 +66,7 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
           </button>
           {pluginOpen && <div id="plugin-navigation" className="mt-1 md:ml-5 md:border-l md:border-fd-border md:pl-3">
             <button type="button" aria-label="Superagent" title="Superagent" aria-current={props.page === 'superagent' ? 'page' : undefined} onClick={() => props.onNavigate('superagent')} className={`flex min-h-9 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm md:justify-start ${props.page === 'superagent' ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="hidden md:block">Superagent</span></button>
+            <button type="button" aria-label="LAI Agents" title="LAI Agents" aria-current={props.page === 'lai-agents' ? 'page' : undefined} onClick={() => props.onNavigate('lai-agents')} className={`flex min-h-9 w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm md:justify-start ${props.page === 'lai-agents' ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="hidden md:block">LAI Agents</span></button>
           </div>}
         </div>
       </div>

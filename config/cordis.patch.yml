@@ -16,10 +16,6 @@
         openBrowser: !!js ctx.webStartup.openBrowser
         publicUrl: !!js ctx.webStartup.publicUrl
 
-- insert:
-    - id: lai-agents
-      name: '@lai/lai-agents'
-
 - id: dsh-superagent
   config:
     stateDir: !!js process.env.LAI_SUPERAGENT_STATE_DIR

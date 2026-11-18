@@ -1,11 +1,9 @@
 import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { AgentPresetDocument, AgentPresetRow, ModelCatalog, ModelSelection, SessionListEntry, SettingsNamespaceView } from '../api/gateway.ts'
-import { describeSettings, listAgentPresets, modelCatalog, readAgentPreset, updateSettings } from '../api/gateway.ts'
-import { AgentPrompts } from './AgentPrompts.tsx'
+import type { ModelCatalog, ModelSelection, SettingsNamespaceView } from '../api/gateway.ts'
+import { describeSettings, modelCatalog, updateSettings } from '../api/gateway.ts'
 import { ProviderSettings } from './ProviderSettings.tsx'
-import type { AgentModelInfo } from '../model/settings.ts'
-import { buildAgentModels, effectiveModel, selectionKey } from '../model/settings.ts'
+import { selectionKey } from '../model/settings.ts'
 
 interface FlatModel {
   key: string
@@ -48,66 +46,9 @@ function ModelSelect(props: {
   )
 }
 
-function AgentCard(props: {
-  agent: AgentModelInfo
-  options: FlatModel[]
-  fallback: ModelSelection
-  writable: boolean
-  saving: boolean
-  onApply: (agent: AgentModelInfo, key: string) => void
-}) {
-  const { t } = useLanguage()
-  const effective = effectiveModel(props.agent, props.fallback)
-  const [draft, setDraft] = useState(selectionKey(effective))
-  useEffect(() => { setDraft(selectionKey(effective)) }, [effective.provider, effective.model])
-  const dirty = draft !== selectionKey(effective)
-  const source = props.agent.configured !== null ? 'pinned' : props.agent.observed !== null ? 'observed' : 'default'
-  const sourceLabel = source === 'pinned' ? 'Pinned in composition' : source === 'observed' ? 'Observed from runs' : 'Inherits default'
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4">
-      <span className="absolute inset-y-0 left-0 w-1" style={{ background: props.agent.hue }} />
-      <div className="mb-3 flex items-center gap-2">
-        {props.agent.stage !== null && (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-medium text-white" style={{ background: props.agent.hue }}>
-            {props.agent.stage}
-          </span>
-        )}
-        <span className="text-sm font-medium">{props.agent.role}</span>
-        {props.agent.toolName !== null && (
-          <span className="rounded border border-fd-border bg-fd-secondary px-1.5 py-0.5 font-mono text-[10px] text-fd-muted-foreground">{props.agent.toolName}</span>
-        )}
-        <span className="ml-auto text-[10px] uppercase tracking-wider text-fd-muted-foreground">{sourceLabel}</span>
-      </div>
-      <p className="mb-2 font-mono text-[11px] text-fd-muted-foreground">{props.agent.presetId}</p>
-      <ModelSelect
-        ariaLabel={`Model for ${props.agent.role}`}
-        disabled={!props.writable || props.saving}
-        onChange={setDraft}
-        options={props.options}
-        value={draft}
-      />
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          className="rounded-md bg-fd-primary px-3 py-1.5 text-xs font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          disabled={!dirty || !props.writable || props.saving}
-          onClick={() => { props.onApply(props.agent, draft) }}
-          type="button"
-        >
-          {t(props.saving ? 'Saving…' : 'Apply')}
-        </button>
-        {props.agent.inherits && (
-          <span className="text-[11px] text-fd-muted-foreground">{t("Follows the orchestrator route")}</span>
-        )}
-      </div>
-    </div>
-  )
-}
-
-export function SettingsPage(props: { entries: SessionListEntry[] }) {
+export function SettingsPage() {
   const { t } = useLanguage()
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null)
-  const [presets, setPresets] = useState<AgentPresetRow[]>([])
-  const [orchestratorDoc, setOrchestratorDoc] = useState<AgentPresetDocument | null>(null)
   const [defaultNs, setDefaultNs] = useState<SettingsNamespaceView | null>(null)
   const [writable, setWritable] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -122,18 +63,14 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
     setLoading(true)
     setLoadError(null)
     try {
-      const [catalogValue, presetValue, settingsValue] = await Promise.all([
+      const [catalogValue, settingsValue] = await Promise.all([
         modelCatalog(),
-        listAgentPresets(),
         describeSettings(),
       ])
       setCatalog(catalogValue)
-      setPresets(presetValue.presets)
       setWritable(settingsValue.writable)
       const ns = settingsValue.namespaces.find(row => row.ns === 'agent-default-model') ?? null
       setDefaultNs(ns)
-      const orchestrator = presetValue.presets.find(preset => preset.id === 'iqe-orchestrator')
-      setOrchestratorDoc(orchestrator !== undefined ? await readAgentPreset(orchestrator.id) : null)
     } catch (cause) {
       setLoadError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -145,11 +82,6 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
 
   const options = useMemo(() => catalog !== null ? flattenCatalog(catalog) : [], [catalog])
   const fallback: ModelSelection = catalog?.default ?? { provider: '', model: '' }
-  const agents = useMemo(
-    () => buildAgentModels(presets, orchestratorDoc, props.entries),
-    [presets, orchestratorDoc, props.entries],
-  )
-
   useEffect(() => {
     if (defaultNs !== null) {
       const value = defaultNs.value as { provider?: string; model?: string }
@@ -190,11 +122,6 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
     } finally {
       setSavingKey(null)
     }
-  }
-
-  const applyAgent = (agent: AgentModelInfo, key: string): void => {
-    // Specialist routes inherit the orchestrator; applying one updates the shared default route.
-    void applyDefault(key, agent.role)
   }
 
   if (loading) {
@@ -268,27 +195,6 @@ export function SettingsPage(props: { entries: SessionListEntry[] }) {
           </div>
         )}
 
-        <AgentPrompts />
-        <section>
-          <div className="mb-3 flex items-baseline justify-between">
-            <h2 className="text-base font-semibold">{t("Pipeline agents")}</h2>
-            <span className="text-xs text-fd-muted-foreground">{agents.length}{t(" presets · ")}{options.length}{t(" model")}{options.length === 1 ? '' : 's'}{t(" available")}</span>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {agents.map(agent => (
-              <AgentCard
-                agent={agent}
-                fallback={fallback}
-                key={agent.presetId}
-                onApply={applyAgent}
-                options={options}
-                saving={savingKey !== null}
-                writable={writable}
-              />
-            ))}
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-fd-muted-foreground">{t("Specialist agents inherit the orchestrator's model route unless their delegation tool pins an explicit")}<span className="font-mono">{t(" agentOptions")}</span>{t("model in the composition. Applying a model here updates the shared default route that the pipeline follows; pinned routes are edited in the IQE composition overlay.")}</p>
-        </section>
       </div>
     </div>
   )
