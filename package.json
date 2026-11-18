@@ -1,0 +1,37 @@
+{
+  "name": "lai-trial",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "packageManager": "pnpm@11.28.5",
+  "engines": {
+    "node": ">=24.9.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --workspace-concurrency=1 run build",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude \"plugins/mq-*/tests/**\"",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "check": "pnpm check:architecture && pnpm build && pnpm typecheck && pnpm test",
+    "profile:prepare": "node scripts/prepare-profile.mjs",
+    "config:dump": "node scripts/run-dsh.mjs --dump-config",
+    "start:backend": "node scripts/run-dsh.mjs --no-open",
+    "dev:web": "pnpm --filter @lai/lai-web dev"
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.2.2-rc.1",
+    "@lai/dsh-agent-mq-bundle": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3",
+    "vitest": "^4.0.0",
+    "yaml": "^2.8.0",
+    "@types/node": "^24.0.0",
+    "@lai/dsh-adapter": "workspace:*",
+    "@deepseek-ai/cordis": "4.1.0",
+    "@deepseek-ai/dsh-agent-loop-testkit": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-agent-loop": "0.2.2-rc.1"
+  }
+}

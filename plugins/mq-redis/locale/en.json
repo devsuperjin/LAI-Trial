@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ Redis backend",
+    "description": "Deliver MQ tasks through Redis Streams consumer groups and publish results to a result stream."
+  }
+}

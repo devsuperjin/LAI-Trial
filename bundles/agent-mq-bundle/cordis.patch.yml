@@ -1,0 +1,27 @@
+# The agent-mq bundle patch: prompt injection plus the MQ task layer. The
+# runtime and its queue backends ship disabled because both require deployment
+# values (workspace, model route, queue identities); a profile patch enables
+# them with real configuration. See the package README for the enable patch.
+
+- insert:
+    - id: agent-mq-prompt-sections
+      name: '@lai/dsh-prompt-sections'
+      config:
+        sections: []
+        contexts: []
+
+    - id: agent-mq-runtime
+      name: '@lai/dsh-mq'
+      disabled: true
+
+    - id: agent-mq-redis
+      name: '@lai/dsh-mq-redis'
+      disabled: true
+
+    - id: agent-mq-rabbitmq
+      name: '@lai/dsh-mq-rabbitmq'
+      disabled: true
+
+    - id: agent-mq-mqtt
+      name: '@lai/dsh-mq-mqtt'
+      disabled: true

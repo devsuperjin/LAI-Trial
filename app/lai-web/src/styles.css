@@ -1,0 +1,186 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fd-background: #0a0b0e;
+  --color-fd-foreground: #e6e8ee;
+  --color-fd-card: #12141a;
+  --color-fd-secondary: #1b1e26;
+  --color-fd-muted: #14161c;
+  --color-fd-muted-foreground: #8a90a0;
+  --color-fd-border: #262a35;
+  --color-fd-primary: #4f7cff;
+  --color-fd-success: #35c48a;
+  --color-fd-warning: #e5a940;
+  --color-fd-danger: #e5534b;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+:root {
+  color-scheme: dark;
+  --fd-stage-1: #22d3ee;
+  --fd-stage-2: #e5a940;
+  --fd-stage-3: #a78bfa;
+  --fd-stage-4: #4f7cff;
+  --fd-stage-5: #35c48a;
+  --fd-stage-6: #f472b6;
+  --fd-glow-a: rgb(79 124 255 / 0.08);
+  --fd-glow-b: rgb(34 211 238 / 0.05);
+  --fd-dot: rgb(38 42 53 / 0.9);
+  --fd-vignette: rgb(4 5 8 / 0.5);
+  --fd-ring: rgb(229 169 64 / 0.5);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-fd-background: #f4f5f8;
+  --color-fd-foreground: #1b1e28;
+  --color-fd-card: #ffffff;
+  --color-fd-secondary: #e9ebf0;
+  --color-fd-muted: #eef0f4;
+  --color-fd-muted-foreground: #5c6575;
+  --color-fd-border: #d7dbe4;
+  --color-fd-primary: #2f5fe0;
+  --color-fd-success: #177b47;
+  --color-fd-warning: #96660d;
+  --color-fd-danger: #c93a32;
+  --fd-stage-1: #0e7490;
+  --fd-stage-2: #b45309;
+  --fd-stage-3: #7c3aed;
+  --fd-stage-4: #2563eb;
+  --fd-stage-5: #15803d;
+  --fd-stage-6: #be185d;
+  --fd-glow-a: rgb(47 95 224 / 0.07);
+  --fd-glow-b: rgb(14 116 144 / 0.06);
+  --fd-dot: rgb(215 219 228 / 0.9);
+  --fd-vignette: rgb(27 30 40 / 0.08);
+  --fd-ring: rgb(150 102 13 / 0.45);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-fd-background);
+  color: var(--color-fd-foreground);
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-fd-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fd-canvas {
+  background-color: var(--color-fd-background);
+  background-image:
+    radial-gradient(ellipse 60% 50% at 18% 0%, var(--fd-glow-a), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, var(--fd-glow-b), transparent 60%);
+}
+
+.fd-grid {
+  background-image:
+    radial-gradient(circle, var(--fd-dot) 1px, transparent 1px),
+    radial-gradient(ellipse 60% 50% at 18% 0%, var(--fd-glow-a), transparent 60%),
+    radial-gradient(ellipse 50% 60% at 100% 100%, var(--fd-glow-b), transparent 60%);
+  background-size: 26px 26px, 100% 100%, 100% 100%;
+}
+
+.fd-vignette {
+  background: radial-gradient(ellipse at center, transparent 55%, var(--fd-vignette) 100%);
+}
+
+.fd-edge-active {
+  stroke-dasharray: 7 5;
+  animation: fd-dash 0.9s linear infinite;
+}
+
+@keyframes fd-dash {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+.fd-shimmer {
+  background: linear-gradient(90deg, var(--color-fd-secondary) 25%, var(--color-fd-border) 50%, var(--color-fd-secondary) 75%);
+  background-size: 200% 100%;
+  animation: fd-shimmer 1.4s ease infinite;
+}
+
+@keyframes fd-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.fd-pulse-ring {
+  animation: fd-ring 1.6s ease-out infinite;
+}
+
+@keyframes fd-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--fd-ring);
+  }
+
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.fd-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-fd-border) transparent;
+}
+
+.fd-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.fd-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-fd-border);
+  border-radius: 3px;
+}
+
+.fd-scroll::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-fd-primary) 60%, transparent);
+}
+
+.fd-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fd-range {
+  accent-color: var(--color-fd-primary);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fd-edge-active,
+  .fd-shimmer,
+  .fd-pulse-ring {
+    animation: none;
+  }
+}

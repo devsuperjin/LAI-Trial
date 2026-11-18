@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Agent MQ 组合包",
+    "description": "可选的消息队列任务层，包含提示词注入、MQ 运行时及其 Redis Streams 后端。"
+  }
+}

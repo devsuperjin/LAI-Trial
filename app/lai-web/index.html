@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LAI Web</title>
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('dsh-console-theme') === 'light' ? 'light' : 'dark'
+      } catch {
+        // Storage can be blocked in private browsing; start dark.
+        document.documentElement.dataset.theme = 'dark'
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

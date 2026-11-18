@@ -1,0 +1,57 @@
+import type { PageResponse, SessionListEntry, WireEvent } from '../api/gateway.ts'
+import { deriveDag, record, textOf } from './dag.ts'
+export const STAGES = ['monitor', 'triage', 'reproduce', 'ticket', 'review', 'report']
+const HUES = ['#60a5fa', '#a78bfa', '#fbbf24', '#fb923c', '#34d399', '#f472b6']
+export const stageHue = (stage: number): string => HUES[((stage % HUES.length) + HUES.length) % HUES.length]!
+export const truncate = (value: string, max: number): string => value.length > max ? value.slice(0, Math.max(0, max - 1)) + '…' : value
+export const formatTokens = (value: number): string => value >= 1e6 ? `${(value / 1e6).toFixed(1)}M` : value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value)
+export const formatDuration = (ms: number): string => ms >= 60000 ? `${(ms / 60000).toFixed(1)}m` : `${(ms / 1000).toFixed(1)}s`
+export interface Delegation { id: string; seq: number; stage: number; hue: string; toolName: string; name: string; description: string; settled: string | null; receiptError: string | null }
+export interface TreeChild { sessionId: string; delegation: Delegation | null; stage: number; hue: string; running: boolean }
+export interface ChildModel { label: string | null; preset: string | null; status: 'running' | 'completed' | 'failed'; tools: { name: string; isError: boolean; time: number; preview: string }[]; toolErrors: number; tokens: number | null; durationMs: number | null; model: string | null; finalText: string }
+export function summarizeChild(events: WireEvent[], entry: SessionListEntry): ChildModel {
+  const dag = deriveDag(events)
+  const tools = events.filter(e => e.type === 'tool/call').map(e => {
+    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
+    return { name: String(e.data.name ?? 'tool'), time: e.time, preview: JSON.stringify(e.data.arguments ?? {}), isError: record(result?.data.message).isError === true }
+  })
+  const values = entry.projections?.values
+  const usage = values?.tokenUsage
+  const route = values?.modelSelection?.lastUsed
+  return { label: values?.title ?? values?.subagent?.label ?? null, preset: values?.agentPreset ?? null, status: entry.running ? 'running' : dag.turnEnd === 'completed' ? 'completed' : 'failed', tools, toolErrors: tools.filter(t => t.isError).length, tokens: usage ? Object.values(usage).reduce((a, b) => a + b, 0) : null, durationMs: values?.subagentTiming?.settledMs ?? null, model: route ? `${route.provider}/${route.model}` : null, finalText: textOf(record(events.findLast(e => e.type === 'assistant/message')?.data.message).content) }
+}
+export function deriveTree(page: PageResponse, entries: SessionListEntry[], sessionId: string, labels: Record<string, string | null> = {}) {
+  const events = page.records.map(r => r.event)
+  const dag = deriveDag(events)
+  const taskEvent = events.find(e => e.type === 'user/message' && record(e.data.source).kind === 'mq')
+  const delegations: Delegation[] = events.filter(e => e.type === 'tool/call' && STAGES.includes(String(e.data.name))).map(e => {
+    const args = record(e.data.arguments)
+    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
+    const receipt = record(result?.data.message)
+    const stage = STAGES.indexOf(String(e.data.name)) + 1
+    return { id: String(e.data.id ?? e.seq), seq: e.seq, stage, hue: stageHue(stage - 1), toolName: String(e.data.name), name: String(args.name ?? e.data.name), description: String(args.prompt ?? args.description ?? ''), settled: result ? textOf(receipt.content) : null, receiptError: receipt.isError ? textOf(receipt.content) : null }
+  })
+  const children: TreeChild[] = entries.filter(e => e.parentSessionId === sessionId).map(entry => {
+    const label = labels[entry.sessionId] ?? entry.projections?.values.subagent?.label
+    const preset = entry.projections?.values.agentPreset ?? ''
+    const stage = STAGES.findIndex(name => preset.includes(name) || label?.toLowerCase().includes(name)) + 1
+    // A repeated role may have several calls: match durable receipt child ids first.
+    const delegation = delegations.find(d => d.settled?.includes(entry.sessionId)) ?? delegations.find(d => d.stage === stage) ?? null
+    return { sessionId: entry.sessionId, delegation, stage: delegation?.stage ?? stage, hue: delegation?.hue ?? stageHue(stage - 1), running: entry.running }
+  })
+  const steps = events.filter(e => e.type === 'assistant/message' || e.type === 'tool/call').map(e => {
+    const delegation = delegations.find(d => d.seq === e.seq)
+    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
+    return { id: `t-${e.seq}`, kind: e.type === 'assistant/message' ? 'turn' : 'tool', turn: Number(e.data.turn ?? 0), time: e.time, label: String(e.data.name ?? 'Assistant'), preview: e.type === 'assistant/message' ? textOf(record(e.data.message).content) : JSON.stringify(e.data.arguments ?? {}), delegationId: delegation?.id ?? null, isError: record(result?.data.message).isError === true }
+  })
+  return { task: taskEvent ? { taskId: String(record(taskEvent.data.source).taskId), prompt: textOf(taskEvent.data.content), time: taskEvent.time } : null, turnEnd: dag.turnEnd, delegations, children, steps }
+}
+export interface SvgEdge { d: string; hue: string; active: boolean }
+export interface SvgNode { x: number; y: number; w: number; h: number; hue: string; badge: string; title: string; lines: string[]; status: 'neutral' | 'running' | 'completed' | 'failed' }
+const escapeXml = (s: string): string => s.replace(/[<>&"']/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[c]!)
+export function buildExportSvg(input: { width: number; height: number; nodes: SvgNode[]; edges: SvgEdge[]; title: string }): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${input.width}" height="${input.height + 40}" viewBox="0 -40 ${input.width} ${input.height + 40}"><rect x="0" y="-40" width="100%" height="100%" fill="#101827"/><text x="16" y="-16" fill="white">${escapeXml(input.title)}</text>${input.edges.map(e => `<path d="${escapeXml(e.d)}" fill="none" stroke="${escapeXml(e.hue)}"/>`).join('')}${input.nodes.map(n => `<g><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="8" fill="#1e293b" stroke="${escapeXml(n.hue)}"/>${[n.badge, n.title, ...n.lines].map((line, i) => `<text x="${n.x + 10}" y="${n.y + 18 + i * 18}" fill="white" font-size="11">${escapeXml(truncate(line, Math.floor(n.w / 7)))}</text>`).join('')}</g>`).join('')}</svg>`
+}
+export function buildSummaryText(tree: ReturnType<typeof deriveTree>, models: Record<string, ChildModel | undefined>): string {
+  return [`Task: ${tree.task?.taskId ?? 'MQ task'}`, tree.task?.prompt ?? '', ...tree.children.map(c => `${c.stage}. ${models[c.sessionId]?.label ?? c.sessionId}: ${models[c.sessionId]?.status ?? 'pending'}\n${models[c.sessionId]?.finalText ?? ''}`)].join('\n')
+}

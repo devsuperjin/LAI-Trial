@@ -1,0 +1,809 @@
+{
+  "sourceCommit": "78d635a214476dbbde87a38d91452f9ff83b76b5",
+  "baseCommit": "fcc0ad462172522aaf5c93a7b2e01f6b9f0b0159",
+  "files": [
+    {
+      "source": "apps/console/index.html",
+      "decision": "migrated",
+      "target": "app/lai-web/index.html"
+    },
+    {
+      "source": "apps/console/package.json",
+      "decision": "migrated",
+      "target": "app/lai-web/package.json"
+    },
+    {
+      "source": "apps/console/src/App.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/App.tsx"
+    },
+    {
+      "source": "apps/console/src/api/gateway.ts",
+      "decision": "adapter",
+      "target": "packages/dsh-adapter/src/gateway.ts"
+    },
+    {
+      "source": "apps/console/src/components/DagView.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/DagView.tsx"
+    },
+    {
+      "source": "apps/console/src/components/DashboardPage.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/DashboardPage.tsx"
+    },
+    {
+      "source": "apps/console/src/components/NavRail.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/NavRail.tsx"
+    },
+    {
+      "source": "apps/console/src/components/RunsPage.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/RunsPage.tsx"
+    },
+    {
+      "source": "apps/console/src/components/SettingsPage.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/SettingsPage.tsx"
+    },
+    {
+      "source": "apps/console/src/components/TaskDetail.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/TaskDetail.tsx"
+    },
+    {
+      "source": "apps/console/src/components/TaskList.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/TaskList.tsx"
+    },
+    {
+      "source": "apps/console/src/components/TopBar.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/components/TopBar.tsx"
+    },
+    {
+      "source": "apps/console/src/hooks/useInterval.ts",
+      "decision": "migrated",
+      "target": "app/lai-web/src/hooks/useInterval.ts"
+    },
+    {
+      "source": "apps/console/src/main.tsx",
+      "decision": "migrated",
+      "target": "app/lai-web/src/main.tsx"
+    },
+    {
+      "source": "apps/console/src/styles.css",
+      "decision": "migrated",
+      "target": "app/lai-web/src/styles.css"
+    },
+    {
+      "source": "apps/console/src/vite-env.d.ts",
+      "decision": "migrated",
+      "target": "app/lai-web/src/vite-env.d.ts"
+    },
+    {
+      "source": "apps/console/tsconfig.json",
+      "decision": "migrated",
+      "target": "app/lai-web/tsconfig.json"
+    },
+    {
+      "source": "apps/console/vite.config.ts",
+      "decision": "migrated",
+      "target": "app/lai-web/vite.config.ts"
+    },
+    {
+      "source": "docs/capability-seams.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/capability-seams.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/capability-seams.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/config-catalog.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/config-catalog.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/event-producer-consumer.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/event-producer-consumer.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-catalog.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-catalog.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-catalog.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/2026-11-16-mq-task-source.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/2026-11-16-mq-task-source.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/2026-11-16-mq-task-source.schema.json",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/2026-11-16-mq-task-source.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/historical-formats/README.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/historical-formats/README.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-changes/historical-formats/README.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/persistence-schema.json",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/README.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/README.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/README.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/mq.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/mq.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "docs/subsystems/mq.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "packages/bundle/web-app/cordis.patch.yml",
+      "decision": "configuration-overlay",
+      "target": "config/cordis.patch.yml",
+      "note": "Disable account settings by id without patching the official bundle."
+    },
+    {
+      "source": "packages/experimental/README.i18n.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "packages/experimental/README.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "packages/experimental/README.zh.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/README.md",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/README.md"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/README.zh.md",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/cordis.patch.yml",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/cordis.patch.yml"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/cordis.source.iqe.yml",
+      "decision": "environment-overlay",
+      "target": "config/development/iqe.yml"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/cordis.source.mqtt.yml",
+      "decision": "environment-overlay",
+      "target": "config/development/mqtt.yml"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/cordis.source.patch.yml",
+      "decision": "environment-overlay",
+      "target": "config/development/redis.yml"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/cordis.source.rabbitmq.yml",
+      "decision": "environment-overlay",
+      "target": "config/development/rabbitmq.yml"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/de.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/en.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/es.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/fr.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/ja.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/pt.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/ru.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/locale/zh.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/package.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/package.json"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/src/index.ts",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/agent-mq-bundle/tsconfig.json",
+      "decision": "migrated",
+      "target": "bundles/agent-mq-bundle/tsconfig.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/README.md",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/README.md"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/README.zh.md",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/de.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/en.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/es.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/fr.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/ja.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/pt.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/ru.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/locale/zh.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/package.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/package.json"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/src/index.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/tests/mqtt.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/tests/mqtt.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq-mqtt/tsconfig.json",
+      "decision": "migrated",
+      "target": "plugins/mq-mqtt/tsconfig.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/README.md",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/README.md"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/README.zh.md",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/de.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/en.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/es.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/fr.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/ja.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/pt.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/ru.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/locale/zh.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/package.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/package.json"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/src/index.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/tests/rabbitmq.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/tests/rabbitmq.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq-rabbitmq/tsconfig.json",
+      "decision": "migrated",
+      "target": "plugins/mq-rabbitmq/tsconfig.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/mq-redis/README.md",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/README.md"
+    },
+    {
+      "source": "packages/experimental/mq-redis/README.zh.md",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/de.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/en.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/es.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/fr.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/ja.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/pt.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/ru.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/locale/zh.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/package.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/package.json"
+    },
+    {
+      "source": "packages/experimental/mq-redis/src/index.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/mq-redis/tests/redis.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/tests/redis.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq-redis/tsconfig.json",
+      "decision": "migrated",
+      "target": "plugins/mq-redis/tsconfig.json"
+    },
+    {
+      "source": "packages/experimental/mq/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/mq/README.md",
+      "decision": "migrated",
+      "target": "plugins/mq/README.md"
+    },
+    {
+      "source": "packages/experimental/mq/README.zh.md",
+      "decision": "migrated",
+      "target": "plugins/mq/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/mq/locale/de.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/en.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/es.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/fr.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/ja.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/pt.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/ru.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/mq/locale/zh.json",
+      "decision": "migrated",
+      "target": "plugins/mq/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/mq/package.json",
+      "decision": "migrated",
+      "target": "plugins/mq/package.json"
+    },
+    {
+      "source": "packages/experimental/mq/src/index.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/mq/src/memory.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/src/memory.ts"
+    },
+    {
+      "source": "packages/experimental/mq/src/task.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/src/task.ts"
+    },
+    {
+      "source": "packages/experimental/mq/src/types.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/src/types.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tests/loader-composition.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/tests/loader-composition.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tests/memory.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/tests/memory.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tests/runtime.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/tests/runtime.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tests/scripted-adapter.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/tests/scripted-adapter.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tests/task.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/mq/tests/task.spec.ts"
+    },
+    {
+      "source": "packages/experimental/mq/tsconfig.json",
+      "decision": "migrated",
+      "target": "plugins/mq/tsconfig.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/README.i18n.yaml",
+      "decision": "replaced-documentation",
+      "note": "Repository-local bilingual README pair replaces the upstream translation sidecar."
+    },
+    {
+      "source": "packages/experimental/prompt-sections/README.md",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/README.md"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/README.zh.md",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/README.zh.md"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/de.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/de.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/en.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/en.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/es.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/es.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/fr.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/fr.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/ja.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/ja.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/pt.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/pt.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/ru.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/ru.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/locale/zh.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/locale/zh.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/package.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/package.json"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/src/index.ts",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/src/index.ts"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/tests/loader-composition.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/tests/loader-composition.spec.ts"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/tests/prompt-sections.spec.ts",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/tests/prompt-sections.spec.ts"
+    },
+    {
+      "source": "packages/experimental/prompt-sections/tsconfig.json",
+      "decision": "migrated",
+      "target": "plugins/prompt-sections/tsconfig.json"
+    },
+    {
+      "source": "packages/extensions/tool-cordis/src/api-catalog.ts",
+      "decision": "plugin-owned-api-docs",
+      "target": "plugins/mq/README.md",
+      "note": "MQ API documentation is owned by the external plugin; the official model-visible API catalog is not patched."
+    },
+    {
+      "source": "packages/preset/agent-preset/skills/cordis-composition-reference/references/packages.md",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "pnpm-lock.yaml",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/check-workspace-constraints.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/experimental-package-policy.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/gen-cordis-catalog.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/gen-doc-graphs.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/product-package-policy.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "scripts/verify-package-readme-model-experience.ts",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "tsconfig.base.json",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    },
+    {
+      "source": "tsconfig.host.json",
+      "decision": "upstream-generated-record",
+      "note": "Upstream catalogs, policy allowlists and workspace metadata are replaced by this repository’s own package metadata and checks."
+    }
+  ],
+  "reconstructed": [
+    "app/lai-web/src/model/dashboard.ts",
+    "app/lai-web/src/model/dag.ts",
+    "app/lai-web/src/model/tree.ts",
+    "app/lai-web/src/model/settings.ts"
+  ]
+}

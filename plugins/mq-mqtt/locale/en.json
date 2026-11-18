@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ MQTT backend",
+    "description": "Deliver MQ tasks over MQTT topics at QoS 1 and publish results to a result topic; delivery settles on receipt."
+  }
+}

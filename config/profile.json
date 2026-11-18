@@ -1,0 +1,11 @@
+{
+  "name": "lai-profile",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@lai/dsh-agent-mq-bundle": "workspace:*" },
+  "dsh": {
+    "profile": {
+      "bundles": ["@deepseek-ai/dsh-base", "@deepseek-ai/dsh-web-app", "@lai/dsh-agent-mq-bundle"]
+    }
+  }
+}

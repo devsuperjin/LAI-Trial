@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Agent MQ bundle",
+    "description": "Optional message-queue task layer with prompt injection, the MQ runtime, and its Redis Streams backend."
+  }
+}

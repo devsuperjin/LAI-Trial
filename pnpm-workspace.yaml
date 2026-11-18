@@ -1,0 +1,16 @@
+packages:
+  - 'app/*'
+  - 'packages/*'
+  - 'plugins/*'
+  - 'bundles/*'
+
+# Keep DSH peer service identities shared with the CLI installation.
+autoInstallPeers: true
+
+allowBuilds:
+  '@deepseek-ai/dsh-subprocess-local': true
+  esbuild: true
+  koffi: true
+  node-pty: true
+  '@google/genai': false
+  protobufjs: false

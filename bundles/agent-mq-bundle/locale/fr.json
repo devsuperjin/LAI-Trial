@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Bundle Agent MQ",
+    "description": "Couche optionnelle de tâches de file de messages avec injection de prompts, le runtime MQ et son backend Redis Streams."
+  }
+}

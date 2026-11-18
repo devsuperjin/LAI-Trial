@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ task runtime",
+    "description": "Run message-queue tasks as workspace-backed Harness sessions and publish each settled result."
+  }
+}

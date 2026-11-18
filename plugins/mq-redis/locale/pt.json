@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Backend Redis do MQ",
+    "description": "Entrega tarefas MQ por grupos de consumidores do Redis Streams e publica os resultados em um fluxo de resultados."
+  }
+}

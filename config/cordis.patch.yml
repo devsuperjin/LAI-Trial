@@ -1,0 +1,5 @@
+# Account settings are disabled through composition instead of editing web-app.
+- id: ui-settings-account
+  disabled: true
+- id: account-controller
+  disabled: true

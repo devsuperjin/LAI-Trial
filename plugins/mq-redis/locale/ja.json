@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ Redis バックエンド",
+    "description": "Redis Streams のコンシューマーグループで MQ タスクを配信し、結果を結果ストリームに公開します。"
+  }
+}

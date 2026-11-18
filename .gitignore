@@ -1,0 +1,11 @@
+.reference/
+.runtime/
+node_modules/
+lib/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+config/production/*.local.yml
+*.tgz

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Agent MQ バンドル",
+    "description": "プロンプト注入、MQ ランタイム、その Redis Streams バックエンドを備えたオプションのメッセージキュータスク層です。"
+  }
+}

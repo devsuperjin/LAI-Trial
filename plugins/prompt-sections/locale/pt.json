@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Seções de prompt",
+    "description": "Adiciona seções de prompt do sistema e contextos de execução definidos pela implantação a partir da configuração do plugin."
+  }
+}

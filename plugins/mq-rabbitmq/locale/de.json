@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ-RabbitMQ-Backend",
+    "description": "Liefert MQ-Aufgaben über dauerhafte RabbitMQ-Warteschlangen mit manueller Bestätigung aus und veröffentlicht Ergebnisse in einer Ergebniswarteschlange."
+  }
+}

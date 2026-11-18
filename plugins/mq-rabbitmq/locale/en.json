@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ RabbitMQ backend",
+    "description": "Deliver MQ tasks through durable RabbitMQ queues with manual acknowledgement and publish results to a result queue."
+  }
+}

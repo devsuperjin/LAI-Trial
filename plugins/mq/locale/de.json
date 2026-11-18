@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "MQ-Aufgabenlaufzeit",
+    "description": "Führt Nachrichtenwartenschlangen-Aufgaben als arbeitsbereichsgestützte Harness-Sitzungen aus und veröffentlicht jedes abgeschlossene Ergebnis."
+  }
+}
