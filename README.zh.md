@@ -19,11 +19,17 @@ LAI Web 监控消息队列任务、展示运行统计与委派关系图，并配
 
 ## 运行
 
-使用 Node.js >=24.9 与 pnpm 11.28.5。先执行 `pnpm install --frozen-lockfile`，再执行 `pnpm build`。通过 `pnpm start:backend` 启动 DSH 后端，在另一个终端执行 `pnpm dev:web` 启动 LAI Web。
+使用 Node.js >=24.9 与 pnpm 11.28.5。首次克隆后执行一次 `pnpm install --frozen-lockfile` 安装依赖。之后只需一条启动命令：
 
-后端默认地址为 `http://127.0.0.1:3080`，LAI Web 地址为 `http://127.0.0.1:5174`。将后端打印的 token 粘贴到 LAI Web。`LAI_WEB_TARGET` 可修改开发代理地址。Vite 服务用于开发；生产部署需要实现相同的带认证同源 API 转发。
+```bash
+pnpm start
+```
 
-队列消费者默认禁用。将 `.env.example` 复制为 `.env`，填写实际绝对工作目录、模型路由和凭据，然后选择一个环境覆盖，例如 `pnpm start:backend --patch config/development/redis.yml`。Redis、RabbitMQ、MQTT 和基于 MQTT 的 IQE 流水线各有独立配置。在 LAI Web → Settings → Model providers 中配置模型 Provider。前端直接使用 DSH 官方设置与凭据 API；在 MQ 覆盖中填写 Provider 名称前，仍需先配置对应路由。
+该命令自动构建 LAI Web 与插件，再启动 DSH 的 `lai` Profile。同一个服务在 `http://127.0.0.1:3080` 提供前端与 API，并打开已经认证的浏览器地址，不需要单独启动前端或复制 token。`pnpm start --no-open` 仅打印地址，`pnpm start --port 8080` 可更换端口。
+
+只有开发前端时，才需要在两个终端分别运行 `pnpm start:backend` 和 `pnpm dev:web`。Vite 使用 5174 端口，通过 `LAI_WEB_TARGET` 代理后端，默认目标为 `http://127.0.0.1:3080`。
+
+队列消费者默认禁用。将 `.env.example` 复制为 `.env`，填写实际绝对工作目录、模型路由和凭据，然后选择一个环境覆盖，例如 `pnpm start --patch config/development/redis.yml`。Redis、RabbitMQ、MQTT 和基于 MQTT 的 IQE 流水线各有独立配置。在 LAI Web → Settings → Model providers 中配置模型 Provider。前端直接使用 DSH 官方设置与凭据 API；在 MQ 覆盖中填写 Provider 名称前，仍需先配置对应路由。
 
 ## 项目结构
 

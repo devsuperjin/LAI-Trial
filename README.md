@@ -19,11 +19,17 @@ LAI Web monitors message-queue tasks, displays run dashboards and delegation gra
 
 ## Run
 
-Use Node.js >=24.9 and pnpm 11.28.5. Install with `pnpm install --frozen-lockfile`, then build with `pnpm build`. Start the DSH backend with `pnpm start:backend` and LAI Web in another terminal with `pnpm dev:web`.
+Use Node.js >=24.9 and pnpm 11.28.5. On a fresh clone, install dependencies once with `pnpm install --frozen-lockfile`. Then start the application with one command:
 
-The backend defaults to `http://127.0.0.1:3080`; LAI Web runs at `http://127.0.0.1:5174`. Paste the backend's printed token into LAI Web. `LAI_WEB_TARGET` changes the development proxy destination. The Vite server is a development proxy; production hosting must implement the same authenticated, same-origin API forwarding.
+```bash
+pnpm start
+```
 
-Queue consumers are disabled by default. Copy `.env.example` to `.env`, provide the actual absolute workspace, model route and credentials, then select one overlay, for example `pnpm start:backend --patch config/development/redis.yml`. Redis, RabbitMQ, MQTT and the MQTT-based IQE pipeline have separate overlays. Configure model providers in LAI Web → Settings → Model providers. The frontend uses official DSH settings and credential APIs; selecting a provider in an MQ overlay still requires that route to be configured first.
+The command builds LAI Web and the plugins, then launches the DSH `lai` Profile. The same server hosts the frontend and API at `http://127.0.0.1:3080` and opens an authenticated browser URL. There is no separate frontend server or token-copy step. Use `pnpm start --no-open` to print the URL without opening a browser, or `pnpm start --port 8080` to choose another port.
+
+For frontend development only, run `pnpm start:backend` and `pnpm dev:web` in separate terminals. Vite listens on port 5174 and proxies to `LAI_WEB_TARGET` (default `http://127.0.0.1:3080`).
+
+Queue consumers are disabled by default. Copy `.env.example` to `.env`, provide the actual absolute workspace, model route and credentials, then select one overlay, for example `pnpm start --patch config/development/redis.yml`. Redis, RabbitMQ, MQTT and the MQTT-based IQE pipeline have separate overlays. Configure model providers in LAI Web → Settings → Model providers. The frontend uses official DSH settings and credential APIs; selecting a provider in an MQ overlay still requires that route to be configured first.
 
 ## Project layout
 

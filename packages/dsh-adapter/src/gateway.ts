@@ -90,9 +90,9 @@ export class UnauthorizedError extends Error {
   }
 }
 
-/** Exchange a URL token for the gateway cookie via the dev-proxy bootstrap path. */
-export async function bootstrapWithToken(token: string): Promise<void> {
-  const response = await fetch(`/dsh-auth?token=${encodeURIComponent(token)}`, { redirect: 'manual' })
+/** Exchange a token for the DSH cookie at the same-origin root, or a development proxy path. */
+export async function bootstrapWithToken(token: string, bootstrapPath = '/'): Promise<void> {
+  const response = await fetch(`${bootstrapPath}?token=${encodeURIComponent(token)}`, { redirect: 'manual' })
   if (!response.ok && response.type !== 'opaqueredirect') {
     throw new Error(`token bootstrap failed (${response.status})`)
   }

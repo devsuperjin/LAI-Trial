@@ -18,11 +18,13 @@
     "profile:prepare": "node scripts/prepare-profile.mjs",
     "config:dump": "node scripts/run-dsh.mjs --dump-config",
     "start:backend": "node scripts/run-dsh.mjs --no-open",
-    "dev:web": "pnpm --filter @lai/lai-web dev"
+    "dev:web": "pnpm --filter @lai/lai-web dev",
+    "start": "pnpm build && node scripts/run-dsh.mjs"
   },
   "dependencies": {
     "@deepseek-ai/dsh": "0.2.2-rc.1",
-    "@lai/dsh-agent-mq-bundle": "workspace:*"
+    "@lai/dsh-agent-mq-bundle": "workspace:*",
+    "@lai/dsh-web-app": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3",
