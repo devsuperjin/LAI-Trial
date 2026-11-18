@@ -98,7 +98,7 @@ export function App() {
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <main aria-label="页面内容" className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
-              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col overflow-hidden' : 'min-h-full'} min-w-0 rounded-xl border border-fd-border bg-fd-card`}>
+              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
               {(page === 'pipeline' || page === 'history') && <PipelinePage view={page === 'history' ? 'history' : 'pipeline'} onSettings={() => { setPage('settings') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}

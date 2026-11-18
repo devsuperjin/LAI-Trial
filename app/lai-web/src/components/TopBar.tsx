@@ -11,7 +11,7 @@ function authLabel(auth: AuthState): string {
 const PAGE_TITLE: Record<Page, string> = {
   pipeline: '流水线',
   history: '执行记录',
-  runs: '会话',
+  runs: 'Runs',
   dashboard: 'Dashboard',
   settings: '设置',
 }
@@ -91,7 +91,7 @@ export function TopBar(props: {
       </div>
       <div className="flex min-w-0 items-center gap-3 text-sm"><span className="hidden text-fd-border sm:inline" aria-hidden>/</span><span className="truncate font-medium">{PAGE_TITLE[props.page]}</span></div>
       <div className="ml-auto flex items-center gap-3 text-xs md:gap-5 text-fd-muted-foreground">
-        <span className="hidden lg:inline">{props.runningCount} 运行中 · {props.totalCount} 会话</span>
+        <span className="hidden lg:inline">{props.runningCount} 运行中 · {props.totalCount} runs</span>
         <span title={right} className="flex items-center gap-1.5">
           <motion.span
             animate={live ? { opacity: [1, 0.4, 1] } : { opacity: 1 }}

@@ -10,8 +10,8 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   { id: 'history', label: '执行记录', hint: '查看流水线历史与阶段输出', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },
   {
     id: 'runs',
-    label: '会话',
-    hint: 'All DSH sessions and their agent activity',
+    label: 'Runs',
+    hint: '执行列表、调用过程与结果',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
         <circle cx="5" cy="6" r="2.2" />
