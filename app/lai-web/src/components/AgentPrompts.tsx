@@ -5,7 +5,7 @@ import { record } from '../model/dag.ts'
 
 const ROLES = [
   ['orchestrator', 'Orchestrator / Monitor'], ['triage', 'Triage'], ['reproduce', 'Reproduction'],
-  ['ticket', 'Ticket'], ['review', 'Review'], ['report', 'Reporting'],
+  ['ticket', 'Ticket'], ['review', 'Review'], ['report', 'Reporter'],
 ] as const
 
 /** Edit the lai-agents plugin's prompts through ordinary DSH settings. */

@@ -24,11 +24,11 @@ export function deriveTree(page: PageResponse, entries: SessionListEntry[], sess
   const events = page.records.map(r => r.event)
   const dag = deriveDag(events)
   const taskEvent = events.find(e => e.type === 'user/message' && record(e.data.source).kind === 'pipeline') ?? events.find(e => e.type === 'user/message' && textOf(e.data.content).trim())
-  const delegations: Delegation[] = events.filter(e => e.type === 'tool/call' && STAGES.includes(String(e.data.name))).map(e => {
+  const delegations: Delegation[] = events.filter(e => e.type === 'tool/call' && STAGES.includes(e.data.name === 'reporter' ? 'report' : String(e.data.name))).map(e => {
     const args = record(e.data.arguments)
     const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
     const receipt = record(result?.data.message)
-    const stage = STAGES.indexOf(String(e.data.name)) + 1
+    const stage = STAGES.indexOf(e.data.name === 'reporter' ? 'report' : String(e.data.name)) + 1
     return { id: String(e.data.id ?? e.seq), seq: e.seq, stage, hue: stageHue(stage - 1), toolName: String(e.data.name), name: String(args.name ?? e.data.name), description: String(args.prompt ?? args.description ?? ''), settled: result ? textOf(receipt.content) : null, receiptError: receipt.isError ? textOf(receipt.content) : null }
   })
   const children: TreeChild[] = entries.filter(e => e.parentSessionId === sessionId).map(entry => {

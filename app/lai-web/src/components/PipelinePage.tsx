@@ -9,7 +9,7 @@ const ROLES: { id: Role; name: string; purpose: string; color: string }[] = [
   { id: 'reproduce', name: 'Reproduction', purpose: 'Run controlled local checks', color: 'var(--color-fd-primary)' },
   { id: 'ticket', name: 'Ticket', purpose: 'Prepare an evidence-backed draft', color: 'var(--color-fd-primary)' },
   { id: 'review', name: 'Reviewer', purpose: 'Independently validate the result', color: 'var(--color-fd-primary)' },
-  { id: 'report', name: 'Reporting', purpose: 'Consolidate findings and metrics', color: 'var(--color-fd-primary)' },
+  { id: 'report', name: 'Reporter', purpose: 'Consolidate findings and metrics', color: 'var(--color-fd-primary)' },
 ]
 const panel = 'rounded-xl border border-fd-border bg-fd-card p-4'
 const button = 'rounded-md border border-fd-border bg-fd-secondary px-3 py-2 text-sm hover:border-fd-primary disabled:cursor-not-allowed disabled:opacity-40'

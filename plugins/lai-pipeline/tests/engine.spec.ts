@@ -23,3 +23,32 @@ it.each(['APPROVE', 'REJECT'])('passes evidence through all stages and preserves
   expect(engine.snapshot().runs[0]).toMatchObject({ status: decision === 'APPROVE' ? 'completed' : 'needs-review', reviewDecision: decision })
   await engine.dispose()
 })
+
+it('does not start the next specialist until the previous result has settled', async () => {
+  const { vi } = await import('vitest')
+  const started: Role[] = []
+  const gates = new Map<Role, () => void>()
+  const driver: PipelineDriver = {
+    async initialize() {}, workers: () => [], async dispose() {},
+    async execute(role) {
+      started.push(role)
+      await new Promise<void>(resolve => { gates.set(role, resolve) })
+      return { text: role === 'review' ? 'Decision: APPROVE' : role, sessionId: role, startSeq: 0, endSeq: 1 }
+    },
+  }
+  const store: PipelineStore = { async load() { return { version: 1, runs: [] } }, async save() {}, async prepare() { return [] }, async stage() {} }
+  const engine = new PipelineEngine(driver, store, '/tmp/lai-order', 10)
+  await engine.initialize()
+  const source = engine.registerSource({ id: 'fixture', name: 'Fixture', simulated: true, description: 'Local', cases: [] })
+  await source.submit({ id: 'order', type: 'ci.failure', title: 'Order', summary: 'Local', evidence: [] })
+  const expected: Role[] = ['monitor', 'triage', 'reproduce', 'ticket', 'review', 'report']
+  for (const [index, role] of expected.entries()) {
+    await vi.waitFor(() => expect(gates.has(role)).toBe(true), { interval: 1 })
+    expect(started).toEqual(expected.slice(0, index + 1))
+    expect(engine.snapshot().runs[0]?.stages.slice(index + 1).every(stage => stage.status === 'pending')).toBe(true)
+    gates.get(role)!()
+  }
+  await engine.whenIdle()
+  expect(engine.snapshot().runs[0]?.status).toBe('completed')
+  await engine.dispose()
+})

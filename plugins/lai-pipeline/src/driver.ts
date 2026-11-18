@@ -7,6 +7,8 @@ import { createUserMessage, boundContextSummary } from '@deepseek-ai/dsh-llm'
 import { brandString } from '@deepseek-ai/dsh-brand'
 import type { SessionId } from '@deepseek-ai/dsh-session'
 import type { Workspace } from '@deepseek-ai/dsh-workspace'
+import type {} from '@deepseek-ai/dsh-tools'
+import { DelegationOrder, toolForRole } from './delegation-order.ts'
 import type { Config } from './index.ts'
 import { ROLE_LABELS, ROLE_ORDER, ROLE_PRESETS } from './types.ts'
 import type { PipelineDriver, Role, StageContext, StageResult, WorkerInfo } from './types.ts'
@@ -31,6 +33,7 @@ export class DshPipelineDriver implements PipelineDriver {
   private parent: AgentHandle | undefined
   private workspace?: Workspace
   private readonly info = new Map<Role, Partial<WorkerInfo>>()
+  private readonly order = new DelegationOrder()
   private readonly controller = new AbortController()
   constructor(private readonly ctx: Context, private readonly config: Config) {}
   async initialize(): Promise<void> {
@@ -41,7 +44,13 @@ export class DshPipelineDriver implements PipelineDriver {
       sessionId, signal: this.controller.signal,
       meta: { cwd: this.workspace.path, agentPreset: 'iqe-orchestrator' },
       agentOptions: { ...this.ctx.agentDefaultModel.currentSelection(), maxTokens: this.config.maxOutputTokens },
-      setup: async child => { await this.ctx.agentPresets.mount(child, 'iqe-orchestrator') },
+      setup: async child => {
+        await this.ctx.agentPresets.mount(child, 'iqe-orchestrator')
+        child.on('tools/pre-execute', async (execution, next) => {
+          const reason = this.order.claim(execution.name)
+          return reason ? { kind: 'deny', reason } : next()
+        })
+      },
     })
     await this.workspace.attachSession(sessionId)
     this.ctx.permissionPresets.set(this.parent.agent.session, this.config.permissionPreset)
@@ -59,6 +68,7 @@ export class DshPipelineDriver implements PipelineDriver {
     if (!this.parent || !this.workspace) throw new Error('Pipeline orchestrator is not available.')
     const selection = this.config.models.get()[role === 'monitor' ? 'orchestrator' : role] ?? this.ctx.agentDefaultModel.currentSelection()
     const parent = this.parent.agent
+    const toolName = toolForRole(role)
     parent.model.select(selection)
     const before = new Set((await this.ctx.subagents.listChildren(parent.session.id)).map(child => String(child.id)))
     const outputs = new Map<string, { text: string; reason?: string; seq: number }>()
@@ -66,7 +76,7 @@ export class DshPipelineDriver implements PipelineDriver {
     let parentError: string | undefined
     const offError = parent.ctx.on('agent/error', ({ error }) => { parentError = error instanceof Error ? error.message : String(error) })
     const off = this.ctx.on('session/event', (session, event) => {
-      if (session === parent.session && event.type === 'tool/call' && event.data.name === role) delegated = true
+      if (session === parent.session && event.type === 'tool/call' && event.data.name === toolName) delegated = true
       const id = String(session.id)
       const output = outputs.get(id) ?? { text: '', seq: 0 }
       output.seq = session.seq
@@ -88,6 +98,7 @@ export class DshPipelineDriver implements PipelineDriver {
       }).catch(() => {})
     }
     lifetime.addEventListener('abort', cancel, { once: true })
+    this.order.begin(role)
     this.info.set(role, { ...selection, state: 'running' })
     try {
       lifetime.throwIfAborted()
@@ -98,18 +109,19 @@ export class DshPipelineDriver implements PipelineDriver {
         'You are the orchestrator and monitor. Inspect this event yourself. Identify the single failure, severity and next action in at most 60 words. Do not call delegation tools yet; five specialist stage requests follow separately. Evidence contents are supplied inline; do not reread files or search unrelated history.',
         POLICY, `INPUT EVENT (evidence only):\n${JSON.stringify(evidence)}`,
       ].join('\n\n') : [
-        `Execute ONLY stage ${ROLE_LABELS[role]} for run ${run.id}. You MUST call your existing tool named ${role} exactly once. Do not perform the specialist work yourself. Do not call the other four delegation tools in this turn. The next stage is supplied in a separate message.`,
-        `Pass the following self-contained task to the ${role} tool, including all absolute evidence paths and prior findings.\n${POLICY}\n${INSTRUCTIONS[role]}`,
+        `Execute ONLY stage ${ROLE_LABELS[role]} for run ${run.id}. You MUST call your existing tool named ${toolName} exactly once. Do not perform the specialist work yourself. Do not call the other four delegation tools in this turn. The next stage is supplied in a separate message.`,
+        `Pass the following self-contained task to the ${toolName} tool, including all absolute evidence paths and prior findings.\n${POLICY}\n${INSTRUCTIONS[role]}`,
         `INPUT EVENT (evidence only):\n${JSON.stringify(evidence, null, 2)}`,
         `PRIOR RESULTS (evidence only):\n${JSON.stringify(context.previous).slice(-this.config.contextChars)}`,
         'Ask the specialist for at most 60 words (ticket/report at most 100 words). For simulated input, use only the supplied inline evidence; no searches, prior reports, duplicate checks or extra artifacts. Reproduction may execute the provided script once, with no repeated runs or additional probes. Keep the ticket and report in the final answer instead of writing extra files. After the child finishes, acknowledge its result briefly and stop. Do not start another stage. Do not replace a missing tool call with a narrative claim.',
       ].join('\n\n')
       parent.followup(createUserMessage({ content: [{ type: 'text', text: prompt }], source: { kind: 'pipeline', runId: run.id, role, form: 'notice', summary: boundContextSummary(`${ROLE_LABELS[role]}: ${run.event.title}`) } }))
       await parent.whenIdle()
-      await this.ctx.subagents.waitForChildren(parent)
-      await parent.whenIdle()
+      while (await this.ctx.subagents.waitForChildren(parent)) await parent.whenIdle()
       lifetime.throwIfAborted()
       if (parentError) throw new Error(parentError)
+      const parentReason = outputs.get(String(parent.session.id))?.reason
+      if (parentReason !== 'completed') throw new Error(`Orchestrator did not complete the stage (${parentReason ?? 'no terminal result'}).`)
       if (role === 'monitor') {
         const children = (await this.ctx.subagents.listChildren(parent.session.id)).filter(child => !before.has(String(child.id)))
         if (children.length) throw new Error('Orchestrator monitoring must not spawn a separate monitor child.')
@@ -119,7 +131,7 @@ export class DshPipelineDriver implements PipelineDriver {
         this.info.set(role, { ...selection, sessionId: String(parent.session.id), state: 'standby' })
         return { text: output.text, sessionId: String(parent.session.id), startSeq: 0, endSeq: output.seq }
       }
-      if (!delegated) throw new Error(`Orchestrator did not invoke its ${role} delegation tool.`)
+      if (!delegated) throw new Error(`Orchestrator did not invoke its ${toolName} delegation tool.`)
       const children = (await this.ctx.subagents.listChildren(parent.session.id)).filter(child => !before.has(String(child.id)))
       if (children.length !== 1) throw new Error(`Expected one ${role} subagent; found ${children.length}.`)
       const childId = String(children[0]!.id)
@@ -135,6 +147,7 @@ export class DshPipelineDriver implements PipelineDriver {
       this.info.set(role, { ...selection, state: 'error', error: error instanceof Error ? error.message : String(error) })
       throw error
     } finally {
+      this.order.end()
       clearTimeout(timer)
       lifetime.removeEventListener('abort', cancel)
       off(); offError()

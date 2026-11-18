@@ -32,6 +32,6 @@ it('merges monitoring into the orchestrator and exposes exactly five delegation 
   expect(DEFAULT_PROMPTS).not.toHaveProperty('monitor')
   const parent = PRESETS.find(preset => preset.id === 'iqe-orchestrator')!
   const tools = parent.plugins!.filter(plugin => plugin.name === '@deepseek-ai/dsh-tool-subagent')
-  expect(tools.map(plugin => (plugin.config as { toolName: string }).toolName)).toEqual(['triage', 'reproduce', 'ticket', 'review', 'report'])
+  expect(tools.map(plugin => (plugin.config as { toolName: string }).toolName)).toEqual(['triage', 'reproduce', 'ticket', 'review', 'reporter'])
   expect(parent.plugins!.some(plugin => plugin.name === '@deepseek-ai/dsh-tool-bash')).toBe(true)
 })
