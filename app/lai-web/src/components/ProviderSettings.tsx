@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { ConfigurableProvider, CredentialInfo, ModelCatalog, SettingsDescribeValue, SettingsNamespaceView, SettingsPathOp } from '../api/gateway.ts'
 import { describeCredentials, describeSettings, listConfigurableProviders, modelCatalog, mutateSettings, setCredential } from '../api/gateway.ts'
 import { record } from '../model/dag.ts'
+import { DEEPSEEK_MESSAGES_URL, validateProviderEndpoint } from '../model/providers.ts'
 
 const CUSTOM = '__custom__'
 const PI_AI = 'llm-pi-ai'
@@ -217,10 +218,7 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
         const id = selected?.provider ?? route.trim()
         if (custom && !/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(id)) throw new Error('Use a provider ID starting with a lowercase letter, with letters, digits and hyphens only.')
         if (custom && props.snapshot.providers.some(provider => provider.provider === id)) throw new Error('This provider ID already exists. Configure the existing provider instead.')
-        if (baseURL.trim()) {
-          const url = new URL(baseURL.trim())
-          if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) throw new Error('Use an HTTP or HTTPS endpoint without credentials in the URL.')
-        }
+        validateProviderEndpoint(nsName, baseURL)
         if (declared && (!baseURL.trim() || !api || models.length === 0)) throw new Error('A custom provider needs an API endpoint, protocol and at least one model.')
         const values = modelValues(models)
         const ops: SettingsPathOp[] = []
@@ -274,7 +272,7 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
       <fieldset className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2" disabled={profileDisabled}>
         {custom && <label className="text-xs text-fd-muted-foreground">Provider ID<input className={`${inputClass} mt-1`} value={route} onChange={e => { setRoute(e.target.value) }} placeholder="my-gateway" required /></label>}
         {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">Display name<input className={`${inputClass} mt-1`} value={displayName} onChange={e => { setDisplayName(e.target.value) }} placeholder={selected?.displayName ?? 'My gateway'} /></label>}
-        <label className="text-xs text-fd-muted-foreground">API endpoint<input className={`${inputClass} mt-1`} value={baseURL} onChange={e => { setBaseURL(e.target.value) }} placeholder={selected?.defaultBaseURL ?? 'https://api.example.com/v1'} type="url" required={declared} /></label>
+        <label className="text-xs text-fd-muted-foreground">API endpoint<input className={`${inputClass} mt-1`} value={baseURL} onChange={e => { setBaseURL(e.target.value) }} placeholder={selected?.defaultBaseURL ?? (nsName === 'llm-deepseek' ? DEEPSEEK_MESSAGES_URL : 'https://api.example.com/v1')} type="url" required={declared} /></label>
         {nsName === PI_AI && <label className="text-xs text-fd-muted-foreground">API protocol<select className={`${inputClass} mt-1`} value={api} onChange={e => { setApi(e.target.value) }}>
           <option value="">Use provider defaults</option>
           <option value="openai-completions">OpenAI compatible (Chat Completions)</option>
@@ -283,6 +281,7 @@ function ProviderEditor(props: { entry: ConfigurableProvider | null; snapshot: S
           {api && !['openai-completions', 'openai-responses', 'anthropic-messages'].includes(api) && <option value={api}>{api}</option>}
         </select></label>}
       </fieldset>
+      {nsName === 'llm-deepseek' && <p className="text-xs text-fd-muted-foreground">The built-in DeepSeek provider uses Anthropic Messages, not Chat Completions. Official endpoint: <code>{DEEPSEEK_MESSAGES_URL}</code>. A custom OpenAI-compatible server needs a separate custom provider.</p>}
       <label className="block text-xs text-fd-muted-foreground">API key
         <input className={`${inputClass} mt-1`} type="password" autoComplete="new-password" value={apiKey} onChange={event => { setApiKey(event.target.value) }} disabled={disabled || credential?.writable === false} placeholder={credential?.configured ? 'Configured — leave blank to keep existing key' : 'Enter API key, or leave blank for native authentication'} />
       </label>

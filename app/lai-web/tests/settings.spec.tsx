@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { act, create } from 'react-test-renderer'
 import type { ReactTestRenderer } from 'react-test-renderer'
+import { validateProviderEndpoint } from '../src/model/providers.ts'
 import { SettingsPage } from '../src/components/SettingsPage.tsx'
 
 let view: ReactTestRenderer | undefined
@@ -43,4 +44,13 @@ it('stores an API key through DSH and lets the first available model be selected
   act(() => select.props.onChange({ target: { value: 'deepseek-official/first-model' } }))
   await act(async () => { button('Save default').props.onClick() })
   expect(calls).toContainEqual({ endpoint: 'settings/update', args: { ns: 'agent-default-model', patch: { provider: 'deepseek-official', model: 'first-model' }, expectedRevision: 0 } })
+})
+
+it('rejects the Chat Completions root for the native DeepSeek Messages adapter', () => {
+  expect(() => validateProviderEndpoint('llm-deepseek', 'https://api.deepseek.com')).toThrow('/anthropic')
+  expect(() => validateProviderEndpoint('llm-deepseek', 'https://api.deepseek.com/v1/')).toThrow('/anthropic')
+  expect(() => validateProviderEndpoint('llm-deepseek', 'https://api.deepseek.com/anthropic')).not.toThrow()
+  expect(() => validateProviderEndpoint('llm-deepseek', 'https://api.deepseek.com/anthropic/v1')).not.toThrow()
+  expect(() => validateProviderEndpoint('llm-deepseek', '')).not.toThrow()
+  expect(() => validateProviderEndpoint('llm-pi-ai', 'https://api.deepseek.com/v1')).not.toThrow()
 })

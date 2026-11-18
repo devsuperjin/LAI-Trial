@@ -23,7 +23,7 @@ export function summarizeChild(events: WireEvent[], entry: SessionListEntry): Ch
 export function deriveTree(page: PageResponse, entries: SessionListEntry[], sessionId: string, labels: Record<string, string | null> = {}) {
   const events = page.records.map(r => r.event)
   const dag = deriveDag(events)
-  const taskEvent = events.find(e => e.type === 'user/message' && record(e.data.source).kind === 'mq')
+  const taskEvent = events.find(e => e.type === 'user/message' && record(e.data.source).kind === 'pipeline') ?? events.find(e => e.type === 'user/message' && textOf(e.data.content).trim())
   const delegations: Delegation[] = events.filter(e => e.type === 'tool/call' && STAGES.includes(String(e.data.name))).map(e => {
     const args = record(e.data.arguments)
     const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
@@ -39,12 +39,35 @@ export function deriveTree(page: PageResponse, entries: SessionListEntry[], sess
     const delegation = delegations.find(d => d.settled?.includes(entry.sessionId)) ?? delegations.find(d => d.stage === stage) ?? null
     return { sessionId: entry.sessionId, delegation, stage: delegation?.stage ?? stage, hue: delegation?.hue ?? stageHue(stage - 1), running: entry.running }
   })
-  const steps = events.filter(e => e.type === 'assistant/message' || e.type === 'tool/call').map(e => {
-    const delegation = delegations.find(d => d.seq === e.seq)
-    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === e.data.id)
-    return { id: `t-${e.seq}`, kind: e.type === 'assistant/message' ? 'turn' : 'tool', turn: Number(e.data.turn ?? 0), time: e.time, label: String(e.data.name ?? 'Assistant'), preview: e.type === 'assistant/message' ? textOf(record(e.data.message).content) : JSON.stringify(e.data.arguments ?? {}), delegationId: delegation?.id ?? null, isError: record(result?.data.message).isError === true }
-  })
-  return { task: taskEvent ? { taskId: String(record(taskEvent.data.source).taskId), prompt: textOf(taskEvent.data.content), time: taskEvent.time } : null, turnEnd: dag.turnEnd, delegations, children, steps }
+  type Tool = { id: string; name: string; preview: string; result: string; isError: boolean; delegationId: string | null }
+  const steps: { id: string; kind: 'turn'; turn: number; time: number; label: string; preview: string; delegationId: string | null; isError: boolean; tools: Tool[] }[] = []
+  let current: typeof steps[number] | undefined
+  let number = 0
+  for (const event of events) {
+    if (event.type === 'turn/start') {
+      current = { id: `t-${event.seq}`, kind: 'turn', turn: ++number, time: event.time, label: 'Assistant', preview: '', delegationId: null, isError: false, tools: [] }
+      steps.push(current)
+    }
+    if (event.type === 'turn/end') { current = undefined; continue }
+    if (event.type !== 'assistant/message' && event.type !== 'tool/call') continue
+    if (!current) {
+      current = { id: `t-${event.seq}`, kind: 'turn', turn: ++number, time: event.time, label: 'Assistant', preview: '', delegationId: null, isError: false, tools: [] }
+      steps.push(current)
+    }
+    if (event.type === 'assistant/message') {
+      const text = textOf(record(event.data.message).content)
+      if (text.trim()) current.preview = text
+    } else {
+      const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === event.data.id)
+      const message = record(result?.data.message)
+      const delegation = delegations.find(d => d.seq === event.seq)
+      const isError = message.isError === true
+      current.tools.push({ id: `t-${event.seq}`, name: String(event.data.name ?? 'tool'), preview: JSON.stringify(event.data.arguments ?? {}), result: textOf(message.content), isError, delegationId: delegation?.id ?? null })
+      current.isError ||= isError
+    }
+    // A terminal boundary keeps later turns separate, including paged histories.
+  }
+  return { task: taskEvent ? { taskId: String(record(taskEvent.data.source).runId ?? sessionId), prompt: textOf(taskEvent.data.content), time: taskEvent.time } : children.length ? { taskId: sessionId, prompt: 'LAI Pipeline · Orchestrator', time: entries.find(entry => entry.sessionId === sessionId)?.updatedAt ?? Date.now() } : null, turnEnd: dag.turnEnd, delegations, children, steps }
 }
 export interface SvgEdge { d: string; hue: string; active: boolean }
 export interface SvgNode { x: number; y: number; w: number; h: number; hue: string; badge: string; title: string; lines: string[]; status: 'neutral' | 'running' | 'completed' | 'failed' }
@@ -53,5 +76,5 @@ export function buildExportSvg(input: { width: number; height: number; nodes: Sv
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${input.width}" height="${input.height + 40}" viewBox="0 -40 ${input.width} ${input.height + 40}"><rect x="0" y="-40" width="100%" height="100%" fill="#101827"/><text x="16" y="-16" fill="white">${escapeXml(input.title)}</text>${input.edges.map(e => `<path d="${escapeXml(e.d)}" fill="none" stroke="${escapeXml(e.hue)}"/>`).join('')}${input.nodes.map(n => `<g><rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="8" fill="#1e293b" stroke="${escapeXml(n.hue)}"/>${[n.badge, n.title, ...n.lines].map((line, i) => `<text x="${n.x + 10}" y="${n.y + 18 + i * 18}" fill="white" font-size="11">${escapeXml(truncate(line, Math.floor(n.w / 7)))}</text>`).join('')}</g>`).join('')}</svg>`
 }
 export function buildSummaryText(tree: ReturnType<typeof deriveTree>, models: Record<string, ChildModel | undefined>): string {
-  return [`Task: ${tree.task?.taskId ?? 'MQ task'}`, tree.task?.prompt ?? '', ...tree.children.map(c => `${c.stage}. ${models[c.sessionId]?.label ?? c.sessionId}: ${models[c.sessionId]?.status ?? 'pending'}\n${models[c.sessionId]?.finalText ?? ''}`)].join('\n')
+  return [`Task: ${tree.task?.taskId ?? 'Pipeline run'}`, tree.task?.prompt ?? '', ...tree.children.map(c => `${c.stage}. ${models[c.sessionId]?.label ?? c.sessionId}: ${models[c.sessionId]?.status ?? 'pending'}\n${models[c.sessionId]?.finalText ?? ''}`)].join('\n')
 }

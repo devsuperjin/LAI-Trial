@@ -8,14 +8,9 @@ try { loadEnvFile(resolve(root, '.env')) } catch (error) {
 }
 const { home } = await prepareProfile()
 const args = process.argv.slice(2)
-if (args.includes('--patch')) {
-  for (const key of ['LAI_WORKSPACE', 'LAI_PROVIDER', 'LAI_MODEL']) {
-    if (!process.env[key]) throw new Error(`${key} is required for MQ overlays; configure .env first`)
-  }
-}
 // Delegate application launch to the installed, version-pinned DSH CLI.
 const child = spawn(process.execPath, [resolve(root, 'node_modules/@deepseek-ai/dsh/lib/bin.js'), '--profile', 'lai', ...args], {
-  cwd: root, env: { ...process.env, DSH_HOME: home, LAI_WEB_DIST_INDEX: resolve(root, 'app/lai-web/dist/index.html') }, stdio: 'inherit',
+  cwd: root, env: { ...process.env, DSH_HOME: home, LAI_WEB_DIST_INDEX: resolve(root, 'app/lai-web/dist/index.html'), LAI_PIPELINE_WORKSPACE: process.env.LAI_PIPELINE_WORKSPACE ?? resolve(home, 'pipeline/workspace'), LAI_PIPELINE_STATE_DIR: resolve(home, 'pipeline') }, stdio: 'inherit',
 })
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal))
 child.on('error', error => { console.error(error); process.exitCode = 1 })

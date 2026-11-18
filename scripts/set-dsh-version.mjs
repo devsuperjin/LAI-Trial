@@ -4,7 +4,7 @@ const root = resolve(import.meta.dirname, '..')
 const version = process.argv[2]
 if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version ?? '')) throw new Error('Supply one exact DSH version, e.g. 0.2.2-rc.1')
 const manifests = ['package.json']
-for (const group of ['app', 'plugins', 'packages', 'bundles']) {
+for (const group of ['app', 'plugins', 'packages']) {
   for (const dir of await readdir(resolve(root, group), { withFileTypes: true })) if (dir.isDirectory()) manifests.push(`${group}/${dir.name}/package.json`)
 }
 for (const file of manifests) {

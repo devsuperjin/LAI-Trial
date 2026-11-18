@@ -31,7 +31,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
   // The last turn/end decides the outcome; a recovered tool error alone is not a failed task.
   const failed = dag.turnEnd !== undefined ? dag.turnEnd !== 'completed' : hasError
   const status = props.running ? 'running' : failed ? 'failed' : 'completed'
-  const statusClass = props.running ? 'bg-fd-primary/10 text-fd-primary border-fd-primary/30' : hasError ? 'bg-fd-danger/10 text-fd-danger border-fd-danger/30' : 'bg-fd-success/10 text-fd-success border-fd-success/30'
+  const statusClass = props.running ? 'bg-fd-primary/10 text-fd-primary border-fd-primary/30' : failed ? 'bg-fd-danger/10 text-fd-danger border-fd-danger/30' : 'bg-fd-success/10 text-fd-success border-fd-success/30'
 
   if (props.page === null) {
     return <div className="flex h-full items-center justify-center text-fd-muted-foreground">loading…</div>

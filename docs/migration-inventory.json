@@ -240,97 +240,97 @@
     },
     {
       "source": "packages/experimental/agent-mq-bundle/README.md",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/README.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/README.zh.md",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/README.zh.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.patch.yml",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/cordis.patch.yml"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.iqe.yml",
-      "decision": "environment-overlay",
-      "target": "config/development/iqe.yml",
+      "decision": "retired",
       "additionalTargets": [
         "plugins/lai-agents/src/definitions.ts",
         "plugins/lai-agents/src/index.ts"
-      ]
+      ],
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.mqtt.yml",
-      "decision": "environment-overlay",
-      "target": "config/development/mqtt.yml"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.patch.yml",
-      "decision": "environment-overlay",
-      "target": "config/development/redis.yml"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/cordis.source.rabbitmq.yml",
-      "decision": "environment-overlay",
-      "target": "config/development/rabbitmq.yml"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/de.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/de.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/en.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/en.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/es.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/es.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/fr.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/fr.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/ja.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/ja.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/pt.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/pt.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/ru.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/ru.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/locale/zh.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/locale/zh.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/package.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/package.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/src/index.ts",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/src/index.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/agent-mq-bundle/tsconfig.json",
-      "decision": "migrated",
-      "target": "bundles/agent-mq-bundle/tsconfig.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/README.i18n.yaml",
@@ -339,73 +339,73 @@
     },
     {
       "source": "packages/experimental/mq-mqtt/README.md",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/README.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/README.zh.md",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/README.zh.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/de.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/de.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/en.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/en.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/es.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/es.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/fr.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/fr.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/ja.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/ja.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/pt.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/pt.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/ru.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/ru.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/locale/zh.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/locale/zh.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/package.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/package.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/src/index.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/src/index.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/tests/mqtt.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/tests/mqtt.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-mqtt/tsconfig.json",
-      "decision": "migrated",
-      "target": "plugins/mq-mqtt/tsconfig.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/README.i18n.yaml",
@@ -414,73 +414,73 @@
     },
     {
       "source": "packages/experimental/mq-rabbitmq/README.md",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/README.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/README.zh.md",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/README.zh.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/de.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/de.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/en.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/en.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/es.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/es.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/fr.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/fr.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/ja.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/ja.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/pt.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/pt.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/ru.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/ru.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/locale/zh.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/locale/zh.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/package.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/package.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/src/index.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/src/index.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/tests/rabbitmq.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/tests/rabbitmq.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-rabbitmq/tsconfig.json",
-      "decision": "migrated",
-      "target": "plugins/mq-rabbitmq/tsconfig.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/README.i18n.yaml",
@@ -489,73 +489,73 @@
     },
     {
       "source": "packages/experimental/mq-redis/README.md",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/README.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/README.zh.md",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/README.zh.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/de.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/de.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/en.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/en.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/es.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/es.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/fr.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/fr.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/ja.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/ja.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/pt.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/pt.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/ru.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/ru.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/locale/zh.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/locale/zh.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/package.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/package.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/src/index.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/src/index.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/tests/redis.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/tests/redis.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq-redis/tsconfig.json",
-      "decision": "migrated",
-      "target": "plugins/mq-redis/tsconfig.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/README.i18n.yaml",
@@ -564,108 +564,108 @@
     },
     {
       "source": "packages/experimental/mq/README.md",
-      "decision": "migrated",
-      "target": "plugins/mq/README.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/README.zh.md",
-      "decision": "migrated",
-      "target": "plugins/mq/README.zh.md"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/de.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/de.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/en.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/en.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/es.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/es.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/fr.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/fr.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/ja.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/ja.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/pt.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/pt.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/ru.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/ru.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/locale/zh.json",
-      "decision": "migrated",
-      "target": "plugins/mq/locale/zh.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/package.json",
-      "decision": "migrated",
-      "target": "plugins/mq/package.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/src/index.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/src/index.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/src/memory.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/src/memory.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/src/task.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/src/task.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/src/types.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/src/types.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tests/loader-composition.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/tests/loader-composition.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tests/memory.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/tests/memory.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tests/runtime.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/tests/runtime.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tests/scripted-adapter.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/tests/scripted-adapter.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tests/task.spec.ts",
-      "decision": "migrated",
-      "target": "plugins/mq/tests/task.spec.ts"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/mq/tsconfig.json",
-      "decision": "migrated",
-      "target": "plugins/mq/tsconfig.json"
+      "decision": "retired",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/experimental/prompt-sections/README.i18n.yaml",
@@ -749,9 +749,9 @@
     },
     {
       "source": "packages/extensions/tool-cordis/src/api-catalog.ts",
-      "decision": "plugin-owned-api-docs",
-      "target": "plugins/mq/README.md",
-      "note": "MQ API documentation is owned by the external plugin; the official model-visible API catalog is not patched."
+      "decision": "retired",
+      "note": "MQ API documentation is owned by the external plugin; the official model-visible API catalog is not patched.",
+      "reason": "MQ architecture removed in favor of native LAI subagent pipeline and simulated events."
     },
     {
       "source": "packages/preset/agent-preset/skills/cordis-composition-reference/references/packages.md",

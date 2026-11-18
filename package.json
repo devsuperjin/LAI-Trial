@@ -12,7 +12,7 @@
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "typecheck": "pnpm -r --if-present run typecheck",
     "test": "vitest run",
-    "test:unit": "vitest run --exclude \"plugins/mq-*/tests/**\"",
+    "test:unit": "vitest run",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check": "pnpm check:architecture && pnpm build && pnpm typecheck && pnpm test",
     "profile:prepare": "node scripts/prepare-profile.mjs",
@@ -23,10 +23,11 @@
   },
   "dependencies": {
     "@deepseek-ai/dsh": "0.2.2-rc.1",
-    "@lai/dsh-agent-mq-bundle": "workspace:*",
     "@lai/dsh-web-host": "workspace:*",
     "@lai/lai-agents": "workspace:*",
-    "@lai/application-config": "workspace:*"
+    "@lai/application-config": "workspace:*",
+    "@lai/lai-pipeline": "workspace:*",
+    "@lai/pipeline-simulator": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3",

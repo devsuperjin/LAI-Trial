@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Runtime de tâches MQ",
-    "description": "Exécute les tâches de file de messages comme sessions Harness adossées à un espace de travail et publie chaque résultat réglé."
-  }
-}

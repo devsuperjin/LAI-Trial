@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Backend MQ do MQTT",
-    "description": "Entrega tarefas MQ por tópicos MQTT com QoS 1 e publica os resultados em um tópico de resultados; a entrega é confirmada no recebimento."
-  }
-}

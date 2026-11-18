@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Agent-MQ-Bundle",
-    "description": "Optionale Nachrichtenwartenschlangen-Aufgabenschicht mit Prompt-Injektion, der MQ-Laufzeit und ihrem Redis-Streams-Backend."
-  }
-}

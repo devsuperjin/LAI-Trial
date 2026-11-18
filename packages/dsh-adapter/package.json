@@ -11,6 +11,10 @@
     "./subagents": {
       "types": "./lib/subagents.d.ts",
       "default": "./lib/subagents.js"
+    },
+    "./pipeline": {
+      "types": "./lib/pipeline.d.ts",
+      "default": "./lib/pipeline.js"
     }
   },
   "files": [
@@ -27,5 +31,8 @@
   "devDependencies": {
     "@deepseek-ai/dsh-agent": "0.2.2-rc.1",
     "@deepseek-ai/dsh-subagent": "0.2.2-rc.1"
+  },
+  "dependencies": {
+    "@lai/lai-pipeline": "workspace:*"
   }
 }

@@ -5,16 +5,12 @@ import { pageSubagentSession } from '../api/gateway.ts'
 import { useInterval } from '../hooks/useInterval.ts'
 import type { ChildModel, Delegation, TreeChild } from '../model/tree.ts'
 import {
-  buildExportSvg,
-  buildSummaryText,
   deriveTree,
   formatDuration,
   formatTokens,
-  stageHue,
   summarizeChild,
-  truncate,
 } from '../model/tree.ts'
-import type { SvgEdge, SvgNode } from '../model/tree.ts'
+import type { SvgEdge } from '../model/tree.ts'
 
 interface Controls {
   layout: 'horizontal' | 'vertical'
@@ -28,12 +24,12 @@ interface Controls {
 
 const DEFAULT_CONTROLS: Controls = {
   layout: 'horizontal',
-  density: 'comfortable',
+  density: 'compact',
   edges: 'curved',
   showTools: true,
-  showPreviews: true,
+  showPreviews: false,
   motion: true,
-  grid: true,
+  grid: false,
 }
 
 const GEO = {
@@ -41,7 +37,6 @@ const GEO = {
   comfortable: { rootW: 260, childW: 296, gap: 116, nodeGap: 12, pad: 28 },
 } as const
 
-const PRIMARY = 'var(--color-fd-primary)'
 
 interface ChildPage {
   state: 'loading' | 'ok' | 'error'
@@ -120,7 +115,7 @@ function formatTime(ms: number): string {
 
 export function DagView(props: { page: PageResponse; sessionId: string; running: boolean; entries: SessionListEntry[] }) {
   const { page, sessionId, running, entries } = props
-  const [controls, setControls] = useState<Controls>(DEFAULT_CONTROLS)
+  const controls = DEFAULT_CONTROLS
   const [childPages, setChildPages] = useState<Record<string, ChildPage | undefined>>({})
   const [expanded, setExpanded] = useState<Record<string, boolean | undefined>>({})
   const [selected, setSelected] = useState<string | null>(null)
@@ -235,9 +230,6 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
     return () => { clearTimeout(timer) }
   }, [toast])
 
-  const setControl = <K extends keyof Controls>(key: K, value: Controls[K]): void => {
-    setControls(prev => ({ ...prev, [key]: value }))
-  }
 
   const registerNode = useCallback((key: string) => (el: HTMLElement | null) => {
     if (el === null) nodeRefs.current.delete(key)
@@ -266,7 +258,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
         const el = nodeRefs.current.get(child.key)
         if (el === undefined) continue
         const size = vertical ? el.offsetWidth : el.offsetHeight
-        const anchor = child.delegation !== null ? nodeRefs.current.get(`t-${child.delegation.seq}`) : undefined
+        const anchor = child.delegation !== null ? nodeRefs.current.get(tree.steps.find(step => step.tools.some(tool => tool.delegationId === child.delegation?.id))?.id ?? '') : nodeRefs.current.get('task')
         let center = cursor + size / 2
         if (anchor !== undefined) {
           const anchorPos = positionIn(anchor, content)
@@ -431,66 +423,6 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
   const visibleSteps = useMemo(() => tree.steps.filter(step =>
     step.kind === 'turn' || step.delegationId !== null || controls.showTools), [tree.steps, controls.showTools])
 
-  const exportSvg = (): void => {
-    const nodes: SvgNode[] = []
-    const pushNode = (key: string, hue: string, badge: string, title: string, lines: string[], status: SvgNode['status']): void => {
-      const box = layout.boxes[key]
-      if (box === undefined) return
-      nodes.push({ x: box.x, y: box.y, w: box.w, h: box.h, hue, badge, title, lines, status })
-    }
-    if (tree.task !== null) pushNode('task', PRIMARY, 'task', tree.task.taskId ?? 'MQ task', controls.showPreviews ? [truncate(tree.task.prompt, 120)] : [], 'neutral')
-    for (const step of visibleSteps) {
-      const delegation = step.delegationId !== null ? tree.delegations.find(candidate => candidate.id === step.delegationId) : undefined
-      if (delegation !== undefined) {
-        pushNode(step.id, delegation.hue, `stage ${delegation.stage}`, `${delegation.toolName} → ${delegation.name}`, [truncate(delegation.description, 90)], delegation.receiptError !== null ? 'failed' : 'neutral')
-      } else {
-        pushNode(step.id, step.kind === 'turn' ? PRIMARY : 'var(--color-fd-warning)', step.kind === 'turn' ? `turn ${step.turn}` : 'tool', step.label, controls.showPreviews ? [truncate(step.preview, 90)] : [], step.isError ? 'failed' : 'neutral')
-      }
-    }
-    for (const child of renderChildren) {
-      const model = child.sessionId !== null ? models[child.sessionId] : undefined
-      const title = model?.label ?? child.delegation?.description ?? child.delegation?.name ?? child.key.slice(0, 8)
-      const lines = [
-        `preset ${model?.preset ?? '…'} · ${model?.status ?? (child.running ? 'running' : 'starting')}`,
-        model !== undefined ? `${model.tools.length} tools · ${model.tokens !== null ? formatTokens(model.tokens) : '?'} tok · ${model.durationMs !== null ? formatDuration(model.durationMs) : '?'}` : '',
-        controls.showPreviews && model !== undefined ? truncate(model.finalText, 110) : '',
-      ].filter(line => line !== '')
-      pushNode(child.key, child.hue, `stage ${child.stage}`, title, lines, model?.status ?? (child.running ? 'running' : 'neutral'))
-    }
-    const status = running ? 'running' : tree.turnEnd === 'completed' ? 'completed' : 'failed'
-    const svg = buildExportSvg({
-      width: layout.width,
-      height: layout.height,
-      nodes,
-      edges: layout.edges,
-      title: `${tree.task?.taskId ?? sessionId} — ${status} · ${new Date().toLocaleString()}`,
-    })
-    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = `dag-${tree.task?.taskId ?? sessionId}.svg`
-    anchor.click()
-    URL.revokeObjectURL(url)
-    setToast('SVG exported')
-  }
-
-  const copySummary = async (): Promise<void> => {
-    const text = buildSummaryText(tree, models)
-    // The clipboard API can stall without focus; bound the wait so feedback always lands.
-    let timer: ReturnType<typeof setTimeout> | undefined
-    try {
-      await Promise.race([
-        navigator.clipboard.writeText(text),
-        new Promise<never>((_, reject) => { timer = setTimeout(() => { reject(new Error('clipboard timeout')) }, 1500) }),
-      ])
-      setToast('Summary copied')
-    } catch {
-      setToast('Clipboard unavailable')
-    } finally {
-      clearTimeout(timer)
-    }
-  }
-
   const layoutReady = renderChildren.every(child => layout.tops[child.key] !== undefined)
   const statusOf = (child: RenderChild): 'running' | 'completed' | 'failed' => {
     const model = child.sessionId !== null ? models[child.sessionId] : undefined
@@ -501,20 +433,6 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
 
   return (
     <div className="flex h-full flex-col">
-      <Toolbar
-        autoFit={autoFit}
-        controls={controls}
-        setAutoFit={setAutoFit}
-        setControl={setControl}
-        scale={view.scale}
-        zoomBy={zoomBy}
-        fitView={() => { setAutoFit(true); fitView() }}
-        resetView={() => { setAutoFit(false); setView({ x: geo.pad, y: geo.pad, scale: 1 }) }}
-        exportSvg={exportSvg}
-        copySummary={() => { void copySummary() }}
-        toast={toast}
-        childCount={renderChildren.length}
-      />
       <div
         aria-label="Subagent tree canvas — drag to pan, scroll to zoom"
         className={`relative min-h-0 flex-1 overflow-hidden ${controls.grid ? 'fd-grid' : ''} fd-canvas`}
@@ -631,7 +549,17 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                     <span className="min-w-0 flex-1 truncate font-mono text-xs">{step.label}</span>
                     <span className="shrink-0 font-mono text-[10px] text-fd-muted-foreground">{formatTime(step.time)}</span>
                   </div>
-                  {controls.showPreviews && step.preview !== '' && <p className="mt-1 line-clamp-2 text-xs text-fd-muted-foreground">{step.preview}</p>}
+                  <details className="mt-2 text-xs" onToggle={() => setMeasureTick(tick => tick + 1)}>
+                    <summary className="cursor-pointer text-fd-muted-foreground">{step.tools.length} tool calls · 查看 Turn</summary>
+                    <div className="mt-2 space-y-2">
+                      {step.tools.map(tool => <details key={tool.id} className="rounded border border-fd-border bg-fd-muted p-2" onToggle={() => setMeasureTick(tick => tick + 1)}>
+                        <summary className={`cursor-pointer break-all font-mono text-[11px] ${tool.isError ? 'text-fd-danger' : 'text-fd-foreground'}`}>{tool.isError ? '✕' : '›'} {tool.name}</summary>
+                        <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all text-[10px] text-fd-muted-foreground">{tool.preview}</pre>
+                        {tool.result && <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all text-[10px]">{tool.result}</pre>}
+                      </details>)}
+                      {step.preview && <p className="whitespace-pre-wrap break-words leading-relaxed text-fd-muted-foreground">{step.preview}</p>}
+                    </div>
+                  </details>
                 </div>
               )
             })}
@@ -797,123 +725,5 @@ function StatusPill(props: { status: 'running' | 'completed' | 'failed'; motion:
       <span className={`h-1 w-1 rounded-full bg-current ${props.status === 'running' && props.motion ? 'animate-pulse' : ''}`} />
       {props.status}
     </span>
-  )
-}
-
-function Toolbar(props: {
-  controls: Controls
-  setControl: <K extends keyof Controls>(key: K, value: Controls[K]) => void
-  autoFit: boolean
-  setAutoFit: (value: boolean) => void
-  scale: number
-  zoomBy: (factor: number) => void
-  fitView: () => void
-  resetView: () => void
-  exportSvg: () => void
-  copySummary: () => void
-  toast: string | null
-  childCount: number
-}) {
-  const { controls, setControl } = props
-  const button = 'rounded-md border border-fd-border bg-fd-secondary px-2 py-1 text-xs text-fd-foreground transition-colors hover:border-fd-primary/60 hover:text-fd-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-fd-primary'
-  const toggle = (key: 'showTools' | 'showPreviews' | 'motion' | 'grid', label: string): ReactNode => (
-    <button
-      aria-pressed={controls[key]}
-      className={`${button} flex items-center gap-1.5 ${controls[key] ? '' : 'opacity-55'}`}
-      onClick={() => { setControl(key, !controls[key]) }}
-      type="button"
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${controls[key] ? 'bg-fd-primary' : 'bg-fd-muted-foreground'}`} />
-      {label}
-    </button>
-  )
-  const select = 'rounded-md border border-fd-border bg-fd-secondary px-1.5 py-1 text-xs text-fd-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-fd-primary'
-  return (
-    <div className="shrink-0 border-b border-fd-border bg-fd-card/70">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2">
-        <div className="flex items-center gap-1.5">
-          <button aria-label="Zoom out" className={button} onClick={() => { props.zoomBy(1 / 1.2) }} type="button">−</button>
-          <input
-            aria-label="Zoom level"
-            className="fd-range w-24"
-            max={250}
-            min={2}
-            onChange={(event) => {
-              const target = Number(event.target.value) / 100
-              props.zoomBy(target / props.scale)
-            }}
-            step={1}
-            type="range"
-            value={Math.round(props.scale * 100)}
-          />
-          <button aria-label="Zoom in" className={button} onClick={() => { props.zoomBy(1.2) }} type="button">+</button>
-          <span className="w-9 font-mono text-[10px] text-fd-muted-foreground">{Math.round(props.scale * 100)}%</span>
-          <button
-            aria-pressed={props.autoFit}
-            className={`${button} flex items-center gap-1.5 ${props.autoFit ? 'border-fd-primary/60 text-fd-primary' : 'opacity-55'}`}
-            onClick={() => { props.setAutoFit(!props.autoFit) }}
-            title="Keep the whole graph fitted to the window automatically"
-            type="button"
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${props.autoFit ? 'bg-fd-primary' : 'bg-fd-muted-foreground'}`} />
-            Auto-fit
-          </button>
-          <button className={button} onClick={props.fitView} type="button">Fit</button>
-          <button className={button} onClick={props.resetView} type="button">Reset</button>
-        </div>
-        <span className="h-4 w-px bg-fd-border" />
-        <label className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-fd-muted-foreground">
-          layout
-          <select className={select} onChange={(event) => { setControl('layout', event.target.value as Controls['layout']) }} value={controls.layout}>
-            <option value="horizontal">horizontal</option>
-            <option value="vertical">vertical</option>
-          </select>
-        </label>
-        <label className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-fd-muted-foreground">
-          density
-          <select className={select} onChange={(event) => { setControl('density', event.target.value as Controls['density']) }} value={controls.density}>
-            <option value="comfortable">comfortable</option>
-            <option value="compact">compact</option>
-          </select>
-        </label>
-        <label className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-fd-muted-foreground">
-          edges
-          <select className={select} onChange={(event) => { setControl('edges', event.target.value as Controls['edges']) }} value={controls.edges}>
-            <option value="curved">curved</option>
-            <option value="elbow">elbow</option>
-          </select>
-        </label>
-        <span className="h-4 w-px bg-fd-border" />
-        <div className="flex items-center gap-1.5">
-          {toggle('showTools', 'Tools')}
-          {toggle('showPreviews', 'Previews')}
-          {toggle('motion', 'Motion')}
-          {toggle('grid', 'Grid')}
-        </div>
-        <span className="h-4 w-px bg-fd-border" />
-        <div className="flex items-center gap-1.5">
-          <button className={button} onClick={props.exportSvg} type="button">Export SVG</button>
-          <button className={button} onClick={props.copySummary} type="button">Copy summary</button>
-          <span aria-live="polite" className="text-[10px] text-fd-success">{props.toast ?? ''}</span>
-        </div>
-      </div>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-fd-border/60 px-3 py-1.5 text-[10px] text-fd-muted-foreground">
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-fd-warning" /> running</span>
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-fd-success" /> completed</span>
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-fd-danger" /> failed</span>
-        {props.childCount > 0 && (
-          <span className="flex items-center gap-1.5">
-            <span className="uppercase tracking-wide">stages</span>
-            {Array.from({ length: Math.min(props.childCount, 6) }, (_, index) => (
-              <span className="flex items-center gap-0.5" key={index}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ background: stageHue(index) }} />
-                {index + 1}
-              </span>
-            ))}
-          </span>
-        )}
-        <span className="ml-auto font-mono">{props.childCount} subagent{props.childCount === 1 ? '' : 's'}</span>
-      </div>
-    </div>
   )
 }

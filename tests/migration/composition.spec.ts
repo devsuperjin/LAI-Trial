@@ -18,25 +18,17 @@ const dump = async (extra: string[] = []) => {
 }
 
 describe('out-of-tree Profile composition through the published CLI', () => {
-  it('disables the account settings rows and keeps queue consumers opt-in', async () => {
+  it('composes LAI subagents, pipeline and simulator without a broker', async () => {
     const rows = await dump()
     expect(rows.find(r => r.id === 'ui-settings-account')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'account-controller')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'web-runtime')?.disabled).toBe(true)
     expect(rows.find(r => r.id === 'lai-web-runtime')?.name).toBe('@lai/dsh-web-host')
     expect(rows.find(r => r.id === 'lai-web-runtime')?.config?.distIndex).toBe('process.env.LAI_WEB_DIST_INDEX')
-    for (const id of ['runtime', 'redis', 'mqtt', 'rabbitmq']) expect(rows.find(r => r.id === `agent-mq-${id}`)?.disabled).toBe(true)
-  })
-  it.each(['redis', 'mqtt', 'rabbitmq', 'iqe'])('composes the %s overlay without duplicate runtime rows', async (backend) => {
-    const rows = await dump(['--patch', `config/development/${backend}.yml`])
-    expect(rows.filter(r => r.id === 'agent-mq-runtime')).toHaveLength(1)
-    expect(rows.find(r => r.id === 'agent-mq-runtime')?.disabled).toBe(false)
-    const enabled = ['redis', 'mqtt', 'rabbitmq'].filter(b => rows.find(r => r.id === `agent-mq-${b}`)?.disabled === false)
-    expect(enabled).toEqual([backend === 'iqe' ? 'mqtt' : backend])
-    if (backend === 'iqe') {
-      expect(rows.find(r => r.id === 'agent-mq-runtime')?.config?.agentPreset).toBe('iqe-orchestrator')
-      expect(rows.find(r => r.id === 'lai-agents')?.name).toBe('@lai/lai-agents')
-    }
+    expect(rows.some(r => r.id.startsWith('agent-mq-'))).toBe(false)
+    expect(rows.find(r => r.id === 'lai-pipeline')?.name).toBe('@lai/lai-pipeline')
+    expect(rows.find(r => r.id === 'pipeline-simulator')?.name).toBe('@lai/pipeline-simulator')
+    expect(rows.find(r => r.id === 'lai-agents')?.name).toBe('@lai/lai-agents')
   })
   it('accounts for every source diff file and resolves every migrated target', async () => {
     const inventory = JSON.parse(await readFile('docs/migration-inventory.json', 'utf8'))

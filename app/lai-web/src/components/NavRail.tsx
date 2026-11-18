@@ -1,13 +1,17 @@
-import { motion } from 'motion/react'
 import type { ReactNode } from 'react'
 
-export type Page = 'runs' | 'dashboard' | 'settings'
+export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
+    id: 'pipeline', label: '流水线', hint: '模拟事件与六阶段执行',
+    icon: () => <svg aria-hidden fill="none" height="18" width="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="4" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><rect x="17" y="15" width="5" height="5" rx="1" /><path d="M7 6.5h5V9.5M14.5 12h5V15" /></svg>,
+  },
+  { id: 'history', label: '执行记录', hint: '查看流水线历史与阶段输出', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },
+  {
     id: 'runs',
-    label: 'Runs',
-    hint: 'Task list & pipeline DAG',
+    label: '会话',
+    hint: 'All DSH sessions and their agent activity',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
         <circle cx="5" cy="6" r="2.2" />
@@ -20,7 +24,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   },
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: '概览',
     hint: 'Run classification & metrics',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
@@ -33,7 +37,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   },
   {
     id: 'settings',
-    label: 'Settings',
+    label: '设置',
     hint: 'Per-agent model configuration',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
@@ -46,41 +50,19 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
 
 export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; runningCount: number }) {
   return (
-    <nav aria-label="Primary" className="flex w-16 shrink-0 flex-col items-center gap-1 border-r border-fd-border bg-fd-card py-3">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-fd-primary to-[var(--fd-stage-3)] text-white shadow-[0_0_18px_-2px_var(--color-fd-primary)]">
-        <svg aria-hidden fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="20">
-          <path d="M12 3l7 4v5c0 4.4-3 8-7 9-4-1-7-4.6-7-9V7z" />
-          <path d="M9 12l2 2 4-4" />
-        </svg>
-      </div>
-      {ITEMS.map((item) => {
-        const active = props.page === item.id
-        return (
-          <button
-            aria-current={active ? 'page' : undefined}
-            className={`group relative flex h-14 w-14 flex-col items-center justify-center gap-1 rounded-xl transition-colors ${active ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
-            key={item.id}
-            onClick={() => { props.onNavigate(item.id) }}
-            title={item.hint}
-            type="button"
-          >
-            {active && (
-              <motion.span
-                className="absolute inset-0 rounded-xl border border-fd-primary/30 bg-fd-primary/10"
-                layoutId="nav-pill"
-                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-              />
-            )}
-            <span className="relative">{item.icon(active)}</span>
-            <span className="relative text-[10px] leading-none">{item.label}</span>
-            {item.id === 'runs' && props.runningCount > 0 && (
-              <span className="absolute right-2 top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-fd-primary px-1 text-[9px] font-medium text-white">
-                {props.runningCount}
-              </span>
-            )}
-          </button>
-        )
-      })}
+    <nav aria-label="主导航" className="flex w-16 shrink-0 flex-col border-r border-fd-border bg-fd-card p-2 md:w-52 md:p-4">
+      <div className="mb-8 flex h-10 items-center gap-3 px-2"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-sm font-semibold text-white">L</span><div className="hidden md:block"><p className="text-sm font-semibold">LAI</p><p className="text-[11px] text-fd-muted-foreground">Agent workspace</p></div></div>
+      <p className="mb-2 hidden px-3 text-[10px] font-medium uppercase tracking-widest text-fd-muted-foreground md:block">工作空间</p>
+      <div className="space-y-1">{ITEMS.filter(item => item.id !== 'dashboard' && item.id !== 'settings').map(item => renderItem(item))}</div>
+      <div className="mt-auto border-t border-fd-border pt-3">{renderItem(ITEMS.find(item => item.id === 'settings')!)}</div>
+      <a className="mt-2 hidden px-3 py-2 text-xs text-fd-muted-foreground hover:text-fd-foreground md:block" href="/dsh/" target="_blank" rel="noopener noreferrer">原版 DSH 调试 ↗</a>
     </nav>
   )
+  function renderItem(item: typeof ITEMS[number]) {
+    const active = props.page === item.id
+    return <button key={item.id} type="button" title={item.hint} aria-label={item.label} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(item.id)} className={`flex min-h-10 w-full items-center justify-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary md:justify-start ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
+      <span className="shrink-0">{item.icon(active)}</span><span className="hidden md:block">{item.label}</span>
+      {item.id === 'runs' && props.runningCount > 0 && <span className="ml-auto hidden rounded bg-fd-secondary px-1.5 text-xs tabular-nums md:block">{props.runningCount}</span>}
+    </button>
+  }
 }

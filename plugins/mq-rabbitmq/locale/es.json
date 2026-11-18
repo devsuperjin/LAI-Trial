@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Backend MQ de RabbitMQ",
-    "description": "Entrega tareas MQ mediante colas duraderas de RabbitMQ con confirmación manual y publica los resultados en una cola de resultados."
-  }
-}

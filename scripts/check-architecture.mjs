@@ -8,7 +8,7 @@ const manifest = JSON.parse(await read('package.json'))
 assert.equal(manifest.dependencies['@deepseek-ai/dsh'], baseline.version)
 assert.deepEqual(baseline.corePatches, [])
 const packages = []
-for (const group of ['app', 'plugins', 'packages', 'bundles']) {
+for (const group of ['app', 'plugins', 'packages']) {
   for (const dir of await readdir(resolve(root, group), { withFileTypes: true })) {
     if (!dir.isDirectory()) continue
     const path = `${group}/${dir.name}`

@@ -3,10 +3,11 @@ import type { PageResponse, SessionListEntry } from '../api/gateway.ts'
 import { pageSession } from '../api/gateway.ts'
 import { useInterval } from '../hooks/useInterval.ts'
 import { TaskDetail } from './TaskDetail.tsx'
+import { rootRuns } from '../model/runs.ts'
 import { TaskList } from './TaskList.tsx'
 
 export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: string | null }) {
-  const taskEntries = props.entries.filter(entry => entry.sessionId.startsWith('mq-'))
+  const taskEntries = rootRuns(props.entries)
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,10 +33,11 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
             <svg aria-hidden className="opacity-40" fill="none" height="40" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" viewBox="0 0 24 24" width="40">
               <path d="M4 6h16M4 12h10M4 18h7" />
             </svg>
-            <p className="text-sm">No MQ tasks yet — push an envelope to the queue</p>
+            <p className="text-sm">No runs yet — start a task in DSH or trigger the pipeline</p>
           </div>
         ) : (
           <DetailLoader
+            key={selectedId}
             entries={props.entries}
             running={taskEntries.find(entry => entry.sessionId === selectedId)?.running ?? false}
             sessionId={selectedId}

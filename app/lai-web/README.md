@@ -1,6 +1,6 @@
 # @lai/lai-web
 
-Independent React frontend for MQ run lists, dashboards, delegation graphs and model settings. Run `pnpm start` from the repository root to build and serve the frontend alongside the DSH API at `http://127.0.0.1:3080`. The application opens its authenticated browser URL automatically.
+Independent React frontend for pipeline runs, sessions, delegation graphs and model settings. Run `pnpm start` from the repository root to build and serve the frontend alongside the DSH API at `http://127.0.0.1:3080`. The application opens its authenticated browser URL automatically.
 
 For frontend development only, `pnpm dev:web` runs Vite on port 5174; `LAI_WEB_TARGET` selects its authenticated DSH proxy target (default `http://127.0.0.1:3080`).
 
@@ -9,3 +9,5 @@ The public DSH wire protocol lives in `@lai/dsh-adapter/gateway`; components do 
 The Settings page offers **Model providers**: configure an installed provider or add a custom OpenAI Chat Completions, OpenAI Responses or Anthropic Messages endpoint. Edit the API endpoint, protocol, write-only API key and model list (IDs, names and optional token limits). Saving refreshes the default and pipeline model selectors. Existing model metadata and unedited provider options are preserved. API keys go to DSH's credential service; an empty key input keeps the existing credential. If settings save but the credential write fails, the form reports partial completion and retries only the key.
 
 Provider configuration calls the existing `llm/listConfigurableProviders`, `settings/describe`, `settings/mutate` and `credentials/describe` / `credentials/set` endpoints through `@lai/dsh-adapter/gateway`. It does not require a custom backend plugin. Writes include the settings namespace revision, so concurrent edits are rejected instead of overwritten.
+
+The built-in DeepSeek provider speaks Anthropic Messages and uses `https://api.deepseek.com/anthropic`. Its form rejects the Chat Completions root (`https://api.deepseek.com` or `/v1`) to prevent requests to a missing `/v1/messages` route. OpenAI-compatible endpoints belong in a custom provider with the matching protocol.

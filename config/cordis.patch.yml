@@ -19,3 +19,12 @@
 - insert:
     - id: lai-agents
       name: '@lai/lai-agents'
+
+- insert:
+    - id: lai-pipeline
+      name: '@lai/lai-pipeline'
+      config:
+        workspacePath: !!js process.env.LAI_PIPELINE_WORKSPACE
+        stateDirectory: !!js process.env.LAI_PIPELINE_STATE_DIR
+    - id: pipeline-simulator
+      name: '@lai/pipeline-simulator'

@@ -98,7 +98,7 @@ export function DashboardPage(props: { entries: SessionListEntry[]; onOpenRun: (
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 text-fd-muted-foreground">
         <p className="text-sm">No runs to classify yet</p>
-        <p className="text-xs">Push an MQ task envelope to populate the dashboard.</p>
+        <p className="text-xs">Start a task in DSH or trigger the pipeline to populate the dashboard.</p>
       </div>
     )
   }

@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "MQ-Redis-Backend",
-    "description": "Liefert MQ-Aufgaben über Redis-Streams-Verbrauchergruppen aus und veröffentlicht Ergebnisse in einem Ergebnisstrom."
-  }
-}

@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "MQ RabbitMQ バックエンド",
-    "description": "永続化された RabbitMQ キューで MQ タスクを配信し、手動確認を経て結果を結果キューに発行します。"
-  }
-}

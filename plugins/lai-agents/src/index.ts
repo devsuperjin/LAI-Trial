@@ -10,6 +10,8 @@ export { DEFAULT_PROMPTS, PRESETS }
 export const name = 'lai-agents'
 export const inject = ['agentPresets', 'systemPrompt']
 
+declare module '@deepseek-ai/cordis' { interface Context { laiAgents: { readonly presets: readonly string[] } } }
+
 /** Each role's prompt is editable through ordinary DSH settings. */
 export interface Prompts {
   orchestrator: string
@@ -43,14 +45,16 @@ export const Config: z<Config> = z.object({
  * @param ctx - Host composition with the public preset and prompt services.
  * @param config - Settings-backed role prompts; edits apply at the next assembly.
  */
-export function apply(ctx: Context, config: Config): void {
+export async function apply(ctx: Context, config: Config): Promise<void> {
   ctx.inject(['settings'], child => {
     child.effect(() => child.settings.configure({ auto: false }, ctx.fiber))
   })
   for (const role of Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]) {
     ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => config.prompts.get()[role]), `lai-agents prompt: ${role}`)
   }
+  ctx.effect(() => ctx.systemPrompt.section({ name: 'lai-agents:available-roles', order: 2790, text: 'Available LAI role presets: iqe-monitor (CI observation), iqe-triage (root cause), iqe-reproduction (controlled reproduction), iqe-ticket (ticket draft), iqe-reviewer (independent review), iqe-reporting (report). These role definitions are distinct from live descendants returned by list_agents. The pipeline uses iqe-orchestrator as its parent and spawns these six LAI presets as real native subagents in stage order. list_agents reports actual descendants of the current session; unrelated chats can have no children. Use the tools actually mounted in this session; do not invent delegation tools.' }), 'LAI role catalog')
   for (const preset of PRESETS) {
-    ctx.effect(() => ctx.agentPresets.register(preset), `lai-agents preset: ${preset.id}`)
+    await ctx.effect(() => ctx.agentPresets.register(preset), `lai-agents preset: ${preset.id}`)
   }
+  ctx.provide('laiAgents', { presets: PRESETS.map(preset => preset.id) })
 }

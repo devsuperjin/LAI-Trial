@@ -17,15 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         target: ${{ fromJSON(inputs.candidate && '["baseline","candidate"]' || '["baseline"]') }}
-    services:
-      redis:
-        image: redis:7-alpine
-        ports: ['6379:6379']
-        options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 12
-      rabbitmq:
-        image: rabbitmq:4-alpine
-        ports: ['5672:5672']
-        options: --health-cmd "rabbitmq-diagnostics -q ping" --health-interval 10s --health-timeout 10s --health-retries 12
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -44,12 +35,5 @@ jobs:
       - name: Resolve candidate lockfile in isolated CI checkout
         if: matrix.target == 'candidate' && inputs.candidate != ''
         run: pnpm install --no-frozen-lockfile
-      - name: Start MQTT broker
-        run: |
-          printf 'listener 1883\nallow_anonymous true\n' > /tmp/lai-mosquitto.conf
-          docker run -d --name lai-mqtt -p 1883:1883 -v /tmp/lai-mosquitto.conf:/mosquitto/config/mosquitto.conf:ro eclipse-mosquitto:2
-          node --input-type=module -e 'import net from "node:net"; for (let i=0;i<30;i++){const ok=await new Promise(r=>{const s=net.connect(1883,"127.0.0.1");s.once("connect",()=>{s.destroy();r(true)});s.once("error",()=>r(false))});if(ok)process.exit(0);await new Promise(r=>setTimeout(r,1000))}process.exit(1)'
-      - name: Build and test public integration, migration and broker delivery
-        env:
-          LAI_REQUIRE_BROKERS: '1'
+      - name: Build and test event, resident-worker and lifecycle integration
         run: pnpm check

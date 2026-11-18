@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Paquete Agent MQ",
-    "description": "Capa opcional de tareas de cola de mensajes con inyección de prompts, el runtime MQ y su backend de Redis Streams."
-  }
-}

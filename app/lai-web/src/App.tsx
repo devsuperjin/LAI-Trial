@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionListEntry } from './api/gateway.ts'
 import { bootstrapWithToken, listSessions, UnauthorizedError } from './api/gateway.ts'
+import { PipelinePage } from './components/PipelinePage.tsx'
 import { DashboardPage } from './components/DashboardPage.tsx'
 import { NavRail } from './components/NavRail.tsx'
 import type { Page } from './components/NavRail.tsx'
 import { RunsPage } from './components/RunsPage.tsx'
 import { SettingsPage } from './components/SettingsPage.tsx'
 import { TopBar } from './components/TopBar.tsx'
+import { rootRuns } from './model/runs.ts'
 import { useInterval } from './hooks/useInterval.ts'
 
 export type AuthState = 'probing' | 'need-token' | 'ready'
@@ -17,7 +19,7 @@ export function App() {
   const [entries, setEntries] = useState<SessionListEntry[]>([])
   const [gatewayError, setGatewayError] = useState<string | null>(null)
   const [lastPollAt, setLastPollAt] = useState<number | null>(null)
-  const [page, setPage] = useState<Page>('runs')
+  const [page, setPage] = useState<Page>('pipeline')
   const [focusRunId, setFocusRunId] = useState<string | null>(null)
 
   const refresh = useCallback(async (): Promise<'ok' | 'unauthorized' | 'unreachable'> => {
@@ -71,7 +73,7 @@ export function App() {
     if ((await refresh()) === 'unauthorized') setAuthError('token rejected by gateway')
   }
 
-  const taskEntries = entries.filter(entry => entry.sessionId.startsWith('mq-'))
+  const taskEntries = rootRuns(entries)
   const runningCount = taskEntries.filter(entry => entry.running).length
 
   const openRun = (id: string): void => {
@@ -96,6 +98,7 @@ export function App() {
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <div className="flex min-w-0 flex-1 flex-col">
+              {(page === 'pipeline' || page === 'history') && <PipelinePage view={page === 'history' ? 'history' : 'pipeline'} onSettings={() => { setPage('settings') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
               {page === 'settings' && <SettingsPage entries={entries} />}

@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "MQ RabbitMQ 后端",
-    "description": "通过持久化 RabbitMQ 队列交付 MQ 任务，手动确认，并把结果发布到结果队列。"
-  }
-}

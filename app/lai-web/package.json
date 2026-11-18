@@ -1,6 +1,6 @@
 {
   "name": "@lai/lai-web",
-  "description": "LAI Web: independent frontend for MQ task monitoring, dashboards, delegation graphs and model settings",
+  "description": "LAI Web: independent frontend for LAI pipeline monitoring, dashboards, delegation graphs and model settings",
   "version": "0.1.0",
   "type": "module",
   "exports": {

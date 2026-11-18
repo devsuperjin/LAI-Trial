@@ -9,9 +9,11 @@ function authLabel(auth: AuthState): string {
 }
 
 const PAGE_TITLE: Record<Page, string> = {
-  runs: 'Runs',
+  pipeline: '流水线',
+  history: '执行记录',
+  runs: '会话',
   dashboard: 'Dashboard',
-  settings: 'Settings',
+  settings: '设置',
 }
 
 type Theme = 'dark' | 'light'
@@ -82,24 +84,18 @@ export function TopBar(props: {
     ? `Live · polled ${props.lastPollAt !== null ? new Date(props.lastPollAt).toLocaleTimeString([], { hour12: false }) : ''}`
     : props.error ?? authLabel(props.auth)
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b border-fd-border bg-fd-card px-4">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold tracking-wide">LAI Web</span>
-        <span className="rounded border border-fd-border bg-fd-secondary px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-fd-muted-foreground">backend</span>
-      </div>
-      <span className="text-fd-border">/</span>
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-fd-border bg-fd-card px-5">
       <span className="text-sm text-fd-muted-foreground">{PAGE_TITLE[props.page]}</span>
       <div className="ml-auto flex items-center gap-4 text-xs text-fd-muted-foreground">
-        <span>{props.runningCount} running · {props.totalCount} tasks</span>
-        <span className="flex items-center gap-1.5">
+        <span className="hidden lg:inline">{props.runningCount} 运行中 · {props.totalCount} 会话</span>
+        <span title={right} className="flex items-center gap-1.5">
           <motion.span
             animate={live ? { opacity: [1, 0.4, 1] } : { opacity: 1 }}
             className={`h-2 w-2 rounded-full ${live ? 'bg-fd-success' : 'bg-fd-warning'}`}
             transition={live ? { duration: 2, repeat: Infinity } : undefined}
           />
-          {right}
+          {live ? '已连接' : '连接中'}
         </span>
-        <a className="shrink-0 rounded-md border border-fd-border px-2 py-1 hover:text-fd-foreground" href="/dsh/" target="_blank" rel="noopener noreferrer">Original DSH ↗</a>
         <ThemeToggle />
       </div>
     </header>

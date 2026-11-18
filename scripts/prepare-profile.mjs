@@ -8,6 +8,7 @@ export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 export const home = resolve(process.env.LAI_DSH_HOME ?? resolve(root, '.runtime/dsh'))
 export const profile = resolve(home, 'profiles/lai')
 const applicationBundle = '@lai/application-config'
+const retiredBundle = '@lai/dsh-agent-mq-bundle'
 
 async function optionalFile(path) {
   try { return await readFile(path, 'utf8') } catch (error) {
@@ -55,14 +56,24 @@ export async function prepareProfile() {
   if (linked) { await unlink(patch); await writeFile(patch, '[]\n') }
   else if (!previous.dsh?.profile?.bundles?.includes(applicationBundle)) await migratePatch(patch)
   else if (await optionalFile(patch) === undefined) await writeFile(patch, '[]\n')
+  if (previous.dependencies?.[retiredBundle] || previous.dsh?.profile?.bundles?.includes(retiredBundle)) {
+    const document = parseDocument(await readFile(patch, 'utf8'), { customTags: [{ tag: 'tag:yaml.org,2002:js', resolve: value => value }] })
+    if (document.errors.length || !isSeq(document.contents)) throw new Error('The previous profile patch could not be migrated; its contents were preserved.')
+    const retired = row => isMap(row) && (/^(?:agent-)?mq-/.test(String(row.get('id') ?? '')) || /^@lai\/dsh-mq/.test(String(row.get('name') ?? '')))
+    for (const row of document.contents.items) if (isMap(row) && isSeq(row.get('insert', true))) row.get('insert', true).items = row.get('insert', true).items.filter(item => !retired(item))
+    document.contents.items = document.contents.items.filter(row => !retired(row) && !(isMap(row) && isSeq(row.get('insert', true)) && row.get('insert', true).items.length === 0 && row.items.length === 1))
+    try { await copyFile(patch, resolve(profile, 'cordis.patch.before-pipeline.yml'), constants.COPYFILE_EXCL) } catch (error) { if (error.code !== 'EEXIST') throw error }
+    await writeFile(patch, document.toString())
+  }
   const manifest = {
     ...previous, ...template,
     dependencies: { ...previous.dependencies, ...template.dependencies },
     dsh: { ...previous.dsh, ...template.dsh, profile: {
       ...previous.dsh?.profile, ...template.dsh.profile,
-      bundles: [...new Set([...template.dsh.profile.bundles, ...previous.dsh?.profile?.bundles ?? []])],
+      bundles: [...new Set([...template.dsh.profile.bundles, ...(previous.dsh?.profile?.bundles ?? []).filter(name => name !== retiredBundle)])],
     } },
   }
+  delete manifest.dependencies[retiredBundle]
   await writeFile(resolve(profile, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
   const modules = resolve(profile, 'node_modules')
   try { await lstat(modules) } catch (error) {

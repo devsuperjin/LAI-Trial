@@ -3,7 +3,6 @@ packages:
   - 'app/*'
   - 'packages/*'
   - 'plugins/*'
-  - 'bundles/*'
 
 # Keep DSH peer service identities shared with the CLI installation.
 autoInstallPeers: true

@@ -1,6 +1,0 @@
-{
-  "meta": {
-    "title": "Backend MQ RabbitMQ",
-    "description": "Distribue les tâches MQ via des files durables RabbitMQ avec accusé de réception manuel et publie les résultats dans une file de résultats."
-  }
-}

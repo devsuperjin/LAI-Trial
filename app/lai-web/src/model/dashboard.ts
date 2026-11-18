@@ -1,4 +1,5 @@
 import type { SessionListEntry } from '../api/gateway.ts'
+import { rootRuns } from './runs.ts'
 import { stageHue, STAGES } from './tree.ts'
 export { formatDuration, formatTokens } from './tree.ts'
 export type RunStatus = 'running' | 'completed' | 'failed'
@@ -6,7 +7,7 @@ export const STATUS_HUE = { running: '#fbbf24', completed: '#34d399', failed: '#
 const tokens = (e: SessionListEntry): number => Object.values(e.projections?.values.tokenUsage ?? {}).reduce((a, b) => a + b, 0)
 const status = (e: SessionListEntry): RunStatus => e.running ? 'running' : e.projections?.values.subagentTiming?.lastTurnCompleted === true ? 'completed' : 'failed'
 export function deriveDashboard(entries: SessionListEntry[]) {
-  const roots = entries.filter(e => e.sessionId.startsWith('mq-') && !e.parentSessionId)
+  const roots = rootRuns(entries)
   const childEntries = entries.filter(e => e.parentSessionId && roots.some(r => r.sessionId === e.parentSessionId))
   const runs = roots.map(e => {
     const children = childEntries.filter(c => c.parentSessionId === e.sessionId)

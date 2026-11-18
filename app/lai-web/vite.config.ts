@@ -14,6 +14,7 @@ export default defineConfig({
     port: 5174,
     strictPort: true,
     proxy: {
+      '/lai-api': { target, changeOrigin: true, headers: { origin: target } },
       '/api': {
         target,
         changeOrigin: true,
