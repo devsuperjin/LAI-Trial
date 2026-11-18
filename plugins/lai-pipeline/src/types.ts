@@ -1,8 +1,8 @@
 /** Provider-neutral input and observable state for the six-stage IQE pipeline. */
 export const ROLE_ORDER = ['monitor', 'triage', 'reproduce', 'ticket', 'review', 'report'] as const
 export type Role = typeof ROLE_ORDER[number]
-export const ROLE_LABELS: Record<Role, string> = { monitor: 'Monitor', triage: 'Triage', reproduce: 'Reproduction', ticket: 'Ticket', review: 'Reviewer', report: 'Reporting' }
-export const ROLE_PRESETS: Record<Role, string> = { monitor: 'iqe-monitor', triage: 'iqe-triage', reproduce: 'iqe-reproduction', ticket: 'iqe-ticket', review: 'iqe-reviewer', report: 'iqe-reporting' }
+export const ROLE_LABELS: Record<Role, string> = { monitor: 'Orchestrator', triage: 'Triage', reproduce: 'Reproduction', ticket: 'Ticket', review: 'Reviewer', report: 'Reporting' }
+export const ROLE_PRESETS: Record<Role, string> = { monitor: 'iqe-orchestrator', triage: 'iqe-triage', reproduce: 'iqe-reproduction', ticket: 'iqe-ticket', review: 'iqe-reviewer', report: 'iqe-reporting' }
 export type EventType = 'ci.failure' | 'code.commit' | 'pull_request.updated'
 export interface EvidenceInput { name: string; content: string }
 /** Connectors submit normalized facts; simulation is stamped by the registered source. */

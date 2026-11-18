@@ -4,8 +4,8 @@ import { describeSettings, mutateSettings } from '../api/gateway.ts'
 import { record } from '../model/dag.ts'
 
 const ROLES = [
-  ['monitor', 'Monitor'], ['triage', 'Triage'], ['reproduce', 'Reproduction'],
-  ['ticket', 'Ticket'], ['review', 'Review'], ['report', 'Reporting'], ['orchestrator', 'Orchestrator'],
+  ['orchestrator', 'Orchestrator / Monitor'], ['triage', 'Triage'], ['reproduce', 'Reproduction'],
+  ['ticket', 'Ticket'], ['review', 'Review'], ['report', 'Reporting'],
 ] as const
 
 /** Edit the lai-agents plugin's prompts through ordinary DSH settings. */
@@ -48,7 +48,7 @@ export function AgentPrompts() {
   const dirty = ROLES.some(([id]) => draft[id] !== original[id])
   return <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label="LAI agents">
     <h2 className="text-base font-medium">LAI agents</h2>
-    <p className="mt-1 text-sm text-fd-muted-foreground">Six specialist agents and their orchestrator. Prompts are stored in the independent lai-agents plugin.</p>
+    <p className="mt-1 text-sm text-fd-muted-foreground">One orchestrator with monitoring and five specialist subagents. Prompts are stored in the independent lai-agents plugin.</p>
     {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">The lai-agents plugin is not enabled in this profile.</p>}
     {namespace && <div className="mt-4 space-y-2">{ROLES.map(([id, title]) => <details className="rounded-lg border border-fd-border p-3" key={id}>
       <summary className="cursor-pointer text-sm font-medium">{title}</summary>

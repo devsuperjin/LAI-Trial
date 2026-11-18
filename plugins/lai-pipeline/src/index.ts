@@ -42,8 +42,8 @@ export default class LaiPipeline extends Service {
     workspacePath: z.string().required(), stateDirectory: z.string().required(),
     stageTimeoutMs: z.number().step(1).min(1000).max(2147483647).default(300000),
     historyLimit: z.number().step(1).min(1).max(500).default(50),
-    contextChars: z.number().step(1).min(1000).max(256000).default(64000),
-    maxOutputTokens: z.number().step(1).min(256).max(65536).default(8192),
+    contextChars: z.number().step(1).min(1000).max(256000).default(8000),
+    maxOutputTokens: z.number().step(1).min(256).max(65536).default(4096),
     permissionPreset: z.string().default('workspace-write'),
     models: z.dict(z.object({ provider: z.string().min(1).required(), model: z.string().min(1).required() })).default({}).volatile(),
   }) as z<Config>

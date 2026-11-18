@@ -1,6 +1,6 @@
 {
   "name": "@lai/lai-agents",
-  "description": "Six IQE specialist agents and their orchestrator with configurable prompts",
+  "description": "IQE orchestrator with monitoring and five specialist agents with configurable prompts",
   "version": "0.1.0",
   "type": "module",
   "license": "MIT",

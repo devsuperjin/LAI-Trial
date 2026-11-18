@@ -1,4 +1,4 @@
-/** Six specialist presets and one orchestrator, with settings-owned prompt text. */
+/** One orchestrator/monitor and five specialist presets, with settings-owned prompt text. */
 import type { Context, Volatile } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-agent-preset-registry'
@@ -15,7 +15,6 @@ declare module '@deepseek-ai/cordis' { interface Context { laiAgents: { readonly
 /** Each role's prompt is editable through ordinary DSH settings. */
 export interface Prompts {
   orchestrator: string
-  monitor: string
   triage: string
   reproduce: string
   ticket: string
@@ -31,7 +30,6 @@ export interface Config {
 export const Config: z<Config> = z.object({
   prompts: z.object({
     orchestrator: z.string().min(1).default(DEFAULT_PROMPTS.orchestrator),
-    monitor: z.string().min(1).default(DEFAULT_PROMPTS.monitor),
     triage: z.string().min(1).default(DEFAULT_PROMPTS.triage),
     reproduce: z.string().min(1).default(DEFAULT_PROMPTS.reproduce),
     ticket: z.string().min(1).default(DEFAULT_PROMPTS.ticket),
@@ -52,7 +50,7 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   for (const role of Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]) {
     ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => config.prompts.get()[role]), `lai-agents prompt: ${role}`)
   }
-  ctx.effect(() => ctx.systemPrompt.section({ name: 'lai-agents:available-roles', order: 2790, text: 'Available LAI role presets: iqe-monitor (CI observation), iqe-triage (root cause), iqe-reproduction (controlled reproduction), iqe-ticket (ticket draft), iqe-reviewer (independent review), iqe-reporting (report). These role definitions are distinct from live descendants returned by list_agents. The pipeline uses iqe-orchestrator as its parent and spawns these six LAI presets as real native subagents in stage order. list_agents reports actual descendants of the current session; unrelated chats can have no children. Use the tools actually mounted in this session; do not invent delegation tools.' }), 'LAI role catalog')
+  ctx.effect(() => ctx.systemPrompt.section({ name: 'lai-agents:available-roles', order: 2790, text: 'Available LAI role presets: iqe-triage (root cause), iqe-reproduction (controlled reproduction), iqe-ticket (ticket draft), iqe-reviewer (independent review), iqe-reporting (report). These role definitions are distinct from live descendants returned by list_agents. The pipeline uses iqe-orchestrator as its parent and performs monitoring itself and invokes its five delegation tools to create LAI subagents in stage order. list_agents reports actual descendants of the current session; unrelated chats can have no children. Use the tools actually mounted in this session; do not invent delegation tools.' }), 'LAI role catalog')
   for (const preset of PRESETS) {
     await ctx.effect(() => ctx.agentPresets.register(preset), `lai-agents preset: ${preset.id}`)
   }

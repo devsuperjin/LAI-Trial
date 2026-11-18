@@ -4,7 +4,7 @@ import { cancelPipeline, pipelineSnapshot, simulatePipeline } from '@lai/dsh-ada
 import { useInterval } from '../hooks/useInterval.ts'
 
 const ROLES: { id: Role; name: string; purpose: string; color: string }[] = [
-  { id: 'monitor', name: 'Monitor', purpose: 'Find failures and regressions', color: 'var(--color-fd-primary)' },
+  { id: 'monitor', name: 'Orchestrator', purpose: 'Monitor inputs and delegate tasks', color: 'var(--color-fd-primary)' },
   { id: 'triage', name: 'Triage', purpose: 'Classify root cause and evidence', color: 'var(--color-fd-primary)' },
   { id: 'reproduce', name: 'Reproduction', purpose: 'Run controlled local checks', color: 'var(--color-fd-primary)' },
   { id: 'ticket', name: 'Ticket', purpose: 'Prepare an evidence-backed draft', color: 'var(--color-fd-primary)' },
@@ -82,7 +82,7 @@ export function PipelinePage(props: { onSettings: () => void; view?: 'pipeline' 
         {snapshot && !snapshot.sources.length && <p className="mt-3 text-sm text-fd-warning">No event source is enabled. Enable the simulator or install an input-source plugin.</p>}
       </section>}
       {props.view !== 'history' && <section aria-label="LAI agents">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-sm font-medium">六个 LAI Agent</h2><p className="text-xs text-fd-muted-foreground">使用 lai-agents 的角色配置，按阶段创建主 Agent 下的真实 subagent。</p></div>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-sm font-medium">1 个主 Agent + 5 个子 Agent</h2><p className="text-xs text-fd-muted-foreground">主 Agent 负责监控与调度，后续五个角色通过真实工具调用执行。</p></div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">{ROLES.map((role, index) => {
           const worker = snapshot?.workers.find(item => item.role === role.id)
           return <article className={`${panel} relative overflow-hidden`} key={role.id} style={{ borderTop: `3px solid ${role.color}` }}>
