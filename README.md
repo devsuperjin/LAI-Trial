@@ -58,8 +58,6 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 | LAI Agents | Worker coordination preset, five specialist roles, configurable prompts and sequential execution guards |
 | lai-web | Unified views for tasks, sessions, execution, configuration and results |
 
-The former standalone LAI trigger layer and simulation entry point have been removed. Superagent owns event intake and task lifecycle. The architecture requires no MQ, external message broker or shared knowledge base; local SQLite and durable execution records store application state.
-
 ## Current capabilities and extensions
 
 The application integrates Superagent's GitHub source. Depending on configuration, it receives notifications, new Issues, PRs, comments and CI status changes, then applies admission policy. Accepted work runs through LAI's native subagent pipeline.

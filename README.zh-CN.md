@@ -58,8 +58,6 @@ Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其�
 | LAI Agents | Worker 协调预设、五个专业角色、可配置 Prompt、串行执行约束 |
 | lai-web | 统一的任务、会话、执行过程、配置和结果查看界面 |
 
-原有的 LAI 独立触发层和模拟入口已移除，事件接入与任务生命周期统一由 Superagent 管理。当前架构不依赖 MQ、外部消息 Broker 或共享知识库；本地 SQLite 和持久化执行记录用于保存应用状态。
-
 ## 当前能力与扩展方向
 
 当前代码已接入 Superagent 的 GitHub 来源，可按配置接收通知、新 Issue、PR、评论及 CI 状态变化，并通过准入策略决定后续处理。任务执行采用 LAI 原生子 Agent 流水线。
