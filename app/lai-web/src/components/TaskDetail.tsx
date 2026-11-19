@@ -24,14 +24,14 @@ function textOf(value: unknown): string {
   return ''
 }
 
-export function TaskDetail(props: { page: PageResponse | null; sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean }) {
+export function TaskDetail(props: { page: PageResponse | null; sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean; title?: string; hideResult?: boolean }) {
   const { t } = useLanguage()
   const [tab, setTab] = useState<Tab>('timeline')
   const [timelineView, setTimelineView] = useState<'waterfall' | 'list'>(() => { try { return localStorage.getItem('lai-web-timeline-view') === 'list' ? 'list' : 'waterfall' } catch { return 'waterfall' } })
   useEffect(() => { try { localStorage.setItem('lai-web-timeline-view', timelineView) } catch { /* Keep the current view when storage is unavailable. */ } }, [timelineView])
   const events = useMemo(() => props.page?.records.map(record => record.event) ?? [], [props.page])
   const dag = useMemo(() => deriveDag(events), [events])
-  const title = dag.taskLabel
+  const title = props.title ?? dag.taskLabel
   const hasError = dag.toolCounts.errors > 0
   // The last turn/end decides the outcome; a recovered tool error alone is not a failed task.
   const failed = dag.turnEnd !== undefined ? dag.turnEnd !== 'completed' : hasError
@@ -59,7 +59,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
         </div>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-fd-border px-3 py-2">
-        {TABS.map(candidate => (
+        {TABS.filter(candidate => !props.hideResult || candidate !== 'result').map(candidate => (
           <button
             className={`relative rounded-md px-3 py-1.5 text-sm transition-colors ${tab === candidate ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
             key={candidate}

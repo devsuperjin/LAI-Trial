@@ -80,7 +80,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
   )
 }
 
-export function RunDetailLoader(props: { sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean }) {
+export function RunDetailLoader(props: { sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean; title?: string; hideResult?: boolean }) {
   const [page, setPage] = useState<PageResponse | null>(null)
   const load = useCallback(async (): Promise<void> => {
     try {
@@ -95,5 +95,5 @@ export function RunDetailLoader(props: { sessionId: string; running: boolean; en
   useEffect(() => {
     if (!props.running) void load()
   }, [props.running, load])
-  return <TaskDetail onDelete={props.onDelete} deleting={props.deleting} entries={props.entries} page={page} running={props.running} sessionId={props.sessionId} />
+  return <TaskDetail hideResult={props.hideResult} title={props.title} onDelete={props.onDelete} deleting={props.deleting} entries={props.entries} page={page} running={props.running} sessionId={props.sessionId} />
 }
