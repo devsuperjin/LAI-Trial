@@ -67,4 +67,9 @@ export const superagentDecisions = async (kind: string, offset = 0): Promise<Rou
   const page = await superagentRequest<Omit<RouterDecisions, 'items'> & { items: (Omit<RouterDecision, 'reason'> & { reason: unknown })[] }>(`decisions?kind=${encodeURIComponent(kind)}&offset=${offset}&limit=30`)
   return { ...page, items: page.items.map(item => ({ ...item, reason: routerReasonText(item.reason) })) }
 }
-export const previewSuperagentPrompts = (config: unknown) => superagentRequest<{ orchestrator: string; worker: string }>('prompts/preview', 'POST', config)
+export const previewSuperagentPrompts = async (config: unknown): Promise<{ orchestrator: string; worker: string }> => {
+  const response = await superagentRequest<{ orchestrator: unknown; worker: unknown }>('prompts/preview', 'POST', config)
+  if (typeof response.orchestrator !== 'string' || typeof response.worker !== 'string') throw new Error('Invalid Superagent prompt preview response')
+  // The endpoint also returns structured parts, skills and scope metadata.
+  return { orchestrator: response.orchestrator, worker: response.worker }
+}
