@@ -1,5 +1,5 @@
 import { LanguageSwitch, useLanguage } from '../i18n.tsx'
-import { useEffect, useState } from 'react'
+import { useAppearance } from '../appearance.tsx'
 import { motion } from 'motion/react'
 import type { AuthState } from '../App.tsx'
 import type { Page } from './NavRail.tsx'
@@ -11,7 +11,6 @@ function authLabel(auth: AuthState): string {
 
 const PAGE_TITLE: Record<Page, string> = {
   pipeline: 'Tasks',
-  history: 'History',
   runs: 'Runs',
   dashboard: 'Dashboard',
   settings: 'Settings',
@@ -19,36 +18,15 @@ const PAGE_TITLE: Record<Page, string> = {
   'lai-agents': 'Plugin / LAI Agents',
 }
 
-type Theme = 'dark' | 'light'
-
-const THEME_KEY = 'dsh-console-theme'
-
-function storedTheme(): Theme {
-  try {
-    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
-  } catch {
-    // Storage can be blocked in private browsing; start dark.
-    return 'dark'
-  }
-}
-
 function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(storedTheme)
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    try {
-      localStorage.setItem(THEME_KEY, theme)
-    } catch {
-      // Storage can be blocked in private browsing; the choice still applies for this visit.
-    }
-  }, [theme])
-  const next: Theme = theme === 'dark' ? 'light' : 'dark'
+  const { resolvedTheme: theme, setMode } = useAppearance()
+  const next: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark'
   const label = `Switch to ${next} theme`
   return (
     <button
       aria-label={label}
       className="flex h-7 w-7 items-center justify-center rounded-md border border-fd-border bg-fd-secondary text-fd-muted-foreground transition-colors hover:text-fd-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-fd-primary"
-      onClick={() => { setTheme(next) }}
+      onClick={() => { setMode(next) }}
       title={label}
       type="button"
     >

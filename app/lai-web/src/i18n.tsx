@@ -4,6 +4,20 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  'Appearance, versions and model configuration': '外观、版本信息与模型配置',
+  'General': '通用', 'Model configuration': '模型配置', 'Settings sections': '设置分类', 'Appearance': '外观',
+  'Personalize this browser. Changes apply immediately.': '自定义当前浏览器的显示设置，修改立即生效。',
+  'Theme': '主题', 'Light': '浅色', 'Dark': '深色', 'System': '跟随系统', 'Language': '语言', 'Interface language': '界面语言',
+  'Version information': '版本信息', 'Built at': '构建时间', 'Source code': '源代码',
+
+  'Timeline view': '时间线视图', 'Waterfall': '瀑布图', 'List': '列表', 'Timing filter': '执行类型筛选',
+  'All activity': '全部活动', 'Turns': 'Turns', 'Subagents': '子 Agent', 'Zoom out': '缩小', 'Zoom in': '放大',
+  'No timing events available.': '暂无可用时间记录。', 'Earlier events are not loaded.': '更早的事件尚未加载。',
+  'Loading subagent timing…': '正在加载子 Agent 时间记录…', 'Some subagent timing could not be loaded.': '部分子 Agent 时间记录加载失败。',
+  'Execution waterfall': '执行瀑布图', 'Name / duration': '名称 / 耗时', 'Partial history': '部分记录',
+  'No activity matches this filter.': '没有符合筛选条件的执行记录。', 'Timing details': '执行时间详情', 'End not recorded': '结束时间未记录',
+  'session': '会话', 'subagent': '子 Agent', 'turn': 'Turn', 'tool': '工具', 'unknown': '未知',
+
   'Expand sidebar': '展开侧边栏', 'Collapse sidebar': '收起侧边栏',
   'Plugin / LAI Agents': '插件 / LAI Agents', 'Configure the Worker model in Plugin → Superagent → Execution.': 'Worker 模型请在 Plugin → Superagent → Execution 配置。', 'Role model': '角色模型', 'Inherit Worker model': '使用 Worker 模型', 'Save configuration': '保存配置', 'Configuration saved. Prompts apply at the next assembly; model overrides apply to new children.': '配置已保存。Prompt 下次组装时生效，模型覆盖对新建子 Agent 生效。',
   'Plugin': '插件', 'Plugin / Superagent': '插件 / Superagent', 'Configure Superagent': '配置 Superagent',

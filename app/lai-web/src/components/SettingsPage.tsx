@@ -2,6 +2,7 @@ import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ModelCatalog, ModelSelection, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, modelCatalog, updateSettings } from '../api/gateway.ts'
+import { GeneralSettings } from './GeneralSettings.tsx'
 import { ProviderSettings } from './ProviderSettings.tsx'
 import { selectionKey } from '../model/settings.ts'
 
@@ -46,7 +47,7 @@ function ModelSelect(props: {
   )
 }
 
-export function SettingsPage() {
+function ModelConfiguration() {
   const { t } = useLanguage()
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null)
   const [defaultNs, setDefaultNs] = useState<SettingsNamespaceView | null>(null)
@@ -102,7 +103,7 @@ export function SettingsPage() {
     } finally { setCatalogBusy(false) }
   }
 
-  const applyDefault = async (key: string, role?: string): Promise<void> => {
+  const applyDefault = async (key: string): Promise<void> => {
     const option = options.find(item => item.key === key)
     if (option === undefined || defaultNs === null) return
     setSavingKey('default')
@@ -113,9 +114,7 @@ export function SettingsPage() {
       setCatalog(await modelCatalog())
       setNotice({
         kind: 'ok',
-        text: role !== undefined
-          ? `${role} now routes through ${option.providerName} · ${option.name} (shared default)`
-          : `Default model set to ${option.providerName} · ${option.name}`,
+        text: `Default model set to ${option.providerName} · ${option.name}`,
       })
     } catch (cause) {
       setNotice({ kind: 'err', text: cause instanceof Error ? cause.message : String(cause) })
@@ -144,8 +143,7 @@ export function SettingsPage() {
   const defaultDirty = defaultDraft !== selectionKey(fallback)
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="mx-auto max-w-5xl space-y-5">
+    <div className="space-y-5">
         <ProviderSettings onSaved={refreshModels} />
         <section className="rounded-xl border border-fd-border bg-fd-card p-5">
           <div className="mb-1 flex items-center gap-2">
@@ -195,7 +193,18 @@ export function SettingsPage() {
           </div>
         )}
 
-      </div>
     </div>
   )
+}
+
+
+export function SettingsPage() {
+  const { t } = useLanguage()
+  const [section, setSection] = useState<'general' | 'models'>('general')
+  return <div className="mx-auto w-full max-w-5xl space-y-5">
+    <h1 className="text-lg font-semibold">{t('Settings')}</h1>
+    <div role="tablist" aria-label={t('Settings sections')} className="flex gap-1 border-b border-fd-border pb-2">{(['general', 'models'] as const).map(value => <button key={value} id={`settings-tab-${value}`} role="tab" aria-selected={section === value} aria-controls={`settings-panel-${value}`} onClick={() => setSection(value)} className={`rounded-lg px-4 py-2 text-sm transition-colors ${section === value ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary'}`}>{t(value === 'general' ? 'General' : 'Model configuration')}</button>)}</div>
+    <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={section !== 'general'}><GeneralSettings /></div>
+    <div role="tabpanel" id="settings-panel-models" aria-labelledby="settings-tab-models" hidden={section !== 'models'}><ModelConfiguration /></div>
+  </div>
 }

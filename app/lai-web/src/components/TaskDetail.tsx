@@ -1,8 +1,9 @@
 import { useLanguage } from '../i18n.tsx'
 import { motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { PageResponse, SessionListEntry } from '../api/gateway.ts'
 import { deriveDag } from '../model/dag.ts'
+import { WaterfallView } from './WaterfallView.tsx'
 import { DagView } from './DagView.tsx'
 
 type Tab = 'timeline' | 'dag' | 'result'
@@ -26,6 +27,8 @@ function textOf(value: unknown): string {
 export function TaskDetail(props: { page: PageResponse | null; sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean }) {
   const { t } = useLanguage()
   const [tab, setTab] = useState<Tab>('timeline')
+  const [timelineView, setTimelineView] = useState<'waterfall' | 'list'>(() => { try { return localStorage.getItem('lai-web-timeline-view') === 'list' ? 'list' : 'waterfall' } catch { return 'waterfall' } })
+  useEffect(() => { try { localStorage.setItem('lai-web-timeline-view', timelineView) } catch { /* Keep the current view when storage is unavailable. */ } }, [timelineView])
   const events = useMemo(() => props.page?.records.map(record => record.event) ?? [], [props.page])
   const dag = useMemo(() => deriveDag(events), [events])
   const title = dag.taskLabel
@@ -55,7 +58,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
           <span>{dag.toolCounts.total}{t(" tool calls")}{hasError ? ` · ${dag.toolCounts.errors} failed` : ''}</span>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1 border-b border-fd-border px-3 py-2">
+      <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-fd-border px-3 py-2">
         {TABS.map(candidate => (
           <button
             className={`relative rounded-md px-3 py-1.5 text-sm transition-colors ${tab === candidate ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
@@ -69,11 +72,12 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
             <span className="relative capitalize">{t(candidate)}</span>
           </button>
         ))}
+        {tab === 'timeline' && <div role="group" aria-label={t('Timeline view')} className="ml-auto flex gap-0.5 rounded-md border border-fd-border p-0.5">{(['waterfall', 'list'] as const).map(view => <button key={view} type="button" aria-pressed={timelineView === view} className={`rounded px-2.5 py-1 text-xs ${timelineView === view ? 'bg-fd-secondary font-medium text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`} onClick={() => setTimelineView(view)}>{t(view === 'waterfall' ? 'Waterfall' : 'List')}</button>)}</div>}
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         {/* Hidden documents pause animations; an exit-gated swap would never mount the next tab. */}
         <div className="h-full" key={tab}>
-          {tab === 'timeline' && <TimelineView events={events} />}
+          {tab === 'timeline' && (timelineView === 'waterfall' ? <WaterfallView page={props.page} sessionId={props.sessionId} running={props.running} entries={props.entries} /> : <TimelineView events={events} />)}
           {tab === 'dag' && <DagView entries={props.entries} page={props.page} running={props.running} sessionId={props.sessionId} />}
           {tab === 'result' && <ResultView events={events} />}
         </div>

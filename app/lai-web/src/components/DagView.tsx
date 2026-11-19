@@ -30,7 +30,7 @@ const DEFAULT_CONTROLS: Controls = {
   showTools: true,
   showPreviews: false,
   motion: true,
-  grid: false,
+  grid: true,
 }
 
 const GEO = {

@@ -8,6 +8,7 @@ let view: ReactTestRenderer | undefined
 afterEach(() => { if (view) act(() => view?.unmount()); view = undefined; vi.unstubAllGlobals() })
 
 it('stores an API key through DSH and lets the first available model be selected', async () => {
+  vi.stubGlobal('__LAI_BUILD__', { version: 'fixture', webVersion: 'fixture', dshVersion: 'fixture', builtAt: '2026-01-01T00:00:00Z' })
   let configured = false
   let defaultValue = { provider: 'deepseek-official', model: 'unavailable-old-model' }
   const defaultNs = () => ({ ns: 'agent-default-model', value: defaultValue, revision: 0, applies: 'live', autoGenerate: false })
@@ -31,7 +32,8 @@ it('stores an API key through DSH and lets the first available model be selected
     }
     return Response.json({ type: 'server-response', rpcId: request.rpcId, result: { ok: true, value } })
   }))
-  await act(async () => { view = create(<SettingsPage entries={[]} />) })
+  await act(async () => { view = create(<SettingsPage />) })
+  act(() => view!.root.findByProps({ id: 'settings-tab-models' }).props.onClick())
   const button = (label: string) => view!.root.findAllByType('button').find(node => node.children.join('') === label)!
   await act(async () => { button('Configure DeepSeek').props.onClick() })
   act(() => view!.root.findByProps({ type: 'password' }).props.onChange({ target: { value: 'test-only-not-a-real-key' } }))

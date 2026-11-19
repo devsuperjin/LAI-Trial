@@ -108,11 +108,10 @@ pnpm start
 | --- | --- |
 | Dashboard | 查看 Run 概览、状态及模型用量等统计 |
 | Tasks | 查看 Superagent 任务，打开对应 Monitor / Router 或 Worker 会话 |
-| History | 查看已结束任务及路由决策 |
-| Runs | 查看会话、Turn、工具调用、原生子 Agent 和执行结果 |
+| Runs | 瀑布图 / 列表 Timeline、带网格的 DAG、原生子 Agent 与执行结果 |
 | Plugin → Superagent | 独立的 Superagent 管理页面，包含 Sources、Policy、Eval、Execution、Prompts、Deployment |
 | Plugin → LAI Agents | Worker 和专业角色 Prompt，以及各专业子 Agent 的模型覆盖 |
-| Settings | 模型 Provider、凭据与默认模型 |
+| Settings | General：外观、语言和版本信息；Model configuration：Provider、凭据与默认模型 |
 
 界面支持 EN / 中文切换。原版 DSH 调试界面保留在 **`/dsh/`**，与 lai-web 使用同一个后端。Runs 的删除操作使用 DSH 原生归档，支持 Undo；运行中的会话需要先停止。
 

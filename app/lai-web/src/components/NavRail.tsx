@@ -2,7 +2,7 @@ import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type Page = 'pipeline' | 'history' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
+export type Page = 'pipeline' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
@@ -23,7 +23,6 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
     id: 'pipeline', label: 'Tasks', hint: 'Monitor inputs and follow Worker tasks',
     icon: () => <svg aria-hidden fill="none" height="18" width="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="4" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><rect x="17" y="15" width="5" height="5" rx="1" /><path d="M7 6.5h5V9.5M14.5 12h5V15" /></svg>,
   },
-  { id: 'history', label: 'History', hint: 'Browse pipeline history and stage outputs', icon: () => <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 5h16M4 12h16M4 19h16" /></svg> },
   {
     id: 'runs',
     label: 'Runs',
@@ -41,7 +40,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   {
     id: 'settings',
     label: 'Settings',
-    hint: 'Per-agent model configuration',
+    hint: 'Appearance, versions and model configuration',
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
         <circle cx="12" cy="12" r="3" />

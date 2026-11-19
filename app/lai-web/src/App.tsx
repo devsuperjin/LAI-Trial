@@ -103,8 +103,8 @@ export function App() {
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
-              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
-              {(page === 'pipeline' || page === 'history') && <SuperagentTasks history={page === 'history'} onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
+              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
+              {page === 'pipeline' && <SuperagentTasks onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
               {page === 'superagent' && <SuperagentPage />}

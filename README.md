@@ -108,11 +108,10 @@ The minimum polling interval is 60 seconds; longer intervals requested by GitHub
 | --- | --- |
 | Dashboard | Run overview, status and model-usage statistics |
 | Tasks | Superagent tasks with links to their Monitor / Router and Worker sessions |
-| History | Ended tasks and routing decisions |
-| Runs | Sessions, turns, tool calls, native subagents and execution results |
+| Runs | Timeline with Waterfall / List views, grid-backed DAG, native subagents and execution results |
 | Plugin → Superagent | Dedicated management page for Sources, Policy, Eval, Execution, Prompts and Deployment |
 | Plugin → LAI Agents | Worker and specialist prompts, plus per-specialist model overrides |
-| Settings | Model providers, credentials and the default model |
+| Settings | General: appearance, language and version information; Model configuration: providers, credentials and the default model |
 
 The interface supports English and Chinese. The original DSH debugging UI remains available at **`/dsh/`**, sharing the same backend. Deleting a Run uses native DSH archiving with Undo; running sessions must be stopped first.
 
