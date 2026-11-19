@@ -115,6 +115,26 @@ pnpm start
 
 Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，**Plugin → LAI Agents** 管理角色定义和专业子 Agent 的模型覆盖。它是独立 DSH Bundle，在原版 DSH 中也有独立侧栏和配置入口。未固定模型的子 Agent 继承 Worker 模型，模型覆盖仅影响新建子 Agent，不修改全局默认模型。来源、策略和执行设置会保留版本信息，保存时检查并发修改；高级配置编辑器用于访问基础表单之外的完整字段。
 
+## 项目截图
+
+### Worker DAG
+
+在 Runs 中查看 Worker 的原生 Turn、专业子 Agent 委派和执行状态。
+
+![Worker DAG](docs/images/runs-dag.jpg)
+
+### 授权详情
+
+展示任务触发、准入决定、发起人、授权范围和策略版本，下方可展开执行环境。
+
+![授权详情](docs/images/runs-authorization.jpg)
+
+### 原版 DSH 中的 Superagent
+
+通过 `/dsh/` 保留原版 Superagent 管理页面，与 lai-web 共享任务状态及执行记录。
+
+![原版 DSH 中的 Superagent](docs/images/native-superagent.jpg)
+
 ## 项目结构
 
 ```text

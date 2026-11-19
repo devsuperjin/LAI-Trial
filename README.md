@@ -115,6 +115,26 @@ The interface supports English and Chinese. The original DSH debugging UI remain
 
 **Prompts** on the Superagent page manages its Router / Worker instructions. **Plugin → LAI Agents** manages LAI role definitions and specialist model overrides. It is an independent DSH Bundle with its own sidebar and configuration entry in the original DSH interface. Unpinned specialists inherit the Worker model; pinned routes apply to new children without changing the global default. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
 
+## Screenshots
+
+### Worker DAG
+
+Native Worker Turns, specialist delegation and execution status in Runs.
+
+![Worker DAG](docs/images/runs-dag.jpg)
+
+### Authorization details
+
+Trigger, admission decision, requester, scope and policy version, with execution environment details available below.
+
+![Authorization details](docs/images/runs-authorization.jpg)
+
+### Superagent in the original DSH interface
+
+The original Superagent panel remains accessible through `/dsh/`, sharing task state and execution records.
+
+![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
+
 ## Repository structure
 
 ```text
