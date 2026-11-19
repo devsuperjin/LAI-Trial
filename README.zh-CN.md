@@ -1,5 +1,7 @@
 # LAI Trial
 
+[系统设计文档](docs/design.zh-CN.md) · [System design (English)](docs/design.md)
+
 [English](README.md) | **简体中文**
 
 LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Worker 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
