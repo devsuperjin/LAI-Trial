@@ -117,6 +117,12 @@ The interface supports English and Chinese. The original DSH debugging UI remain
 
 ## Screenshots
 
+### Router evaluation
+
+Routing and admission are native Superagent capabilities. LAI provides a dedicated Router page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
+
+![Superagent decisions in the dedicated LAI Router page](docs/images/router-evaluation.jpg)
+
 ### Worker DAG
 
 Native Worker Turns, specialist delegation and execution status in Runs.

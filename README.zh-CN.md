@@ -117,6 +117,12 @@ Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，**P
 
 ## 项目截图
 
+### Router 自动判断
+
+路由与准入判断是 Superagent 的原生能力，LAI 为其提供独立的 Router 展示页面。系统根据发送者授权、策略与评估配置，判断收到的事件是否需要接单、续做、停止或忽略；受理后可直接打开对应的 Runs。
+
+![LAI 独立 Router 页面中的 Superagent 决策记录](docs/images/router-evaluation.jpg)
+
 ### Worker DAG
 
 在 Runs 中查看 Worker 的原生 Turn、专业子 Agent 委派和执行状态。
