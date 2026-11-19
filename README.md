@@ -150,8 +150,6 @@ LAI-Trial/
 | `LAI_SUPERAGENT_STATE_DIR` | Optional absolute path overriding the Superagent state directory |
 | `.reference` | Ignored upstream source checkout for auditing; never used by builds, tests or runtime |
 
-The historical standalone demo on port 3082 is separate from normal startup and is not automatically imported. Migrate existing data with the service stopped and backups retained. Only one running process may use a given state directory.
-
 ## DSH application development conventions
 
 LAI maintains its extensions in an independent application repository. The current official DSH baseline is **`0.2.2-rc.1`**, recorded in [`config/dsh-baseline.json`](config/dsh-baseline.json).

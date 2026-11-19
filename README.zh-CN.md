@@ -150,8 +150,6 @@ LAI-Trial/
 | `LAI_SUPERAGENT_STATE_DIR` | 可覆盖 Superagent 状态目录，须为绝对路径 |
 | `.reference` | 忽略提交的上游源码审计目录，不参与构建、测试或运行 |
 
-历史独立 demo 的 3082 端口及数据不属于默认启动流程，也不会自动导入统一版。已有数据迁移应在服务停止后进行，并保留备份；同一状态目录只能由一个运行实例使用。
-
 ## DSH 二次开发规范
 
 本项目采用独立应用仓库的方式维护二次开发，当前官方 DSH 基线为 **`0.2.2-rc.1`**，以 [`config/dsh-baseline.json`](config/dsh-baseline.json) 为准。
