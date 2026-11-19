@@ -1,7 +1,5 @@
 # LAI Trial
 
-[System design](docs/design.md) · [设计文档（中文）](docs/design.zh-CN.md)
-
 **English** | [简体中文](README.zh-CN.md)
 
 LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Worker delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
@@ -211,4 +209,9 @@ Update the baseline record and retain the previous code, lockfile and matching d
 | `pnpm check:architecture` | Check namespaces, dependency versions and import boundaries |
 | `pnpm check` | Run the complete local check suite |
 
-See [`docs/architecture.md`](docs/architecture.md) for detailed runtime relationships. Repository configuration and scripts are the source of truth for dependencies and startup behavior.
+## Documentation
+
+- [System design](docs/design.md) · [中文](docs/design.zh-CN.md)
+- [Architecture](docs/architecture.md) · [中文](docs/architecture.zh.md)
+
+Repository configuration and scripts are the source of truth for dependencies and startup behavior.
