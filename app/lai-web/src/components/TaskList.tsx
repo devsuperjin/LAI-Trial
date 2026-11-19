@@ -1,3 +1,4 @@
+import { readableRunTitle } from '../model/runs.ts'
 import { useLanguage } from '../i18n.tsx'
 import { AnimatePresence, motion } from 'motion/react'
 import type { SessionListEntry } from '../api/gateway.ts'
@@ -60,7 +61,7 @@ export function TaskList(props: {
         <AnimatePresence initial={false}>
           {visible.map((entry) => {
             const status = statusOf(entry)
-            const title = entry.projections?.values.title ?? entry.sessionId
+            const title = readableRunTitle(entry.projections?.values.title, entry.sessionId)
             const tokens = entry.projections?.values.tokenUsage
             return (
               <motion.button

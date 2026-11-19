@@ -73,3 +73,16 @@ export const previewSuperagentPrompts = async (config: unknown): Promise<{ orche
   // The endpoint also returns structured parts, skills and scope metadata.
   return { orchestrator: response.orchestrator, worker: response.worker }
 }
+
+/** Ticket-owned metadata is only available for Superagent Worker Runs. */
+export interface WorkerTicketDetails {
+  id: string
+  mandate: { scope: string; strength: string; policyVersion: string; actor: { source: string; id: string; name?: Localized } }
+  basis: { legacy: boolean; facts: { name: string; value?: string | { id: string; name: string }[] }[] }
+  decision?: { kind: string; reason: unknown; preview: string; at: string; rules?: { id: string; name: string; matched: boolean; reason: string }[] }
+  environment: { key: string; value: string; description: Localized; owner: string }[]
+}
+export const superagentWorkerDetails = (runId: string) => {
+  if (!runId.startsWith('worker-') || runId.length === 7) throw new Error('This Run is not a Superagent Worker')
+  return superagentRequest<WorkerTicketDetails>(`tickets/${encodeURIComponent(runId.slice(7))}`)
+}

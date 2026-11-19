@@ -35,3 +35,17 @@ export function withoutArchived(entries: SessionListEntry[], archivedIds: string
     return true
   })
 }
+
+/** Prefer the human task title inside a structured Worker input. */
+export function readableRunTitle(value: string | undefined, fallback = 'Run'): string {
+  const text = value?.trim()
+  if (!text) return fallback
+  if (text.startsWith('{') || text.startsWith('[')) {
+    try {
+      const input: unknown = JSON.parse(text)
+      if (input && typeof input === 'object' && !Array.isArray(input) && 'title' in input && typeof input.title === 'string' && input.title.trim()) return input.title.trim()
+    } catch { /* Structured input without a usable title is not a display title. */ }
+    return fallback
+  }
+  return text
+}

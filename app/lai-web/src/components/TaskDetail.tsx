@@ -1,3 +1,4 @@
+import { WorkerRunContext } from './WorkerRunContext.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useState } from 'react'
@@ -31,6 +32,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
   useEffect(() => { try { localStorage.setItem('lai-web-timeline-view', timelineView) } catch { /* Keep the current view when storage is unavailable. */ } }, [timelineView])
   const events = useMemo(() => props.page?.records.map(record => record.event) ?? [], [props.page])
   const dag = useMemo(() => deriveDag(events), [events])
+  const worker = props.sessionId.startsWith('worker-') && props.sessionId.length > 7
   const title = props.title ?? dag.taskLabel
   const hasError = dag.toolCounts.errors > 0
   // The last turn/end decides the outcome; a recovered tool error alone is not a failed task.
@@ -43,7 +45,8 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className={worker ? 'flex min-w-0 flex-col gap-5' : 'flex h-full flex-col'}>
+      <div className={worker ? 'overflow-hidden rounded-xl border border-fd-border bg-fd-card' : 'contents'}>
       <div className="shrink-0 border-b border-fd-border bg-fd-card px-4 py-3">
         <div className="flex items-center gap-3">
           <h2 className="min-w-0 flex-1 truncate text-base font-semibold">{title}</h2>
@@ -58,6 +61,11 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
           <span>{dag.toolCounts.total}{t(" tool calls")}{hasError ? ` · ${dag.toolCounts.errors} failed` : ''}</span>
         </div>
       </div>
+      {worker && <section className="min-w-0" aria-label={t('Worker information')}>
+        <WorkerRunContext key={props.sessionId} runId={props.sessionId} />
+      </section>}
+      </div>
+      <div className={worker ? 'flex h-[75vh] min-h-[36rem] flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card' : 'flex min-h-0 flex-1 flex-col'}>
       <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-fd-border px-3 py-2">
         {TABS.filter(candidate => !props.hideResult || candidate !== 'result').map(candidate => (
           <button
@@ -81,6 +89,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
           {tab === 'dag' && <DagView entries={props.entries} page={props.page} running={props.running} sessionId={props.sessionId} />}
           {tab === 'result' && <ResultView events={events} />}
         </div>
+      </div>
       </div>
     </div>
   )

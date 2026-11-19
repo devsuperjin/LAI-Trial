@@ -1,5 +1,5 @@
 import type { SessionListEntry } from '../api/gateway.ts'
-import { rootRuns } from './runs.ts'
+import { readableRunTitle, rootRuns } from './runs.ts'
 import { stageHue } from './tree.ts'
 export { formatDuration, formatTokens } from './tree.ts'
 export type RunStatus = 'running' | 'completed' | 'failed' | 'idle'
@@ -39,7 +39,7 @@ export function deriveDashboard(entries: SessionListEntry[]) {
     const all = [entry, ...descendants]
     const preset = entry.projections?.values.agentPreset ?? ''
     const role = preset === 'dsh-superagent-router' || entry.sessionId.startsWith('orchestrator-') ? 'Monitor / Router' : entry.sessionId.startsWith('worker-') ? 'Worker' : 'Other run'
-    return { sessionId: entry.sessionId, title: entry.projections?.values.title ?? entry.sessionId, role, status: status(entry), tokens: all.reduce((sum, item) => sum + tokens(item), 0), childCount: descendants.length, time: entry.updatedAt, model: entry.projections?.values.modelSelection?.lastUsed?.model ?? null }
+    return { sessionId: entry.sessionId, title: readableRunTitle(entry.projections?.values.title, entry.sessionId), role, status: status(entry), tokens: all.reduce((sum, item) => sum + tokens(item), 0), childCount: descendants.length, time: entry.updatedAt, model: entry.projections?.values.modelSelection?.lastUsed?.model ?? null }
   }).sort((a, b) => b.time - a.time)
   // Attribute usage to each session's actual route, including pinned specialists.
   const groups = new Map<string, { model: string; tokens: number; output: number; sessions: number; hue: string }>()
