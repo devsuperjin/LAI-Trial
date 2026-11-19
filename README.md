@@ -96,7 +96,7 @@ pnpm start
 3. In **Policy**, configure allowed senders, task scope and admission rules.
 4. In **Eval**, configure evaluation mode, timeout and the Router model. The default is `observe`; choose `auto` when the intended workflow should automatically accept inferred tasks under policy.
 5. In **Execution**, configure the Worker model, concurrency, working directory, workspace preparation command and command restrictions.
-6. Use **Tasks** to inspect accepted work and **Runs** to inspect Router, Worker and subagent execution.
+6. Use **Router** to inspect accepted work and **Runs** to inspect Router, Worker and subagent execution.
 
 If one GitHub account both opens Issues and executes tasks, enable new-Issue intake and **Receive issues opened by the agent account**. Own comments and PRs remain filtered. This switch does not replay previously skipped Issues, and received Issues still pass through Policy.
 
@@ -106,8 +106,8 @@ The minimum polling interval is 60 seconds; longer intervals requested by GitHub
 
 | Page | Purpose |
 | --- | --- |
-| Dashboard | Run overview, status and model-usage statistics |
-| Tasks | Superagent tasks with links to their Monitor / Router and Worker sessions |
+| Dashboard | Superagent intake and task metrics, Router / Worker health, five-stage activity and recorded model usage |
+| Router | Superagent tasks with links to their Monitor / Router and Worker sessions |
 | Runs | Timeline with Waterfall / List views, grid-backed DAG, native subagents and execution results |
 | Plugin → Superagent | Dedicated management page for Sources, Policy, Eval, Execution, Prompts and Deployment |
 | Plugin → LAI Agents | Worker and specialist prompts, plus per-specialist model overrides |

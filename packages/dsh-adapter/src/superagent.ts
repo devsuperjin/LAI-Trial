@@ -24,3 +24,13 @@ export const superagentTicket = (id: string) => superagentRequest<SuperagentTick
 export const superagentAction = (path: string, body?: unknown) => superagentRequest<Record<string, unknown>>(path, 'POST', body)
 export const superagentPrompts = () => superagentRequest<PromptView>('prompts')
 export const saveSuperagentPrompts = (config: unknown, baseRevision: number) => superagentRequest('prompts', 'PUT', { config, baseRevision })
+
+/** Operator metrics come from the task engine, not inferred session completion. */
+export interface SuperagentOverview {
+  problems: { kind: string; detail?: string; name?: string; source?: { title: Localized; health: { detail: string } }; outgoing?: { error?: string } }[]
+  person: SuperagentTicket[]
+  executor: { running: number; queued: number; maxWorkers: number; idle: number }
+  flow: { received: number; filtered: number; triggers: number; judged: number; accepted: number; evaluating: number; dropped: number }
+  policyVersion: string
+}
+export const superagentOverview = () => superagentRequest<SuperagentOverview>('overview')

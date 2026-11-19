@@ -1,243 +1,73 @@
-import { useLanguage } from '../i18n.tsx'
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useLanguage } from '../i18n.tsx'
+import { useInterval } from '../hooks/useInterval.ts'
 import type { SessionListEntry } from '../api/gateway.ts'
-import type { RunStatus } from '../model/dashboard.ts'
-import { deriveDashboard, formatDuration, formatTokens, STATUS_HUE } from '../model/dashboard.ts'
+import { superagentOverview, superagentState, superagentTickets } from '@lai/dsh-adapter/superagent'
+import type { SuperagentOverview, SuperagentState, SuperagentTicket, TicketPage } from '@lai/dsh-adapter/superagent'
+import { deriveDashboard, formatDuration, formatTokens } from '../model/dashboard.ts'
 
-const STATUS_LABEL: Record<RunStatus, string> = { running: 'Running', completed: 'Completed', failed: 'Failed' }
-
-function StatCard(props: { label: string; value: string; sub?: string; hue: string }) {
-  const { t } = useLanguage()
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-fd-border bg-fd-card p-4">
-      <span className="absolute inset-y-0 left-0 w-1" style={{ background: props.hue }} />
-      <p className="text-xs uppercase tracking-wider text-fd-muted-foreground">{t(props.label)}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums" style={{ color: props.hue }}>{props.value}</p>
-      {props.sub !== undefined && <p className="mt-0.5 text-xs text-fd-muted-foreground">{props.sub}</p>}
-    </div>
-  )
+interface Snapshot { state: SuperagentState; overview: SuperagentOverview; open: TicketPage; ended: TicketPage; at: number }
+const button = 'rounded-lg border border-fd-border bg-fd-card px-3 py-2 text-xs hover:bg-fd-secondary disabled:opacity-40'
+const PROBLEM_LABELS: Record<string, string> = { setup: 'Source setup required', 'no-source': 'No input source enabled', 'no-allowed': 'No allowed senders', 'source-error': 'Source connection issue', 'executor-paused': 'Processing is paused', 'runtime-error': 'Service issue', 'eval-overdue': 'Evaluation overdue', 'eval-unavailable': 'Evaluation unavailable', outgoing: 'Reply delivery failed' }
+function taskStatus(task: SuperagentTicket): string {
+  if (task.stage === 'person') return ({ review: 'Awaiting review', answer: 'Awaiting response', blocked: 'Blocked', failed: 'Failed', delivery: 'Delivery failed' } as Record<string, string>)[task.action ?? ''] ?? 'Needs attention'
+  return task.action === 'queued' ? 'Queued' : ({ working: 'Running', idle: 'Idle', ended: 'Ended' } as Record<string, string>)[task.stage] ?? task.stage
 }
-
-function Donut(props: { segments: { label: string; count: number; hue: string }[]; total: number }) {
+function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   const { t } = useLanguage()
-  const radius = 52
-  const circumference = 2 * Math.PI * radius
-  let offset = 0
-  return (
-    <div className="flex items-center gap-5">
-      <svg aria-hidden height="140" viewBox="0 0 140 140" width="140">
-        <circle cx="70" cy="70" fill="none" r={radius} stroke="var(--color-fd-secondary)" strokeWidth="16" />
-        {props.segments.filter(segment => segment.count > 0).map((segment) => {
-          const fraction = props.total > 0 ? segment.count / props.total : 0
-          const dash = fraction * circumference
-          const element = (
-            <circle
-              cx="70"
-              cy="70"
-              fill="none"
-              key={segment.label}
-              r={radius}
-              stroke={segment.hue}
-              strokeDasharray={`${dash} ${circumference - dash}`}
-              strokeDashoffset={-offset}
-              strokeWidth="16"
-              transform="rotate(-90 70 70)"
-            />
-          )
-          offset += dash
-          return element
-        })}
-        <text fill="var(--color-fd-foreground)" fontSize="26" fontWeight="600" textAnchor="middle" x="70" y="66">{props.total}</text>
-        <text fill="var(--color-fd-muted-foreground)" fontSize="11" textAnchor="middle" x="70" y="84">{t("runs")}</text>
-      </svg>
-      <ul className="space-y-2">
-        {props.segments.map(segment => (
-          <li className="flex items-center gap-2 text-sm" key={segment.label}>
-            <span className="h-2.5 w-2.5 rounded-sm" style={{ background: segment.hue }} />
-            <span className="text-fd-muted-foreground">{segment.label}</span>
-            <span className="ml-auto font-medium tabular-nums">{segment.count}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
+  return <section className="min-w-0 rounded-xl border border-fd-border bg-fd-card p-5"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-semibold">{t(title)}</h2>{action}</div>{children}</section>
 }
-
-function BarRow(props: { label: string; value: number; max: number; hue: string; detail: string }) {
+function Metric({ label, value, note, warning }: { label: string; value: string; note: string; warning?: boolean }) {
   const { t } = useLanguage()
-  const width = props.max > 0 ? Math.max(2, (props.value / props.max) * 100) : 0
-  return (
-    <div>
-      <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">
-        <span className="truncate text-fd-foreground">{t(props.label)}</span>
-        <span className="shrink-0 tabular-nums text-fd-muted-foreground">{props.detail}</span>
-      </div>
-      <div className="h-2 overflow-hidden rounded-full bg-fd-secondary">
-        <div className="h-full rounded-full transition-[width] duration-500" style={{ background: props.hue, width: `${width}%` }} />
-      </div>
-    </div>
-  )
+  return <div className="rounded-xl border border-fd-border bg-fd-card p-4"><p className="text-xs text-fd-muted-foreground">{t(label)}</p><p className={`mt-2 text-2xl font-semibold tabular-nums ${warning ? 'text-fd-warning' : ''}`}>{value}</p><p className="mt-2 text-xs text-fd-muted-foreground">{note}</p></div>
 }
-
-function Panel(props: { title: string; children: ReactNode; className?: string }) {
+export function DashboardPage({ entries, onOpenRun, onRouter, onConfigure }: { entries: SessionListEntry[]; onOpenRun: (id: string) => void; onRouter: () => void; onConfigure: () => void }) {
   const { t } = useLanguage()
-  return (
-    <section className={`rounded-xl border border-fd-border bg-fd-card p-4 ${props.className ?? ''}`}>
-      <h3 className="mb-3 text-sm font-medium text-fd-foreground">{t(props.title)}</h3>
-      {props.children}
-    </section>
-  )
-}
-
-export function DashboardPage(props: { entries: SessionListEntry[]; onOpenRun: (id: string) => void }) {
-  const { t } = useLanguage()
-  const model = useMemo(() => deriveDashboard(props.entries), [props.entries])
-  const [statusFilter, setStatusFilter] = useState<RunStatus | 'all'>('all')
-  const visibleRuns = model.runs.filter(run => statusFilter === 'all' || run.status === statusFilter)
-  const maxStageTokens = Math.max(1, ...model.stageStats.map(stage => stage.tokens))
-  const maxPreset = Math.max(1, ...model.presetBreakdown.map(row => row.count))
-  const maxTimeline = Math.max(1, ...model.tokenTimeline.map(row => row.tokens))
-  const { totals } = model
-
-
-  return (
-    <div className="p-4 md:p-6">
-      <div className="mx-auto max-w-6xl space-y-5">
-        <div><h1 className="text-xl font-medium">{t("Dashboard")}</h1><p className="mt-1 text-sm text-fd-muted-foreground">{t("Run outcomes, agent activity, and token usage at a glance.")}</p></div>
-        {totals.runs === 0 && <p className="rounded-lg border border-fd-border bg-fd-muted p-4 text-sm text-fd-muted-foreground">{t("No runs yet. Configure a source in Plugin → Superagent, or start a task in DSH.")}</p>}
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-          <StatCard hue="var(--color-fd-primary)" label={t("Total runs")} sub={`${totals.subagents} subagents`} value={String(totals.runs)} />
-          <StatCard hue={STATUS_HUE.completed} label={t("Completed")} value={String(totals.completed)} />
-          <StatCard hue={STATUS_HUE.running} label={t("Running")} value={String(totals.running)} />
-          <StatCard hue={STATUS_HUE.failed} label={t("Failed")} value={String(totals.failed)} />
-          <StatCard hue="var(--color-fd-warning)" label={t("Tokens")} sub={`${formatTokens(totals.outputTokens)} output`} value={formatTokens(totals.tokens)} />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Panel title={t("Outcome")}>
-            <Donut
-              segments={model.statusBreakdown.map(row => ({ label: STATUS_LABEL[row.status], count: row.count, hue: row.hue }))}
-              total={totals.runs}
-            />
-            <p className="mt-3 text-xs text-fd-muted-foreground">{t("Success rate")}{' '}
-              <span className="font-medium text-fd-success">
-                {model.successRate !== null ? `${Math.round(model.successRate * 100)}%` : '—'}
-              </span>{' '}{t("of settled runs")}</p>
-          </Panel>
-
-          <Panel title={t("Runs by preset")}>
-            <div className="space-y-3">
-              {model.presetBreakdown.map(row => (
-                <BarRow detail={`${row.count} run${row.count === 1 ? '' : 's'}`} hue={row.hue} key={row.preset} label={row.preset} max={maxPreset} value={row.count} />
-              ))}
-            </div>
-          </Panel>
-
-          <Panel title={t("Model usage")}>
-            <div className="space-y-3">
-              {model.modelBreakdown.map(row => (
-                <BarRow detail={`${formatTokens(row.tokens)} tok · ${row.count}`} hue={row.hue} key={row.model} label={row.model} max={Math.max(1, ...model.modelBreakdown.map(item => item.tokens))} value={row.tokens} />
-              ))}
-            </div>
-          </Panel>
-        </div>
-
-        <Panel title={t("Pipeline stage activity")}>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-            {model.stageStats.map(stage => (
-              <div className="rounded-lg border border-fd-border bg-fd-muted/40 p-3" key={stage.label}>
-                <div className="mb-2 flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: stage.hue }} />
-                  <span className="text-sm font-medium">{stage.label}</span>
-                  <span className="ml-auto text-xs tabular-nums text-fd-muted-foreground">{stage.runs}×</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-fd-secondary">
-                  <div className="h-full rounded-full" style={{ background: stage.hue, width: `${(stage.tokens / maxStageTokens) * 100}%` }} />
-                </div>
-                <div className="mt-2 flex justify-between text-xs text-fd-muted-foreground">
-                  <span>{formatTokens(stage.tokens)}{t(" tok")}</span>
-                  <span>{stage.avgMs !== null ? `avg ${formatDuration(stage.avgMs)}` : '—'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel title={t("Tokens per run (chronological)")}>
-          <div className="flex h-36 items-end gap-2">
-            {model.tokenTimeline.map(row => (
-              <button
-                className="group flex min-w-0 flex-1 flex-col items-center justify-end gap-1"
-                key={row.sessionId}
-                onClick={() => { props.onOpenRun(row.sessionId) }}
-                title={`${row.title} · ${formatTokens(row.tokens)} tokens`}
-                type="button"
-              >
-                <span className="text-[10px] tabular-nums text-fd-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">{formatTokens(row.tokens)}</span>
-                <span
-                  className="w-full rounded-t transition-[height] duration-500 group-hover:opacity-80"
-                  style={{ background: row.hue, height: `${Math.max(3, (row.tokens / maxTimeline) * 100)}%` }}
-                />
-              </button>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel title={t("Runs")}>
-          <div className="mb-3 flex items-center gap-1">
-            {(['all', 'completed', 'running', 'failed'] as const).map(candidate => (
-              <button
-                className={`rounded-md px-2.5 py-1 text-xs transition-colors ${statusFilter === candidate ? 'bg-fd-secondary text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
-                key={candidate}
-                onClick={() => { setStatusFilter(candidate) }}
-                type="button"
-              >
-                {t(candidate === 'all' ? 'All' : STATUS_LABEL[candidate])}
-              </button>
-            ))}
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-fd-border text-xs uppercase tracking-wider text-fd-muted-foreground">
-                  <th className="pb-2 pr-3 font-normal">{t("Run")}</th>
-                  <th className="pb-2 pr-3 font-normal">{t("Status")}</th>
-                  <th className="pb-2 pr-3 font-normal">{t("Stages")}</th>
-                  <th className="pb-2 pr-3 font-normal">{t("Tokens")}</th>
-                  <th className="pb-2 pr-3 font-normal">{t("Duration")}</th>
-                  <th className="pb-2 font-normal">{t("Model")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleRuns.map(run => (
-                  <tr
-                    className="cursor-pointer border-b border-fd-border/50 transition-colors hover:bg-fd-secondary/40"
-                    key={run.sessionId}
-                    onClick={() => { props.onOpenRun(run.sessionId) }}
-                  >
-                    <td className="max-w-56 truncate py-2 pr-3">
-                      <span className="block truncate">{run.title}</span>
-                      <span className="block truncate font-mono text-xs text-fd-muted-foreground">{run.sessionId}</span>
-                    </td>
-                    <td className="py-2 pr-3">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs" style={{ borderColor: `color-mix(in srgb, ${STATUS_HUE[run.status]} 33%, transparent)`, color: STATUS_HUE[run.status] }}>
-                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS_HUE[run.status] }} />
-                        {t(STATUS_LABEL[run.status])}
-                      </span>
-                    </td>
-                    <td className="py-2 pr-3 tabular-nums text-fd-muted-foreground">{run.settledChildren}/{run.childCount}</td>
-                    <td className="py-2 pr-3 tabular-nums">{formatTokens(run.tokens)}</td>
-                    <td className="py-2 pr-3 tabular-nums text-fd-muted-foreground">{run.durationMs !== null ? formatDuration(run.durationMs) : '—'}</td>
-                    <td className="max-w-40 truncate py-2 font-mono text-xs text-fd-muted-foreground">{run.model ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {visibleRuns.length === 0 && <p className="py-6 text-center text-xs text-fd-muted-foreground">{t("no runs match this filter")}</p>}
-          </div>
-        </Panel>
-      </div>
+  const model = useMemo(() => deriveDashboard(entries), [entries])
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const load = useCallback(async () => {
+    setBusy(true)
+    try {
+      const [state, overview, open, ended] = await Promise.all([superagentState(), superagentOverview(), superagentTickets(), superagentTickets('ended')])
+      setSnapshot({ state, overview, open, ended, at: Date.now() }); setError(null)
+    } catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)) }
+    finally { setBusy(false) }
+  }, [])
+  useEffect(() => { void load() }, [load])
+  useInterval(() => { void load() }, 10000)
+  const state = snapshot?.state
+  const overview = snapshot?.overview
+  const recent = snapshot ? [...snapshot.open.items, ...snapshot.ended.items].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 6) : []
+  const routerReady = state?.health.runtime?.state === 'ready'
+  const maxTokens = Math.max(1, ...model.modelBreakdown.map(item => item.tokens))
+  const count = (value: number | undefined) => value === undefined ? '—' : String(value)
+  const openTask = (task: SuperagentTicket) => { if (task.sessionId && model.runs.some(run => run.sessionId === task.sessionId)) onOpenRun(task.sessionId); else onRouter() }
+  return <div className="mx-auto w-full max-w-7xl space-y-5">
+    <header className="flex flex-wrap items-start justify-between gap-4"><div><h1 className="text-xl font-semibold">{t('Dashboard')}</h1><p className="mt-1 text-sm text-fd-muted-foreground">{t('Monitor intake, Worker execution and specialist activity.')}</p></div><div className="flex flex-wrap items-center gap-2">{snapshot && <span className="mr-2 text-xs text-fd-muted-foreground">{t('Updated')} {new Date(snapshot.at).toLocaleTimeString([], { hour12: false })}</span>}<button className={button} onClick={onConfigure}>Superagent ↗</button><button className={button} disabled={busy} onClick={() => { void load() }}>{t(busy ? 'Refreshing…' : 'Refresh')}</button></div></header>
+    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-fd-border bg-fd-card px-4 py-3 text-xs"><span className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${state?.paused ? 'bg-fd-warning' : routerReady ? 'bg-fd-success' : 'bg-fd-muted-foreground'}`} />{t(state ? state.paused ? 'Paused' : routerReady ? 'Ready' : 'Setup required' : 'Connecting…')}</span><span className="font-mono">{state?.setup.accounts?.repository ?? t('No repository configured')}</span>{state?.setup.accounts?.agent && <span className="text-fd-muted-foreground">@{state.setup.accounts.agent}</span>}<span className="ml-auto text-fd-muted-foreground">{t('Task metrics: Superagent')} · {t('Usage: recorded runs')}</span></div>
+    {error && <p role="alert" className="rounded-lg border border-fd-warning/30 bg-fd-warning/5 p-3 text-sm text-fd-warning">{t(snapshot ? 'Refresh failed. Showing the last successful snapshot.' : 'Task metrics unavailable. Run activity remains available.')} <span className="text-xs">{error}</span></p>}
+    <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">
+      <Metric label="Received · 24h" value={count(overview?.flow.received)} note={`${count(overview?.flow.filtered)} ${t('filtered')}`} />
+      <Metric label="Accepted · 24h" value={count(overview?.flow.accepted)} note={`${count(overview?.flow.evaluating)} ${t('evaluating now')}`} />
+      <Metric label="Open tasks" value={count(snapshot?.open.total)} note={`${count(snapshot?.ended.total)} ${t('ended tasks')}`} />
+      <Metric label="Workers" value={state ? `${state.load.running} / ${state.load.maxWorkers}` : '—'} note={`${count(state?.load.queued)} ${t('queued')}`} />
+      <Metric label="Needs attention" value={count(overview?.person.length)} note={t('Review, questions or execution issues')} warning={!!overview?.person.length} />
     </div>
-  )
+    <Panel title="Execution pipeline" action={<span className="text-xs text-fd-muted-foreground">{t('Five native specialists · strictly sequential per Worker')}</span>}>
+      <div className="mb-4 grid gap-3 md:grid-cols-[1fr_auto_1fr]"><div className="rounded-lg bg-fd-secondary/50 p-4"><div className="flex items-center justify-between gap-3"><span className="text-sm font-medium">Monitor / Router</span><span className={`text-xs ${routerReady ? 'text-fd-success' : 'text-fd-muted-foreground'}`}>{t(state?.paused ? 'Paused' : routerReady ? 'Ready' : 'Unavailable')}</span></div><p className="mt-1 text-xs text-fd-muted-foreground">{t('Receive events, evaluate policy and dispatch tasks.')}</p><button disabled={!state?.setup.accounts} className="mt-3 text-xs text-fd-primary disabled:opacity-40" onClick={() => onRouter()}>{t('Open Router')} ↗</button></div><span aria-hidden className="hidden self-center text-fd-muted-foreground md:block">→</span><div className="rounded-lg bg-fd-secondary/50 p-4"><div className="flex items-center justify-between gap-3"><span className="text-sm font-medium">Worker</span><span className="text-xs text-fd-muted-foreground">{count(state?.load.running)} {t('active')}</span></div><p className="mt-1 text-xs text-fd-muted-foreground">{t('One task workspace; delegate to five LAI specialists.')}</p><button className="mt-3 text-xs text-fd-primary" onClick={onRouter}>{t('Open Router')} ↗</button></div></div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{model.stageStats.map((stage, index) => <div key={stage.id} className="relative rounded-lg border border-fd-border p-3"><div className="flex items-center gap-2"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold" style={{ color: stage.hue, background: `color-mix(in srgb, ${stage.hue} 12%, transparent)` }}>{index + 1}</span><h3 className="text-sm font-medium">{t(stage.label)}</h3>{stage.active > 0 && <span className="ml-auto h-2 w-2 rounded-full bg-fd-warning" title={t('Running')} />}</div><p className="mt-3 text-xs text-fd-muted-foreground">{stage.runs} {t('recorded agents')} · {stage.active} {t('active')}</p><div className="mt-2 flex justify-between text-xs"><span>{formatTokens(stage.tokens)} tok</span><span className="text-fd-muted-foreground">{stage.avgMs === null ? '—' : formatDuration(stage.avgMs)}</span></div><p className="mt-2 text-[10px] text-fd-muted-foreground">{stage.completed} {t('completed')} · {stage.failed} {t('failed')}</p></div>)}</div>
+      <p className="mt-3 text-[11px] text-fd-muted-foreground">{t('Stage totals include recorded, non-archived specialist runs. Durations use recorded active time.')}</p>
+    </Panel>
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <Panel title="Recent tasks" action={<button className="text-xs text-fd-primary" onClick={onRouter}>{t('Open Router')} ↗</button>}><div className="divide-y divide-fd-border">{recent.map(task => <button key={task.id} onClick={() => openTask(task)} className="flex w-full items-start justify-between gap-3 rounded-md py-3 text-left hover:bg-fd-secondary/40"><span className="min-w-0"><span className="block truncate text-sm font-medium">{task.title}</span><span className="mt-1 block text-xs text-fd-muted-foreground">{new Date(task.updatedAt).toLocaleString()}</span></span><span className={`shrink-0 rounded-md px-2 py-1 text-[10px] ${task.stage === 'person' ? 'bg-fd-warning/10 text-fd-warning' : 'bg-fd-secondary text-fd-muted-foreground'}`}>{t(taskStatus(task))}</span></button>)}{recent.length === 0 && <p className="py-8 text-center text-sm text-fd-muted-foreground">{t(snapshot ? 'No tasks yet. Configure a source and policy to get started.' : 'Waiting for task metrics…')}</p>}</div></Panel>
+      <Panel title="Attention & service health"><div className="space-y-3">{overview?.problems.map((problem, index) => <div key={`${problem.kind}-${index}`} className="rounded-lg border border-fd-warning/25 bg-fd-warning/5 p-3"><p className="text-xs font-medium text-fd-warning">{t(PROBLEM_LABELS[problem.kind] ?? 'Service issue')}</p>{(problem.detail || problem.source?.health.detail || problem.outgoing?.error) && <p className="mt-1 break-words text-xs text-fd-muted-foreground">{problem.detail ?? problem.source?.health.detail ?? problem.outgoing?.error}</p>}</div>)}{overview && overview.problems.length === 0 && <p className="text-sm text-fd-success">{t('No service issues reported.')}</p>}{!snapshot && <p className="text-sm text-fd-muted-foreground">{t('Waiting for task metrics…')}</p>}{state?.health.github && <div className="border-t border-fd-border pt-3 text-xs"><span className="font-medium">GitHub · {t(state.health.github.state)}</span><p className="mt-1 text-fd-muted-foreground">{state.health.github.detail}</p></div>}{overview?.person.slice(0, 3).map(task => <button key={task.id} className="block w-full rounded-lg bg-fd-secondary/50 p-3 text-left text-xs hover:bg-fd-secondary" onClick={() => openTask(task)}><span className="font-medium">{task.title}</span><span className="mt-1 block text-fd-warning">{t(taskStatus(task))}</span></button>)}</div></Panel>
+    </div>
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+      <Panel title="Recorded model usage"><p className="mb-4 text-2xl font-semibold tabular-nums">{formatTokens(model.totals.tokens)} <span className="text-xs font-normal text-fd-muted-foreground">tok · {formatTokens(model.totals.outputTokens)} {t('output')}</span></p><div className="space-y-4">{model.modelBreakdown.map(row => <div key={row.model}><div className="mb-1 flex items-center justify-between gap-3 text-xs"><span className="min-w-0 truncate font-mono" title={row.model}>{t(row.model)}</span><span className="shrink-0 text-fd-muted-foreground">{formatTokens(row.tokens)} tok</span></div><div className="h-1.5 overflow-hidden rounded-full bg-fd-secondary"><div className="h-full rounded-full" style={{ width: `${row.tokens / maxTokens * 100}%`, background: row.hue }} /></div></div>)}</div>{model.modelBreakdown.length === 0 && <p className="text-sm text-fd-muted-foreground">{t('No recorded model usage.')}</p>}<p className="mt-4 text-[11px] text-fd-muted-foreground">{t('Usage is grouped by each run’s actual model route; token counts are not a cost estimate.')}</p></Panel>
+      <Panel title="Recent run activity" action={<span className="text-xs text-fd-muted-foreground">{model.totals.runs} {t('root runs')} · {model.totals.subagents} {t('subagents')}</span>}><div className="divide-y divide-fd-border">{model.runs.slice(0, 6).map(run => <button key={run.sessionId} className="flex w-full items-center gap-3 rounded-md py-3 text-left hover:bg-fd-secondary/40" onClick={() => onOpenRun(run.sessionId)}><span className={`h-2 w-2 shrink-0 rounded-full ${run.status === 'running' ? 'bg-fd-warning' : 'bg-fd-muted-foreground'}`} /><span className="min-w-0 flex-1"><span className="block truncate text-sm">{run.title}</span><span className="mt-1 block text-[11px] text-fd-muted-foreground">{t(run.role)} · {run.childCount} {t('subagents')}</span></span><span className="text-right text-xs"><span>{formatTokens(run.tokens)} tok</span><span className="mt-1 block text-[10px] text-fd-muted-foreground">{t(run.status === 'running' ? 'Running' : 'Idle')}</span></span></button>)}{model.runs.length === 0 && <p className="py-6 text-sm text-fd-muted-foreground">{t('No run activity yet.')}</p>}</div></Panel>
+    </div>
+  </div>
 }

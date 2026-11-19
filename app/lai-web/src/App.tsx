@@ -2,7 +2,7 @@ import { useLanguage } from './i18n.tsx'
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionListEntry } from './api/gateway.ts'
 import { bootstrapWithToken, listSessions, UnauthorizedError } from './api/gateway.ts'
-import { SuperagentTasks } from './components/SuperagentTasks.tsx'
+import { RouterPage } from './components/RouterPage.tsx'
 import { DashboardPage } from './components/DashboardPage.tsx'
 import { NavRail } from './components/NavRail.tsx'
 import type { Page } from './components/NavRail.tsx'
@@ -103,10 +103,10 @@ export function App() {
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
-              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
-              {page === 'pipeline' && <SuperagentTasks onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
+              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' || page === 'dashboard' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
+              {page === 'router' && <RouterPage entries={entries} onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
-              {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} />}
+              {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} onRouter={() => setPage('router')} onConfigure={() => setPage('superagent')} />}
               {page === 'superagent' && <SuperagentPage />}
               {page === 'lai-agents' && <div className="p-4 md:p-6"><AgentPrompts /></div>}
               {page === 'settings' && <SettingsPage />}

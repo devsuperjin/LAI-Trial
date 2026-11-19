@@ -62,7 +62,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
             <p className="text-sm">{t("No runs yet — start a task in DSH or trigger the pipeline")}</p>
           </div>
         ) : (
-          <DetailLoader
+          <RunDetailLoader
             onDelete={() => { void deleteSelected() }}
             deleting={deleting}
             key={selectedId}
@@ -80,7 +80,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
   )
 }
 
-function DetailLoader(props: { sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete: () => void; deleting: boolean }) {
+export function RunDetailLoader(props: { sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean }) {
   const [page, setPage] = useState<PageResponse | null>(null)
   const load = useCallback(async (): Promise<void> => {
     try {

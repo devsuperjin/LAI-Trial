@@ -2,7 +2,7 @@ import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type Page = 'pipeline' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
+export type Page = 'router' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
@@ -20,7 +20,7 @@ const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) =>
   },
 
   {
-    id: 'pipeline', label: 'Tasks', hint: 'Monitor inputs and follow Worker tasks',
+    id: 'router', label: 'Router', hint: 'Monitor inputs and follow Worker tasks',
     icon: () => <svg aria-hidden fill="none" height="18" width="18" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.6"><rect x="2" y="4" width="5" height="5" rx="1" /><rect x="9.5" y="9.5" width="5" height="5" rx="1" /><rect x="17" y="15" width="5" height="5" rx="1" /><path d="M7 6.5h5V9.5M14.5 12h5V15" /></svg>,
   },
   {

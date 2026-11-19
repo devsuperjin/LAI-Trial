@@ -20,6 +20,7 @@ export default defineConfig({
     port: 5174,
     strictPort: true,
     proxy: {
+      '/orchestrator': { target, changeOrigin: true, headers: { origin: target } },
       '/lai-api': { target, changeOrigin: true, headers: { origin: target } },
       '/api': {
         target,

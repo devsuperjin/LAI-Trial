@@ -96,7 +96,7 @@ pnpm start
 3. 在 **Policy** 配置允许的发送者、任务范围和准入规则。
 4. 在 **Eval** 配置判断模式、超时和 Router 模型。默认是 `observe`；需要自动受理推断任务时，按使用场景选择 `auto`。
 5. 在 **Execution** 配置 Worker 模型、并发数、工作目录、工作区准备命令和命令限制。
-6. 在 **Tasks** 查看受理任务，在 **Runs** 查看 Router、Worker 和子 Agent 的执行过程。
+6. 在 **Router** 查看受理任务，在 **Runs** 查看 Router、Worker 和子 Agent 的执行过程。
 
 如果使用同一个 GitHub 账号发 Issue 和执行任务，需要同时开启新 Issue 接收和 **Receive issues opened by the agent account**。自己的评论和 PR 仍会被过滤；开关不会自动补跑此前已跳过的 Issue，接收后的 Issue 仍受 Policy 约束。
 
@@ -106,8 +106,8 @@ pnpm start
 
 | 页面 | 用途 |
 | --- | --- |
-| Dashboard | 查看 Run 概览、状态及模型用量等统计 |
-| Tasks | 查看 Superagent 任务，打开对应 Monitor / Router 或 Worker 会话 |
+| Dashboard | Superagent 事件与任务指标、Router / Worker 状态、五阶段活动和模型用量 |
+| Router | 查看 Superagent 任务，打开对应 Monitor / Router 或 Worker 会话 |
 | Runs | 瀑布图 / 列表 Timeline、带网格的 DAG、原生子 Agent 与执行结果 |
 | Plugin → Superagent | 独立的 Superagent 管理页面，包含 Sources、Policy、Eval、Execution、Prompts、Deployment |
 | Plugin → LAI Agents | Worker 和专业角色 Prompt，以及各专业子 Agent 的模型覆盖 |
