@@ -26,7 +26,8 @@
     "@lai/dsh-web-host": "workspace:*",
     "@lai/lai-agents": "workspace:*",
     "@lai/application-config": "workspace:*",
-    "@lai/superagent": "workspace:*"
+    "@lai/superagent": "workspace:*",
+    "@lai/feishu-tools": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^6.0.3",

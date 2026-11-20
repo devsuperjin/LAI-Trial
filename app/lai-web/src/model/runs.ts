@@ -37,7 +37,7 @@ export function withoutArchived(entries: SessionListEntry[], archivedIds: string
 }
 
 /** Prefer the human task title inside a structured Worker input. */
-export function readableRunTitle(value: string | undefined, fallback = 'Run'): string {
+export function readableRunTitle(value: string | null | undefined, fallback = 'Run'): string {
   const text = value?.trim()
   if (!text) return fallback
   if (text.startsWith('{') || text.startsWith('[')) {

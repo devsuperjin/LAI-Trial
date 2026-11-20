@@ -23,6 +23,10 @@
     "./runs": {
       "types": "./lib/runs.d.ts",
       "default": "./lib/runs.js"
+    },
+    "./agent-tools": {
+      "types": "./lib/agent-tools.d.ts",
+      "default": "./lib/agent-tools.js"
     }
   },
   "files": [

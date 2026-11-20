@@ -1,3 +1,7 @@
+import { FeishuToolsConfig } from './FeishuToolsConfig.tsx'
+import { agentToolCatalog, defaultToolIds } from '@lai/dsh-adapter/agent-tools'
+import type { AgentToolCatalog } from '@lai/dsh-adapter/agent-tools'
+import { AgentConfigDialog, type AgentConfigTab } from './AgentConfigDialog.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { SettingsNamespaceView, ModelCatalog } from '../api/gateway.ts'
@@ -14,9 +18,12 @@ function routeKey(value: unknown): string { const route = record(value); return 
 /** Edit the lai-agents plugin's prompts through ordinary DSH settings. */
 export function AgentPrompts() {
   const { t } = useLanguage()
+  const [editing, setEditing] = useState<{ role: string; title: string; tab: AgentConfigTab } | null>(null)
   const [namespace, setNamespace] = useState<SettingsNamespaceView | null>(null)
   const [writable, setWritable] = useState(false)
   const [catalog, setCatalog] = useState<ModelCatalog | null>(null)
+  const [tools, setTools] = useState<Record<string, string[] | null>>({})
+  const [toolCatalog, setToolCatalog] = useState<AgentToolCatalog | null>(null)
   const [routes, setRoutes] = useState<Record<string, string>>({})
   const [draft, setDraft] = useState<Record<string, string>>({})
   const [busy, setBusy] = useState(true)
@@ -26,11 +33,14 @@ export function AgentPrompts() {
     setBusy(true)
     setError(null)
     try {
-      const [settings, models] = await Promise.all([describeSettings(), modelCatalog()])
+      const [settings, models, availableTools] = await Promise.all([describeSettings(), modelCatalog(), agentToolCatalog().catch(() => null)])
+      setToolCatalog(availableTools)
       setCatalog(models)
       const ns = settings.namespaces.find(item => item.ns === 'lai-agents') ?? null
       setNamespace(ns)
       setWritable(settings.writable)
+      const selectedTools = record(ns?.value.tools)
+      setTools(Object.fromEntries(ROLES.filter(([id]) => id !== 'orchestrator').map(([id]) => [id, Array.isArray(selectedTools[id]) ? selectedTools[id] as string[] : null])))
       const configured = record(ns?.value.models)
       setRoutes(Object.fromEntries(ROLES.filter(([id]) => id !== 'orchestrator').map(([id]) => [id, routeKey(configured[id])])))
       const prompts = record(ns?.value.prompts)
@@ -52,23 +62,37 @@ export function AgentPrompts() {
       for (const [id] of ROLES) if (id !== 'orchestrator' && (routes[id] ?? '') !== routeKey(models[id])) {
         ops.push(routes[id] ? { op: 'set', path: ['models', id], value: JSON.parse(routes[id]!) } : { op: 'unset', path: ['models', id] })
       }
+      const originalTools = record(namespace.value.tools)
+      for (const [id] of ROLES) if (id !== 'orchestrator' && JSON.stringify(tools[id] ?? null) !== JSON.stringify(originalTools[id] ?? null)) {
+        ops.push({ op: 'set', path: ['tools', id], value: tools[id] ?? null })
+      }
       if (ops.length) setNamespace(await mutateSettings(namespace.ns, ops, namespace.revision))
-      setNotice('Configuration saved. Prompts apply at the next assembly; model overrides apply to new children.')
+      setNotice(t('Saved. Prompts apply at the next assembly; models and tools apply to new subagents.'))
     } catch (failure) { setError(failure instanceof Error ? failure.message : String(failure)) }
     finally { setBusy(false) }
   }
   const original = record(namespace?.value.prompts)
   const originalModels = record(namespace?.value.models)
-  const dirty = ROLES.some(([id]) => draft[id] !== original[id] || id !== 'orchestrator' && (routes[id] ?? '') !== routeKey(originalModels[id]))
-  return <section className="rounded-xl border border-fd-border bg-fd-card p-5" aria-label={t("LAI agents")}>
+  const dirty = ROLES.some(([id]) => draft[id] !== original[id] || id !== 'orchestrator' && ((routes[id] ?? '') !== routeKey(originalModels[id]) || JSON.stringify(tools[id] ?? null) !== JSON.stringify(record(namespace?.value.tools)[id] ?? null)))
+  return <section className="min-w-0" aria-label={t("LAI agents")}>
     <h2 className="text-base font-medium">{t("LAI agents")}</h2>
     <p className="mt-1 text-sm text-fd-muted-foreground">{t("A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.")}</p>
+    <FeishuToolsConfig />
     {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">{t("The lai-agents plugin is not enabled in this profile.")}</p>}
-    {namespace && <div className="mt-4 space-y-2">{ROLES.map(([id, title]) => <details className="rounded-lg border border-fd-border p-3" key={id}>
-      <summary className="cursor-pointer text-sm font-medium">{t(title)}</summary>
-      {id === 'orchestrator' ? <p className="mt-3 text-xs text-fd-muted-foreground">{t('Configure the Worker model in Plugin → Superagent → Execution.')}</p> : <label className="mt-3 block text-sm">{t('Role model')}<select aria-label={`${t(title)} model`} className="mt-1 w-full rounded-md border border-fd-border bg-fd-muted px-3 py-2 text-sm" disabled={busy || !writable} value={routes[id] ?? ''} onChange={event => setRoutes(current => ({ ...current, [id]: event.target.value }))}><option value="">{t('Inherit Worker model')}</option>{routes[id] && !catalog?.groups.some(group => group.models.some(model => JSON.stringify({ provider: group.id, model: model.id }) === routes[id])) && <option value={routes[id]}>{routes[id]}</option>}{catalog?.groups.map(group => <optgroup key={group.id} label={group.name}>{group.models.map(model => <option key={model.id} value={JSON.stringify({ provider: group.id, model: model.id })}>{model.name}</option>)}</optgroup>)}</select></label>}
-      <textarea aria-label={`${t(title)} prompt`} className="mt-3 min-h-40 w-full rounded-md border border-fd-border bg-fd-muted p-3 text-sm outline-none focus:border-fd-primary disabled:opacity-50" value={draft[id] ?? ''} disabled={busy || !writable} onChange={event => { setDraft(value => ({ ...value, [id]: event.target.value })) }} />
-    </details>)}</div>}
+    {namespace && <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{ROLES.map(([id, title], index) => {
+      const selected = tools[id] ?? (toolCatalog ? defaultToolIds(toolCatalog, id) : [])
+      const route = routes[id] ? record(JSON.parse(routes[id]!)) : null
+      const modelName = route ? catalog?.groups.find(group => group.id === route.provider)?.models.find(model => model.id === route.model)?.name ?? String(route.model) : t('Inherit Worker model')
+      const descriptions = ['Coordinate the five-stage pipeline and pass context between specialists.', 'Classify failures and identify the root cause from evidence.', 'Reproduce the problem and implement explicitly authorized fixes.', 'Prepare an actionable ticket draft with evidence and findings.', 'Independently review the diagnosis, changes and evidence.', 'Consolidate validated findings into the final report.']
+      return <article key={id} className="flex min-w-0 flex-col rounded-xl border border-fd-border bg-fd-card p-4 transition-shadow hover:shadow-sm">
+        <div className="flex items-center gap-3"><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold ${id === 'orchestrator' ? 'bg-fd-primary/10 text-fd-primary' : 'bg-fd-secondary text-fd-muted-foreground'}`}>{id === 'orchestrator' ? 'W' : String(index).padStart(2, '0')}</span><div><h3 className="text-sm font-semibold">{t(title)}</h3><p className="mt-0.5 text-[10px] uppercase tracking-wide text-fd-muted-foreground">{t(id === 'orchestrator' ? 'Coordinator' : 'Specialist')}</p></div></div>
+        <p className="mt-3 min-h-10 text-xs leading-5 text-fd-muted-foreground">{t(descriptions[index]!)}</p>
+        <dl className="my-3 space-y-2 border-y border-fd-border py-3 text-xs"><div className="flex items-start justify-between gap-3"><dt className="text-fd-muted-foreground">{t('Model')}</dt><dd className="min-w-0 truncate text-right" title={id === 'orchestrator' ? 'Superagent → Execution' : modelName}>{id === 'orchestrator' ? 'Superagent → Execution' : modelName}</dd></div><div className="flex justify-between gap-3"><dt className="text-fd-muted-foreground">{t('Tools')}</dt><dd>{id === 'orchestrator' ? t('Five fixed delegations') : toolCatalog ? `${selected.length} ${t('selected')} · ${t(tools[id] == null ? 'Role defaults' : 'Custom')}` : '—'}</dd></div></dl>
+        <p className="mb-4 line-clamp-2 min-h-9 text-[11px] leading-[18px] text-fd-muted-foreground" title={draft[id]}>{draft[id]}</p>
+        <div className="mt-auto grid grid-cols-3 gap-2">{(['prompt', 'model', 'tools'] as const).map(tab => <button key={tab} type="button" aria-label={`${t(title)} ${t(tab === 'prompt' ? 'Prompt' : tab === 'model' ? 'Model' : 'Tools')}`} disabled={busy || id === 'orchestrator' && tab !== 'prompt'} title={id === 'orchestrator' && tab !== 'prompt' ? t('Worker model is managed by Superagent; delegation tools are fixed.') : undefined} onClick={() => setEditing({ role: id, title: t(title), tab })} className="rounded-lg border border-fd-border px-2 py-2 text-xs hover:bg-fd-secondary disabled:cursor-default disabled:opacity-35">{t(tab === 'prompt' ? 'Prompt' : tab === 'model' ? 'Model' : 'Tools')}</button>)}</div>
+      </article>
+    })}</div>}
+    {editing && <AgentConfigDialog key={editing.role} role={editing.role} title={editing.title} initialTab={editing.tab} value={{ prompt: draft[editing.role] ?? '', route: routes[editing.role] ?? '', tools: tools[editing.role] ?? null }} catalog={catalog} toolsCatalog={toolCatalog} disabled={busy || !writable} onClose={() => setEditing(null)} onApply={value => { setDraft(current => ({ ...current, [editing.role]: value.prompt })); if (editing.role !== 'orchestrator') { setRoutes(current => ({ ...current, [editing.role]: value.route })); setTools(current => ({ ...current, [editing.role]: value.tools })) } }} />}
     {error && <p className="mt-3 text-sm text-fd-danger" role="alert">{error}{t(" Discard the draft and reload if settings changed elsewhere.")}</p>}
     {notice && <p className="mt-3 text-sm text-fd-success" role="status">{notice}</p>}
     <div className="mt-4 flex flex-wrap gap-2">

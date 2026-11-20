@@ -126,6 +126,8 @@ Ticket 与 Run 含义不同：前者表达业务任务生命周期，后者表�
 2. **运行时限制**：Superagent 对 Router、Worker 及关联子 Agent 限制可用工具；Ticket 结束后阻止继续工作。自定义工作工具需要纳入相应放行配置。
 3. **职责说明**：Prompt 规定角色应如何使用工具，但不能代替权限检查。
 
+LAI Agents 按已安装插件列出工具，支持专业角色逐项选择。新 Run 保存选择快照，配置修改和重启不改变已有快照。自定义插件使用标准 `ctx.tools.register`，LAI 主动扫描公开注册表中的无条件全局工具（该接口不提供来源包信息），Superagent 显式检查选择并保留 Ticket 结束拦截。详见 [插件说明](../plugins/lai-agents/README.zh.md)。
+
 工具集合定义主要位于 `plugins/lai-agents/src/definitions.ts`；Superagent 的工作工具白名单和生命周期约束位于 `plugins/superagent/src/app/sessions.ts`。
 
 当前 Triage、Review 关闭了文件写入类工具，但仍可以调用 Shell；因此它们不是文件系统层面的强制只读角色。Superagent 管理的运行使用宽权限模式，命令包装与黑名单也不等于操作系统沙箱。需要严格隔离时应另外设计执行环境与权限边界。
@@ -201,7 +203,7 @@ Dashboard 的业务状态来自 Superagent；Token 用量来自各原生 Run 的
 
 - 专用 Jenkins Source、通用 Commit / Push 触发及其他 CI 平台适配。
 - Jira / Azure 等外部工单的实际提交连接器。
-- 每角色工具集合的可视化编辑及强制文件系统隔离。
+- 强制文件系统隔离；每角色工具选择已实现，但 Shell 仍可能间接提供更广泛能力。
 - lai-web 对所有动态来源字段的完整表单支持。
 
 扩展优先复用 Source、Preset、工具插件和配置接口，保持输入、任务协调、专业执行与界面展示的责任边界。

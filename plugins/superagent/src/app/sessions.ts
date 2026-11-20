@@ -1,3 +1,4 @@
+import type {} from '@lai/lai-agents'
 /** Lifecycle, prompt/tool/skill decoration, message delivery, and budget retry tracking for orchestrator and worker DSH sessions. */
 import type { Context } from '@deepseek-ai/cordis'
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -295,8 +296,11 @@ export class Sessions {
   private workOnly(agent: Agent, ticketId: string): (() => void)[] {
     const store = this.host.store
     const parent = scopeParentOf(agent)
-    const allow = WORK_TOOLS.filter(name => agent.ctx.tools.get(name, parent))
-    return [agent.ctx.tools.restrict({ allow }), agent.ctx.tools.guard(() => {
+    const approved = this.ctx.get('laiAgents')?.allowedToolNames(agent) ?? []
+    const allow = [...new Set([...WORK_TOOLS, ...approved])].filter(name => agent.ctx.tools.get(name, parent))
+    return [agent.ctx.tools.restrict({ allow }), agent.ctx.tools.guard(execution => {
+      const selectionDenial = this.ctx.get('laiAgents')?.toolDenial(agent, execution.name)
+      if (selectionDenial) return selectionDenial
       const current = store.tickets.get(ticketId)
       return !current || !liveTicket(current) ? 'Ticket ended; new work needs a new authorized ticket' : undefined
     })]

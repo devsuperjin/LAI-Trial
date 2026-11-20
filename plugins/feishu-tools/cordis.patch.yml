@@ -1,0 +1,3 @@
+- insert:
+    - id: lai-feishu-tools
+      name: '@lai/feishu-tools'

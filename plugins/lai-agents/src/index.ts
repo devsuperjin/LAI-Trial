@@ -1,3 +1,9 @@
+import { join } from 'node:path'
+import { homedir } from 'node:os'
+import { AgentToolCatalog, type RoleTools } from './tools.ts'
+import type {} from '@deepseek-ai/dsh-tools'
+import type {} from '@deepseek-ai/dsh-host-webserver'
+import type {} from '@deepseek-ai/dsh-client-connection'
 /** Independent LAI Agents bundle: Worker coordinator and five configurable native specialists. */
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import type { Context, Volatile } from '@deepseek-ai/cordis'
@@ -8,10 +14,11 @@ import type {} from '@deepseek-ai/dsh-settings'
 import { DEFAULT_PROMPTS, PRESETS } from './definitions.ts'
 
 export { DEFAULT_PROMPTS, PRESETS }
+export type { ToolGroup, ToolCatalogView, RoleTools } from './tools.ts'
 export const name = 'lai-agents'
-export const inject = ['agentPresets', 'systemPrompt']
+export const inject = ['agentPresets', 'systemPrompt', 'tools']
 
-declare module '@deepseek-ai/cordis' { interface Context { laiAgents: { readonly presets: readonly string[] } } }
+declare module '@deepseek-ai/cordis' { interface Context { laiAgents: { readonly presets: readonly string[]; registerTools: AgentToolCatalog['registerTools']; catalog: AgentToolCatalog['catalog']; toolDenial: AgentToolCatalog['toolDenial']; allowedToolNames: AgentToolCatalog['allowedToolNames'] } } }
 
 /** Each role's prompt is editable through ordinary DSH settings. */
 export interface Prompts {
@@ -38,10 +45,13 @@ export interface Config {
   /** Prompt templates used by the next prompt assembly in each agent scope. */
   prompts: Volatile<Prompts>
   models?: Volatile<RoleModels>
+  tools?: Volatile<RoleTools>
 }
 
 const Route = z.union([z.object({ provider: z.string().min(1).required(), model: z.string().min(1).required() }), z.const(null)]).default(null)
+const ToolSelection = z.union([z.array(z.string().min(1)), z.const(null)]).default(null)
 export const Config: z<Config> = z.object({
+  tools: z.object({ triage: ToolSelection, reproduce: ToolSelection, ticket: ToolSelection, review: ToolSelection, report: ToolSelection }).default({}).volatile(),
   models: z.object({ triage: Route, reproduce: Route, ticket: Route, review: Route, report: Route }).default({}).volatile(),
   prompts: z.object({
     orchestrator: z.string().min(1).default(DEFAULT_PROMPTS.orchestrator),
@@ -62,7 +72,7 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   ctx.inject(['settings'], child => {
     child.effect(() => child.settings.configure({ auto: false }, ctx.fiber))
   })
-  ctx.on('agent/created', ({ agent }) => { seedRoleModel(agent, config.models?.get() ?? {}); return undefined })
+
   for (const role of Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]) {
     ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => config.prompts.get()[role]), `lai-agents prompt: ${role}`)
   }
@@ -70,5 +80,21 @@ export async function apply(ctx: Context, config: Config): Promise<void> {
   for (const preset of PRESETS) {
     await ctx.effect(() => ctx.agentPresets.register(preset), `lai-agents preset: ${preset.id}`)
   }
-  ctx.provide('laiAgents', { presets: PRESETS.map(preset => preset.id) })
+  const toolCatalog = new AgentToolCatalog(ctx, join(process.env.DSH_HOME ?? join(homedir(), '.dsh'), 'lai-agents', 'tool-selections'))
+  ctx.effect(() => () => toolCatalog.dispose(), 'LAI tools lifecycle')
+  ctx.on('agent/created', async ({ agent }) => {
+    seedRoleModel(agent, config.models?.get() ?? {})
+    await toolCatalog.mount(agent, config.tools?.get() ?? {})
+  }, { prepend: true })
+  ctx.on('agent/disposed', ({ agent }) => toolCatalog.release(agent))
+  ctx.provide('laiAgents', { presets: PRESETS.map(preset => preset.id), registerTools: toolCatalog.registerTools.bind(toolCatalog), catalog: toolCatalog.catalog.bind(toolCatalog), toolDenial: toolCatalog.toolDenial.bind(toolCatalog), allowedToolNames: toolCatalog.allowedToolNames.bind(toolCatalog) })
+  ctx.inject(['webServer', 'connection'], web => {
+    web.effect(() => web.webServer.register({ kind: 'exact', path: '/lai-api/agents/tools', handler: async (req, res) => {
+      const rejection = web.connection.requestRejection(req)
+      if (rejection !== undefined) { res.writeHead(rejection); res.end(); return }
+      if (req.method !== 'GET') { res.writeHead(405, { allow: 'GET' }); res.end(); return }
+      try { const value = await toolCatalog.catalog(); res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' }); res.end(JSON.stringify(value)) }
+      catch (error) { res.writeHead(503, { 'content-type': 'application/json' }); res.end(JSON.stringify({ error: error instanceof Error ? error.message : String(error) })) }
+    } }), 'LAI tool catalog API')
+  })
 }

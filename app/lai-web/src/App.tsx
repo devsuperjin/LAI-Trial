@@ -103,12 +103,12 @@ export function App() {
           <>
             <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
             <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
-              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' || page === 'dashboard' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
+              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' || page === 'dashboard' || page === 'lai-agents' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
               {page === 'router' && <RouterPage entries={entries} onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
               {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
               {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} onRouter={() => setPage('router')} onConfigure={() => setPage('superagent')} />}
               {page === 'superagent' && <SuperagentPage />}
-              {page === 'lai-agents' && <div className="p-4 md:p-6"><AgentPrompts /></div>}
+              {page === 'lai-agents' && <AgentPrompts />}
               {page === 'settings' && <SettingsPage />}
               </div>
             </main>

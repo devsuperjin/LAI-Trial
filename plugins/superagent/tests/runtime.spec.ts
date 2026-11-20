@@ -1730,6 +1730,24 @@ it('gives a subagent of a worker only the worker\'s work tools, and none once th
   expect(restricts.get('child-2')).toBeUndefined()
 })
 
+it('admits explicitly selected LAI tools while preserving role denials and ended-Ticket guards', async () => {
+  const { ticket, sessionId } = await acceptedTicket()
+  const ctx = (runtime as unknown as { ctx: Context }).ctx
+  ctx.provide('laiAgents', {
+    allowedToolNames: () => ['feishu_doc_edit'],
+    toolDenial: (_agent: unknown, name: string) => name === 'web_search' ? 'Not selected for this role' : undefined,
+  } as never)
+  await (controller.create as (options: { sessionId: string }) => Promise<void>)({ sessionId: 'configured-child' })
+  const child = agents.get('configured-child')! as unknown as { session: { header: { parentSession?: string } } }
+  child.session.header.parentSession = sessionId
+  await ctx.parallel('agent/created', { agent: child } as never)
+  expect(restricts.get('configured-child')).toEqual([{ allow: ['read', 'read_image', 'grep', 'bash', 'job_output', 'job_list', 'job_kill', 'web_search', 'skill', 'feishu_doc_edit'] }])
+  expect(guards.get('configured-child')!({ name: 'feishu_doc_edit', arguments: {} })).toBeUndefined()
+  expect(guards.get('configured-child')!({ name: 'web_search', arguments: {} })).toBe('Not selected for this role')
+  runtime.engine.stopTicket(ticket.id)
+  expect(guards.get('configured-child')!({ name: 'feishu_doc_edit', arguments: {} })).toContain('Ticket ended')
+})
+
 it('gives a subagent of a worker\'s subagent the same work tools and guard', async () => {
   const { ticket, sessionId } = await acceptedTicket()
   const create = controller.create as (options: { sessionId: string }) => Promise<void>

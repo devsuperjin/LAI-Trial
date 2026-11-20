@@ -126,6 +126,8 @@ Tool capability has three layers:
 2. **Runtime restrictions:** Superagent restricts Router, Worker and associated subagents, and prevents further work after a Ticket ends. Custom work tools must be included in the relevant allow configuration.
 3. **Role instructions:** prompts describe how agents should use tools, but do not replace permission checks.
 
+LAI Agents exposes installed tool groups for per-specialist selection. New Runs retain their selection across settings changes and restarts. Custom plugins use standard `ctx.tools.register`; LAI discovers unconditional global registrations through the public DSH registry (without package ownership metadata); Superagent explicitly checks the approved selection while retaining its Ticket guard. See [the plugin guide](../plugins/lai-agents/README.md#per-specialist-tools).
+
 Tool composition is primarily defined in `plugins/lai-agents/src/definitions.ts`. Superagent's work-tool allowlist and lifecycle restrictions live in `plugins/superagent/src/app/sessions.ts`.
 
 Triage and Review disable direct file-writing tools but retain Shell access, so they are not enforced read-only filesystem roles. Superagent-managed execution uses broad permissions; command wrappers and blocked-command lists are not an OS sandbox. Strong isolation requires a separate execution-environment and permissions design.
@@ -201,7 +203,7 @@ The following require further development or deployment, beyond changing role pr
 
 - Dedicated Jenkins Sources, general Commit / Push triggers and other CI adapters.
 - Connectors that submit tickets to Jira, Azure or other external systems.
-- Visual per-role tool composition and enforced filesystem isolation.
+- Enforced filesystem isolation; per-role tool selection is implemented, but Shell access remains a broader capability.
 - Complete lai-web forms for every dynamic Source field type.
 
 Extensions should reuse Sources, Presets, tool plugins and configuration interfaces while preserving the boundaries between intake, task coordination, specialist execution and presentation.
