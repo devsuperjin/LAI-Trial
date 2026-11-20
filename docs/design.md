@@ -6,7 +6,7 @@ This document describes the current implementation and its extension boundaries 
 
 ## 1. Goals and use cases
 
-LAI-Superagent combines event intake, task assessment and specialist execution to investigate engineering problems and deliver traceable results. Inputs include GitHub Issues, PRs, comments and CI status, and Feishu conversations. Accepted tasks run in independent workspaces through analysis, reproduction, ticket preparation, review and reporting.
+LAI-Superagent combines event intake, task assessment and specialist execution to investigate engineering problems and deliver traceable results. Inputs include GitHub Issues, PRs, comments and CI status, Feishu conversations, and Jenkins CI failures. Accepted tasks run in independent workspaces through analysis, reproduction, ticket preparation, review and reporting.
 
 The original six-role reference diagram describes business responsibilities. The implementation adapts it as follows:
 
@@ -23,7 +23,7 @@ The original six-role reference diagram describes business responsibilities. The
 flowchart TD
     GH[GitHub Source] --> S[Superagent event intake]
     FS[Feishu Source · optional] --> S
-    CI[Future CI Source] -. extension .-> S
+    JK[Jenkins Source] --> S
     S --> P[Scope and admission checks]
     P --> R[Monitor / Router]
     R --> T[Ticket and Assignment]
@@ -93,6 +93,12 @@ The optional Feishu Source uses a bot-only `lark-cli`, receiving live events thr
 The bot CLI must use `strict-mode bot`. Intake scope includes specified chats with mentions-only or all-message modes, mentions in other chats, and direct messages. Policy controls who may originate work. The Bundle disables this plugin by default; enabling it requires bot deployment and configuration.
 
 The current lai-web basic Source form handles text, switches, numbers and selects. It does not yet cover `rows` fields such as Feishu chat lists; use advanced configuration or the original Superagent interface for those fields.
+
+### Jenkins
+
+The Jenkins Source reads Jenkins' own remote API directly (default `http://127.0.0.1:8080`), with an optional user and API token for instances that do not allow anonymous read. It discovers jobs, including folders and multibranch projects, reads each job's recent builds, and receives each finished, non-replay `FAILURE` build once with its branch, commit, failed stage and native rerun count, optionally attaching the end of the build's console text. A `jobs` list limits the scan to named jobs. The Source plugin is enabled by default and needs no account CLI; turn it off when no Jenkins is reachable.
+
+Failures are senderless machine events. Their only admission cell is the failures row's unlisted, unaddressed cell, which a fresh installation admits as an inferred candidate. With the default Eval mode, observe, accepted work is recorded as `would_accept` rather than a Ticket.
 
 ## 5. Worker and five-stage execution
 
@@ -197,11 +203,11 @@ The current DSH baseline is `0.2.2-rc.1`; `config/dsh-baseline.json` is authorit
 
 ## 11. Current scope and extension opportunities
 
-The implemented path combines Superagent intake and task management, LAI's five-stage native subagent execution, unified configuration and execution inspection. Feishu support exists in the plugin but is disabled by default and requires bot deployment.
+The implemented path combines Superagent intake and task management, LAI's five-stage native subagent execution, unified configuration and execution inspection. Feishu support exists in the plugin but is disabled by default and requires bot deployment. The Jenkins Source receives CI failures directly from the Jenkins remote API.
 
 The following require further development or deployment, beyond changing role prompts:
 
-- Dedicated Jenkins Sources, general Commit / Push triggers and other CI adapters.
+- CI adapters beyond Jenkins failures, and general Commit / Push triggers.
 - Connectors that submit tickets to Jira, Azure or other external systems.
 - Enforced filesystem isolation; per-role tool selection is implemented, but Shell access remains a broader capability.
 - Complete lai-web forms for every dynamic Source field type.

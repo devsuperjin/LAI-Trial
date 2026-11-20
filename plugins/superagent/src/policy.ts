@@ -78,7 +78,10 @@ export const SourcePolicySchema = z.object({ allowed: z.array(AllowedSchema).def
 export type SourcePolicy = z.infer<typeof SourcePolicySchema>
 export const PolicyConfigSchema = z.object({
   rules: z.array(RuleSchema).refine(rules => new Set(rules.map(rule => rule.id)).size === rules.length, 'Duplicate rule IDs').default(DEFAULT_RULES),
-  sources: z.record(z.string().regex(/^[a-z][a-z0-9-]*$/), SourcePolicySchema).default({}),
+  // Jenkins failures are senderless machine events; their only admission cell is admitted as an inferred candidate by default.
+  sources: z.record(z.string().regex(/^[a-z][a-z0-9-]*$/), SourcePolicySchema)
+    .default((): Record<string, z.infer<typeof SourcePolicySchema>> =>
+      ({ jenkins: { allowed: [], admission: { failures: { unlistedUnaddressed: 'inferred' } } } })),
 }).strict()
 export const EvalConfigSchema = z.object({
   mode: z.enum(['off', 'observe', 'auto']).default('observe'),

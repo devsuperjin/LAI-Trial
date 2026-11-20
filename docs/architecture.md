@@ -5,7 +5,7 @@ LAI is an independent DSH application using published packages pinned to `config
 ## Execution ownership
 
 ```text
-GitHub / future CI Source
+GitHub / Jenkins CI / Feishu Sources
   → Superagent Monitor / Router
   → Superagent Ticket + per-ticket workspace and Worker session
       → triage → reproduce → ticket → review → reporter

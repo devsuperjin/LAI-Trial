@@ -5,8 +5,8 @@ import { join } from 'node:path'
 import { promisify } from 'node:util'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { SENSITIVE_ENV_PATTERN, type SubprocessRuntime } from '@deepseek-ai/dsh-subprocess'
-import { GIT_LOCATION, agentVariables, credentialHelper, runAsWorker, verifyDirectory, withoutDirectory, workerBin, workerGitConfig, writeEnvironment }
-  from '../src/infra/environment.ts'
+import { GIT_LOCATION, agentVariables, credentialHelper, runAsWorker, verifyDirectory, verifyEnvironment, withoutDirectory, workerBin, workerGitConfig,
+  writeEnvironment } from '../src/infra/environment.ts'
 import { CliError } from '../src/infra/commands.ts'
 import { testDeployment } from './fixtures/deployment.ts'
 import { gitEnv } from './fixtures/git.ts'
@@ -37,6 +37,18 @@ describe('worker shims', () => {
     const bin = workerBin(dir)
     await expect(exec(join(bin, 'lark-cli'), ['im', '+chat-list'])).rejects.toMatchObject({ code: 1, stderr: 'lark-cli is unavailable: this installation has no Feishu bot.\n' })
     await expect(exec(join(bin, 'personal-gh'), [])).rejects.toMatchObject({ code: 1, stderr: 'personal-gh is blocked in this installation; use gh, which acts as agent-bot.\n' })
+  })
+  it('makes `gh` fail without a GitHub account, writes no GitHub credential, and has nothing to verify', async () => {
+    const deployment = testDeployment({ stateDir: dir, repository: '', github: { cli: '', login: '', noreply: '' }, feishu: undefined })
+    await writeEnvironment(deployment, [])
+    const bin = workerBin(dir)
+    await expect(exec(join(bin, 'gh'), ['api', 'user'])).rejects.toMatchObject({ code: 1, stderr: expect.stringContaining('gh is unavailable') })
+    const config = readFileSync(workerGitConfig(dir), 'utf8')
+    // The operator's helpers stay cleared, while no GitHub helper or URL rewriting remains.
+    expect(config).toContain('[credential]\n\thelper =')
+    expect(config).not.toContain('credential "https://github.com"')
+    expect(config).not.toContain('insteadOf')
+    await expect(verifyEnvironment(deployment, {} as unknown as SubprocessRuntime, new AbortController().signal)).resolves.toBeUndefined()
   })
   it('keep `gh` and `lark-cli` working, and shim no `git`, when the blocked commands name the commands workers need', async () => {
     const gh = program(join(dir, 'gh-agent'), 'echo gh "$@"'), lark = program(join(dir, 'lark-bot'), 'echo lark "$@"')

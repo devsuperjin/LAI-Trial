@@ -135,7 +135,10 @@ async function watch(ctx: SourceContext, signal: AbortSignal): Promise<void> {
   while (!signal.aborted) {
     const config = ctx.config<GithubConfig>(SOURCE)
     try {
-      if (config) interval = await pollRound(ctx, signal)
+      // A local deployment has no GitHub repository; a GitHub Source left on has nothing to read.
+      if (config && !ctx.deployment.repository) {
+        ctx.report('github', { state: 'paused', detail: 'The GitHub Source has no repository' })
+      } else if (config) interval = await pollRound(ctx, signal)
       else ctx.report('github', health('paused', 'sourceOff'))
       failures = 0
     } catch (error) {

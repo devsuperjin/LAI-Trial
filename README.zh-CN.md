@@ -60,13 +60,13 @@ Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其�
 
 ## 当前能力与扩展方向
 
-当前代码已接入 Superagent 的 GitHub 来源，可按配置接收通知、新 Issue、PR、评论及 CI 状态变化，并通过准入策略决定后续处理。任务执行采用 LAI 原生子 Agent 流水线。
+当前代码已接入 Superagent 的 GitHub 来源，可按配置接收通知、新 Issue、PR、评论及 CI 状态变化；Jenkins 来源直接通过 Jenkins 远程 API 接收失败构建。两者都通过准入策略决定后续处理。任务执行采用 LAI 原生子 Agent 流水线。
 
 需要注意当前实现的边界：
 
 - **收到事件不等于启动 Worker**：来源开关、允许的发送者、准入规则和 Eval 模式共同决定是否执行。原型默认规则主要面向文案和局部视觉修复，使用 CI 分析场景时需要配置对应规则。
 - 五个角色的职责由 Prompt 和可用工具共同实现；角色名称本身不代表已经安装了 Jarvis、LogDistiller 或其他外部工程工具。
-- 当前没有专门实现 Jenkins 连接器、通用 Commit / Push 触发器、Jira / Azure 工单提交连接器或共享知识库。后续来源应通过 Superagent 的 Source 扩展机制接入。
+- 当前没有实现通用 Commit / Push 触发器、Jira / Azure 工单提交连接器或共享知识库。后续来源应通过 Superagent 的 Source 扩展机制接入。
 - 工单草稿和报告可在任务中产生；是否创建 PR、回复 GitHub 或执行其他外部操作，取决于任务授权、配置及实际可用工具。
 
 ## 快速启动

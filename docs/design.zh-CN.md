@@ -6,7 +6,7 @@
 
 ## 1. 目标与使用场景
 
-LAI-Superagent 将事件接入、任务判断和专业 Agent 执行组合起来，用于分析工程问题并交付可追溯的结果。典型输入包括 GitHub Issue、PR、评论、CI 状态，以及飞书对话。系统判断是否需要工作，受理后在独立工作区执行分析、复现、工单整理、审核和报告。
+LAI-Superagent 将事件接入、任务判断和专业 Agent 执行组合起来，用于分析工程问题并交付可追溯的结果。典型输入包括 GitHub Issue、PR、评论、CI 状态，飞书对话，以及 Jenkins 失败构建。系统判断是否需要工作，受理后在独立工作区执行分析、复现、工单整理、审核和报告。
 
 最初的六角色参考图用于描述业务分工，当前实现作了以下调整：
 
@@ -23,7 +23,7 @@ LAI-Superagent 将事件接入、任务判断和专业 Agent 执行组合起来�
 flowchart TD
     GH[GitHub Source] --> S[Superagent 事件接入]
     FS[Feishu Source · 可选] --> S
-    CI[未来 CI Source] -. 扩展 .-> S
+    JK[Jenkins Source] --> S
     S --> P[范围检查与准入策略]
     P --> R[Monitor / Router]
     R --> T[Ticket 与 Assignment]
@@ -93,6 +93,12 @@ Ticket 与 Run 含义不同：前者表达业务任务生命周期，后者表�
 机器人 CLI 必须使用 `strict-mode bot`。接收范围包括指定群的仅 @ / 全部消息、其他群的 @ 消息和私聊；允许发起工作的用户在 Policy 中配置。Bundle 默认禁用该插件，需要启用并完成机器人配置。
 
 当前 lai-web 的基础来源表单支持文本、开关、数字和选择项，尚未覆盖飞书群列表等 `rows` 字段；这些字段可通过高级配置或原版 Superagent 页面维护。
+
+### Jenkins
+
+Jenkins 来源直接读取 Jenkins 远程 API（默认 `http://127.0.0.1:8080`），在 Jenkins 不允许匿名读取时可配置用户名和 API Token。来源会遍历任务（包括文件夹和多分支项目），读取每个任务最近的构建，把每个已完成、非 Replay 的 `FAILURE` 构建接收一次，附带分支、提交、失败阶段和原生复跑次数，并可选附带构建控制台日志的末尾；`jobs` 列表可把扫描限定在指定任务名。该插件默认启用，无账号 CLI；无法访问 Jenkins 时关闭即可。
+
+失败构建是没有发送人的机器事件，只使用接收表中“未列出的发送人、未点名智能体”一列。全新安装在默认 Eval 模式 `observe` 下把它作为推断候选接收，受理意向记为 `would_accept`，不会直接建单。
 
 ## 5. Worker 与五阶段执行
 
@@ -197,11 +203,11 @@ Dashboard 的业务状态来自 Superagent；Token 用量来自各原生 Run 的
 
 ## 11. 当前范围与待扩展能力
 
-已实现的主要链路是 Superagent 接入与任务管理、LAI 五阶段原生子 Agent、统一配置与执行查看。飞书接入能力已在插件中提供，但默认关闭，需要部署机器人。
+已实现的主要链路是 Superagent 接入与任务管理、LAI 五阶段原生子 Agent、统一配置与执行查看。飞书接入能力已在插件中提供，但默认关闭，需要部署机器人；Jenkins 来源直接通过 Jenkins 远程 API 接收 CI 失败事件。
 
 以下能力需要额外开发或部署，不能仅靠修改角色 Prompt 获得：
 
-- 专用 Jenkins Source、通用 Commit / Push 触发及其他 CI 平台适配。
+- Jenkins 失败之外的 CI 平台适配，以及通用 Commit / Push 触发。
 - Jira / Azure 等外部工单的实际提交连接器。
 - 强制文件系统隔离；每角色工具选择已实现，但 Shell 仍可能间接提供更广泛能力。
 - lai-web 对所有动态来源字段的完整表单支持。

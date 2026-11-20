@@ -29,7 +29,7 @@ const presetOf = (rows: readonly Row[], id: string) => rows.map(row => row.confi
 
 it('uses the LAI worker preset and its five real delegation tools', async () => {
   const rows = await patched()
-  expect(rows.map(row => row.id)).toEqual(['dsh-superagent', 'dsh-superagent-github', 'dsh-superagent-feishu', 'dsh-superagent-router-preset'])
+  expect(rows.map(row => row.id)).toEqual(['dsh-superagent', 'dsh-superagent-github', 'dsh-superagent-feishu', 'dsh-superagent-jenkins', 'dsh-superagent-router-preset'])
   const worker = PRESETS.find(preset => preset.id === WORKER_PRESET)!
   expect(worker).toBeDefined()
   const delegation = worker.plugins.filter(plugin => plugin.name === '@deepseek-ai/dsh-tool-subagent')

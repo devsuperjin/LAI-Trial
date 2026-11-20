@@ -60,13 +60,13 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 
 ## Current capabilities and extensions
 
-The application integrates Superagent's GitHub source. Depending on configuration, it receives notifications, new Issues, PRs, comments and CI status changes, then applies admission policy. Accepted work runs through LAI's native subagent pipeline.
+The application integrates Superagent's GitHub source. Depending on configuration, it receives notifications, new Issues, PRs, comments and CI status changes, then applies admission policy. The Jenkins source receives failed CI builds directly from Jenkins' remote API. Accepted work runs through LAI's native subagent pipeline.
 
 Current boundaries:
 
 - **Receiving an event does not automatically launch a Worker.** Source switches, allowed senders, admission rules and Eval mode determine what proceeds. The prototype's default rules mainly cover copy fixes and local visual fixes; CI analysis requires appropriate rules.
 - Role behavior depends on prompts and available tools. A role name does not mean Jarvis, LogDistiller or another external engineering tool is installed.
-- Dedicated Jenkins integration, general Commit / Push triggers, Jira / Azure ticket-submission connectors and a shared knowledge base are not currently implemented. Future inputs should use Superagent's Source extension mechanism.
+- General Commit / Push triggers, Jira / Azure ticket-submission connectors and a shared knowledge base are not currently implemented. Future inputs should use Superagent's Source extension mechanism.
 - Tasks can produce ticket drafts and reports. Creating PRs, replying on GitHub or taking other external actions depends on authorization, configuration and available tools.
 
 ## Quick start
