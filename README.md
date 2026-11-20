@@ -2,6 +2,8 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
+## Introduction
+
 LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Worker delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
 The project targets engineering work driven by GitHub, Jenkins CI and optional Feishu conversations: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
@@ -120,32 +122,6 @@ The interface supports English and Chinese. The original DSH debugging UI remain
 
 **Prompts** on the Superagent page manages its Router / Worker instructions. **Plugin → LAI Agents** manages LAI role definitions and specialist model overrides. It is an independent DSH Bundle with its own sidebar and configuration entry in the original DSH interface. Unpinned specialists inherit the Worker model; pinned routes apply to new children without changing the global default. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
 
-## Screenshots
-
-### Router evaluation
-
-Routing and admission are native Superagent capabilities. LAI provides a dedicated Router page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
-
-![Superagent decisions in the dedicated LAI Router page](docs/images/router-evaluation.jpg)
-
-### Worker DAG
-
-Native Worker Turns, specialist delegation and execution status in Runs.
-
-![Worker DAG](docs/images/runs-dag.jpg)
-
-### Authorization details
-
-Trigger, admission decision, requester, scope and policy version, with execution environment details available below.
-
-![Authorization details](docs/images/runs-authorization.jpg)
-
-### Superagent in the original DSH interface
-
-The original Superagent panel remains accessible through `/dsh/`, sharing task state and execution records.
-
-![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
-
 ## Repository structure
 
 ```text
@@ -239,6 +215,32 @@ Update the baseline record and retain the previous code, lockfile and matching d
 | `pnpm config:dump` | Inspect the composed DSH configuration |
 | `pnpm check:architecture` | Check namespaces, dependency versions and import boundaries |
 | `pnpm check` | Run the complete local check suite |
+
+## Screenshots
+
+### Router evaluation
+
+Routing and admission are native Superagent capabilities. LAI provides a dedicated Router page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
+
+![Superagent decisions in the dedicated LAI Router page](docs/images/router-evaluation.jpg)
+
+### Worker DAG
+
+Native Worker Turns, specialist delegation and execution status in Runs.
+
+![Worker DAG](docs/images/runs-dag.jpg)
+
+### Authorization details
+
+Trigger, admission decision, requester, scope and policy version, with execution environment details available below.
+
+![Authorization details](docs/images/runs-authorization.jpg)
+
+### Superagent in the original DSH interface
+
+The original Superagent panel remains accessible through `/dsh/`, sharing task state and execution records.
+
+![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
 
 ## Documentation
 

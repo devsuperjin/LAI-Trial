@@ -2,6 +2,8 @@
 
 [English](README.md) | **简体中文**
 
+## 项目介绍
+
 LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Worker 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
 
 项目面向 GitHub、Jenkins CI 和可选飞书对话驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
@@ -120,32 +122,6 @@ pnpm start
 
 Superagent 页面中的 **Prompts** 管理其 Router / Worker 工作指令，**Plugin → LAI Agents** 管理角色定义和专业子 Agent 的模型覆盖。它是独立 DSH Bundle，在原版 DSH 中也有独立侧栏和配置入口。未固定模型的子 Agent 继承 Worker 模型，模型覆盖仅影响新建子 Agent，不修改全局默认模型。来源、策略和执行设置会保留版本信息，保存时检查并发修改；高级配置编辑器用于访问基础表单之外的完整字段。
 
-## 项目截图
-
-### Router 自动判断
-
-路由与准入判断是 Superagent 的原生能力，LAI 为其提供独立的 Router 展示页面。系统根据发送者授权、策略与评估配置，判断收到的事件是否需要接单、续做、停止或忽略；受理后可直接打开对应的 Runs。
-
-![LAI 独立 Router 页面中的 Superagent 决策记录](docs/images/router-evaluation.jpg)
-
-### Worker DAG
-
-在 Runs 中查看 Worker 的原生 Turn、专业子 Agent 委派和执行状态。
-
-![Worker DAG](docs/images/runs-dag.jpg)
-
-### 授权详情
-
-展示任务触发、准入决定、发起人、授权范围和策略版本，下方可展开执行环境。
-
-![授权详情](docs/images/runs-authorization.jpg)
-
-### 原版 DSH 中的 Superagent
-
-通过 `/dsh/` 保留原版 Superagent 管理页面，与 lai-web 共享任务状态及执行记录。
-
-![原版 DSH 中的 Superagent](docs/images/native-superagent.jpg)
-
 ## 项目结构
 
 ```text
@@ -239,6 +215,32 @@ pnpm check
 | `pnpm config:dump` | 查看组合后的 DSH 配置 |
 | `pnpm check:architecture` | 检查命名空间、依赖版本和导入边界 |
 | `pnpm check` | 执行完整本地检查 |
+
+## 项目截图
+
+### Router 自动判断
+
+路由与准入判断是 Superagent 的原生能力，LAI 为其提供独立的 Router 展示页面。系统根据发送者授权、策略与评估配置，判断收到的事件是否需要接单、续做、停止或忽略；受理后可直接打开对应的 Runs。
+
+![LAI 独立 Router 页面中的 Superagent 决策记录](docs/images/router-evaluation.jpg)
+
+### Worker DAG
+
+在 Runs 中查看 Worker 的原生 Turn、专业子 Agent 委派和执行状态。
+
+![Worker DAG](docs/images/runs-dag.jpg)
+
+### 授权详情
+
+展示任务触发、准入决定、发起人、授权范围和策略版本，下方可展开执行环境。
+
+![授权详情](docs/images/runs-authorization.jpg)
+
+### 原版 DSH 中的 Superagent
+
+通过 `/dsh/` 保留原版 Superagent 管理页面，与 lai-web 共享任务状态及执行记录。
+
+![原版 DSH 中的 Superagent](docs/images/native-superagent.jpg)
 
 ## 项目文档
 
