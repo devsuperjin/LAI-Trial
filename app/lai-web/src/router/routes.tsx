@@ -68,7 +68,7 @@ const ICONS: { id: Page; icon: (active: boolean) => ReactNode }[] = [
     icon: active => (
       <svg aria-hidden fill="none" height="18" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.6} viewBox="0 0 24 24" width="18">
         <circle cx="12" cy="12" r="3" />
-        <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1" />
+        <path d="M12.00,4.00 L13.95,2.19 L15.83,2.76 L16.44,5.35 L17.66,6.34 L20.31,6.44 L21.24,8.17 L19.85,10.44 L20.00,12.00 L21.81,13.95 L21.24,15.83 L18.65,16.44 L17.66,17.66 L17.56,20.31 L15.83,21.24 L13.56,19.85 L12.00,20.00 L10.05,21.81 L8.17,21.24 L7.56,18.65 L6.34,17.66 L3.69,17.56 L2.76,15.83 L4.15,13.56 L4.00,12.00 L2.19,10.05 L2.76,8.17 L5.35,7.56 L6.34,6.34 L6.44,3.69 L8.17,2.76 L10.44,4.15 Z" />
       </svg>
     ),
   },

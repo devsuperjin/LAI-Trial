@@ -2,7 +2,6 @@
 
 [English](glossary.md) | **简体中文**
 
-**LAI** 是 **Linux Agent Infra** 的简写。本文统一应用界面与文档中的名称和含义。
 
 ## 角色与执行
 

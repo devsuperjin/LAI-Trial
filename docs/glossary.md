@@ -2,7 +2,6 @@
 
 **English** | [简体中文](glossary.zh-CN.md)
 
-**LAI** stands for **Linux Agent Infra**. This glossary defines the names used by the application and its documentation.
 
 ## Roles and execution
 

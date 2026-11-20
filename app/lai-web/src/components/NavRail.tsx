@@ -1,3 +1,4 @@
+import { CollapsedMenuFlyout } from './CollapsedMenuFlyout.tsx'
 import { useEffect, useState } from 'react'
 import { useLanguage } from '../i18n.tsx'
 import { MENU, FOOTER_MENU, groupForPage, type Page, type PageDefinition } from '../router/routes.tsx'
@@ -26,6 +27,7 @@ export function NavRail({ page, onNavigate, runningCount }: { page: Page; onNavi
   return <nav aria-label={t('Primary navigation')} className={`flex min-h-0 shrink-0 flex-col overflow-x-hidden border-r border-fd-border bg-fd-card py-4 transition-[width,padding] duration-200 motion-reduce:transition-none ${collapsed ? 'w-16 px-2' : 'w-52 px-4'}`}>
     <div id="lai-sidebar-menu" className="fd-scroll min-h-0 flex-1 space-y-1 overflow-y-auto overflow-x-hidden">{MENU.map(item => {
       if (!('children' in item)) return renderPage(item)
+      if (collapsed) return <div key={item.id} className="pt-2"><CollapsedMenuFlyout group={item} page={page} onNavigate={onNavigate} /></div>
       const open = expanded[item.id] ?? true
       const active = item.children.some(child => child.id === page)
       return <div key={item.id} className="pt-2"><button type="button" aria-label={t(item.name)} title={t(item.name)} aria-expanded={open} aria-controls={`${item.id}-navigation`} onClick={() => setExpanded(current => ({ ...current, [item.id]: !open }))} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm hover:bg-fd-secondary ${alignment} ${collapsed && active ? 'text-fd-primary' : 'text-fd-muted-foreground'}`}><span className="shrink-0">{item.icon()}</span>{!collapsed && <><span>{t(item.name)}</span><svg aria-hidden width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" className={`ml-auto shrink-0 transition-transform ${open ? 'rotate-90' : ''}`}><path d="m6 3 5 5-5 5" /></svg></>}</button>{open && <div id={`${item.id}-navigation`} className={`mt-1 space-y-1 ${collapsed ? '' : 'ml-5 border-l border-fd-border pl-3'}`}>{item.children.map(child => renderPage(child, true))}</div>}</div>
