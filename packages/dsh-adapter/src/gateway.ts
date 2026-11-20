@@ -196,6 +196,7 @@ export function readAgentPreset(agentPreset: string): Promise<AgentPresetDocumen
 }
 
 export interface SettingsNamespaceView {
+  secrets?: { path: string[]; set: boolean }[]
   ns: string
   autoGenerate: boolean
   value: Record<string, unknown>

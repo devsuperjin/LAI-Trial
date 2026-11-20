@@ -32,3 +32,11 @@ export function apply(ctx: Context) {
 ```
 
 Select discovered tools in LAI Agents → specialist → Tools → Registered DSH tools. The public registry does not expose package ownership, so external tools are not attributed to guessed package names. Step-conditional registrations are excluded from cloning to preserve their activation rules. Tool removal is checked before execution. Credentials and configuration remain owned by the supplying plugin. Globally registered tools may be visible to other DSH agents according to their own scope restrictions; LAI specialist selections do not change other agents.
+
+### Credentials Skill
+
+Each specialist preset composes `@lai/credentials/skill` and the standard DSH skill tool. This registers `credentials-access` within that preset scope rather than globally or in the role prompt. Enable `skill` and whichever `credentials_list`, `credentials_get`, and `credentials_update` tools the role needs in its saved tool selection. Credential entries separately grant preset access; updates additionally require the entry's explicit `allowUpdates` setting. Existing explicit tool selections are preserved.
+
+All five specialists enable the standard `skill` capability by default. A one-time versioned migration adds `skill` to existing explicit role tool selections without granting credential tools or changing other selected tools. Subsequent explicit opt-outs are respected. Existing Run snapshots remain unchanged; create a new subagent to use the updated selection.
+
+Specialist prompts begin with a short shared Skill discovery hint: when context or an investigation approach is missing, consult available descriptions and load a relevant Skill before speculative investigation. The hint is also applied to saved custom role prompts, deduplicated on assembly, and leaves the role instructions intact. It does not preload Skill bodies or expand permissions.

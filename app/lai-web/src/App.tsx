@@ -1,17 +1,9 @@
-import { FeishuToolsConfig } from './components/FeishuToolsConfig.tsx'
 import { useLanguage } from './i18n.tsx'
 import { useCallback, useEffect, useState } from 'react'
 import type { SessionListEntry } from './api/gateway.ts'
 import { bootstrapWithToken, listSessions, UnauthorizedError } from './api/gateway.ts'
-import { RouterPage } from './components/RouterPage.tsx'
-import { DashboardPage } from './components/DashboardPage.tsx'
-import { NavRail } from './components/NavRail.tsx'
-import type { Page } from './components/NavRail.tsx'
-import { RunsPage } from './components/RunsPage.tsx'
-import { AgentPrompts } from './components/AgentPrompts.tsx'
-import { SuperagentPage } from './components/SuperagentPage.tsx'
-import { SettingsPage } from './components/SettingsPage.tsx'
-import { TopBar } from './components/TopBar.tsx'
+import { PAGES, pageFromPath, PageRenderer, type Page } from './router/routes.tsx'
+import { AppLayout } from './layout/AppLayout.tsx'
 import { archivedRuns } from '@lai/dsh-adapter/runs'
 import { rootRuns, withoutArchived } from './model/runs.ts'
 import { useInterval } from './hooks/useInterval.ts'
@@ -19,13 +11,18 @@ import { useInterval } from './hooks/useInterval.ts'
 export type AuthState = 'probing' | 'need-token' | 'ready'
 
 export function App() {
-  const { t } = useLanguage()
   const [auth, setAuth] = useState<AuthState>('probing')
   const [authError, setAuthError] = useState<string | null>(null)
   const [entries, setEntries] = useState<SessionListEntry[]>([])
   const [gatewayError, setGatewayError] = useState<string | null>(null)
   const [lastPollAt, setLastPollAt] = useState<number | null>(null)
-  const [page, setPage] = useState<Page>('dashboard')
+  const [page, setPage] = useState<Page>(() => pageFromPath(window.location.hash.slice(1) || '/'))
+  const navigate = (next: Page): void => { setPage(next); window.location.hash = PAGES[next].path }
+  useEffect(() => {
+    const sync = () => setPage(pageFromPath(window.location.hash.slice(1) || '/'))
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
   const [focusRunId, setFocusRunId] = useState<string | null>(null)
 
   const refresh = useCallback(async (): Promise<'ok' | 'unauthorized' | 'unreachable'> => {
@@ -84,41 +81,17 @@ export function App() {
 
   const openRun = (id: string): void => {
     setFocusRunId(id)
-    setPage('runs')
+    navigate('runs')
   }
 
-  return (
-    <div className="flex h-full min-w-0 flex-col overflow-hidden">
-      <TopBar
-        auth={auth}
-        error={gatewayError}
-        lastPollAt={lastPollAt}
-        page={page}
-        runningCount={runningCount}
-        totalCount={taskEntries.length}
-      />
-      <div className="flex min-h-0 flex-1">
-        {auth === 'need-token' ? (
-          <TokenGate error={authError} onSubmit={token => void submitToken(token)} />
-        ) : (
-          <>
-            <NavRail onNavigate={setPage} page={page} runningCount={runningCount} />
-            <main aria-label={t("Page content")} className="fd-scroll min-h-0 min-w-0 flex-1 overflow-y-auto bg-fd-background p-3 md:p-5 lg:p-6">
-              <div className={`${page === 'runs' ? 'flex h-full min-h-[28rem] flex-col' : page === 'settings' || page === 'dashboard' || page === 'lai-agents' || page === 'feishu-tools' ? 'min-h-full' : 'min-h-full rounded-xl border border-fd-border bg-fd-card'} min-w-0`}>
-              {page === 'router' && <RouterPage entries={entries} onOpenRun={openRun} onConfigure={() => { setPage('superagent') }} />}
-              {page === 'runs' && <RunsPage entries={entries} focusRunId={focusRunId} onRefresh={refresh} />}
-              {page === 'dashboard' && <DashboardPage entries={entries} onOpenRun={openRun} onRouter={() => setPage('router')} onRuns={() => setPage('runs')} />}
-              {page === 'superagent' && <SuperagentPage />}
-              {page === 'lai-agents' && <AgentPrompts />}
-              {page === 'feishu-tools' && <FeishuToolsConfig />}
-              {page === 'settings' && <SettingsPage />}
-              </div>
-            </main>
-          </>
-        )}
-      </div>
-    </div>
-  )
+  return <AppLayout
+    page={page}
+    onNavigate={navigate}
+    topBar={{ auth, error: gatewayError, lastPollAt, page, runningCount, totalCount: taskEntries.length }}
+    gate={auth === 'need-token' ? <TokenGate error={authError} onSubmit={token => void submitToken(token)} /> : undefined}
+  >
+    <PageRenderer page={page} entries={entries} focusRunId={focusRunId} onOpenRun={openRun} onNavigate={navigate} onRefresh={refresh} />
+  </AppLayout>
 }
 
 function TokenGate(props: { error: string | null; onSubmit: (token: string) => void }) {

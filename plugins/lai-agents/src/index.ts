@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 import { homedir } from 'node:os'
-import { AgentToolCatalog, type RoleTools } from './tools.ts'
+import { AgentToolCatalog, SKILL_TOOL_ID, type RoleTools } from './tools.ts'
 import type {} from '@deepseek-ai/dsh-tools'
 import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-client-connection'
@@ -11,7 +11,7 @@ import z from '@deepseek-ai/schemastery'
 import type {} from '@deepseek-ai/dsh-agent-preset-registry'
 import type {} from '@deepseek-ai/dsh-system-prompt'
 import type {} from '@deepseek-ai/dsh-settings'
-import { DEFAULT_PROMPTS, PRESETS } from './definitions.ts'
+import { DEFAULT_PROMPTS, PRESETS, withoutCredentialAccess, withSkillDiscovery } from './definitions.ts'
 
 export { DEFAULT_PROMPTS, PRESETS }
 export type { ToolGroup, ToolCatalogView, RoleTools } from './tools.ts'
@@ -46,11 +46,13 @@ export interface Config {
   prompts: Volatile<Prompts>
   models?: Volatile<RoleModels>
   tools?: Volatile<RoleTools>
+  skillDefaults?: Volatile<{ version: number }>
 }
 
 const Route = z.union([z.object({ provider: z.string().min(1).required(), model: z.string().min(1).required() }), z.const(null)]).default(null)
 const ToolSelection = z.union([z.array(z.string().min(1)), z.const(null)]).default(null)
 export const Config: z<Config> = z.object({
+  skillDefaults: z.object({ version: z.number().default(0) }).default({}).volatile(),
   tools: z.object({ triage: ToolSelection, reproduce: ToolSelection, ticket: ToolSelection, review: ToolSelection, report: ToolSelection }).default({}).volatile(),
   models: z.object({ triage: Route, reproduce: Route, ticket: Route, review: Route, report: Route }).default({}).volatile(),
   prompts: z.object({
@@ -71,10 +73,34 @@ export const Config: z<Config> = z.object({
 export async function apply(ctx: Context, config: Config): Promise<void> {
   ctx.inject(['settings'], child => {
     child.effect(() => child.settings.configure({ auto: false }, ctx.fiber))
+    child.effect(async () => {
+      const section = child.settings.describe().find(section => section.ns === 'lai-agents')
+      if (!section) return () => {}
+      const prompts = config.prompts.get()
+      const ops: { op: 'set'; path: string[]; value: string | string[] | number }[] = (Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]).flatMap(role => {
+        const body = withoutCredentialAccess(prompts[role]) || DEFAULT_PROMPTS[role]
+        const cleaned = role === 'orchestrator' ? body : withSkillDiscovery(body)
+        return cleaned === prompts[role] ? [] : [{ op: 'set' as const, path: ['prompts', role], value: cleaned }]
+      })
+      // Upgrade saved explicit selections once; later deliberate opt-outs remain respected.
+      if ((config.skillDefaults?.get().version ?? 0) < 1) {
+        const tools = config.tools?.get() ?? {}
+        for (const role of Object.keys(SPECIALIST_PRESETS) as (keyof RoleTools)[]) {
+          const selected = tools[role]
+          if (selected && !selected.includes(SKILL_TOOL_ID)) ops.push({ op: 'set', path: ['tools', role], value: [...selected, SKILL_TOOL_ID] })
+        }
+        ops.push({ op: 'set', path: ['skillDefaults', 'version'], value: 1 })
+      }
+      if (ops.length) await child.settings.mutate('lai-agents', ops, section.revision).catch(() => { ctx.logger.warn('Could not migrate LAI prompt and Skill defaults; reload configuration before creating new subagents.') })
+      return () => {}
+    }, 'Migrate role prompts and enable Skill defaults')
   })
 
   for (const role of Object.keys(DEFAULT_PROMPTS) as (keyof Prompts)[]) {
-    ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => config.prompts.get()[role]), `lai-agents prompt: ${role}`)
+    ctx.effect(() => ctx.systemPrompt.variable(`lai_agent_${role}`, () => {
+      const body = withoutCredentialAccess(config.prompts.get()[role]) || DEFAULT_PROMPTS[role]
+      return role === 'orchestrator' ? body : withSkillDiscovery(body)
+    }), `lai-agents prompt: ${role}`)
   }
   ctx.effect(() => ctx.systemPrompt.section({ name: 'lai-agents:available-roles', order: 2790, text: 'Available LAI role presets: iqe-triage (root cause), iqe-reproduction (controlled reproduction), iqe-ticket (ticket draft), iqe-reviewer (independent review), iqe-reporting (reporter). These role definitions are distinct from live descendants returned by list_agents. The Superagent Router performs monitoring and dispatch. Each ticket Worker uses iqe-orchestrator and invokes its five delegation tools to create LAI subagents in stage order. list_agents reports actual descendants of the current session; unrelated chats can have no children. Use the tools actually mounted in this session; do not invent delegation tools.' }), 'LAI role catalog')
   for (const preset of PRESETS) {

@@ -1,9 +1,10 @@
+import { PageHeader, PageTabs } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ModelCatalog, ModelSelection, SettingsNamespaceView } from '../api/gateway.ts'
 import { describeSettings, modelCatalog, updateSettings } from '../api/gateway.ts'
-import { GeneralSettings } from './GeneralSettings.tsx'
-import { ProviderSettings } from './ProviderSettings.tsx'
+import { GeneralSettings } from '../components/GeneralSettings.tsx'
+import { ProviderSettings } from '../components/ProviderSettings.tsx'
 import { selectionKey } from '../model/settings.ts'
 
 interface FlatModel {
@@ -199,11 +200,10 @@ function ModelConfiguration() {
 
 
 export function SettingsPage() {
-  const { t } = useLanguage()
   const [section, setSection] = useState<'general' | 'models'>('general')
-  return <div className="mx-auto w-full max-w-5xl space-y-5">
-    <h1 className="text-lg font-semibold">{t('Settings')}</h1>
-    <div role="tablist" aria-label={t('Settings sections')} className="flex gap-1 border-b border-fd-border pb-2">{(['general', 'models'] as const).map(value => <button key={value} id={`settings-tab-${value}`} role="tab" aria-selected={section === value} aria-controls={`settings-panel-${value}`} onClick={() => setSection(value)} className={`rounded-lg px-4 py-2 text-sm transition-colors ${section === value ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary'}`}>{t(value === 'general' ? 'General' : 'Model configuration')}</button>)}</div>
+  return <div className="space-y-5">
+    <PageHeader page="settings" />
+    <PageTabs id="settings" label="Settings sections" items={[{ id: 'general', name: 'General' }, { id: 'models', name: 'Model configuration' }]} value={section} onChange={setSection} />
     <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={section !== 'general'}><GeneralSettings /></div>
     <div role="tabpanel" id="settings-panel-models" aria-labelledby="settings-tab-models" hidden={section !== 'models'}><ModelConfiguration /></div>
   </div>

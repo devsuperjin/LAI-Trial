@@ -24,6 +24,7 @@ const BUILTINS: Record<string, { title: string; names: string[] }> = {
   '@deepseek-ai/dsh-tool-present': { title: 'Presentation', names: ['present'] },
 }
 const builtinGroup = (name: string) => Object.keys(BUILTINS).find(id => BUILTINS[id]!.names.includes(name))
+export const SKILL_TOOL_ID = '@deepseek-ai/dsh-tool-skill#skill'
 const idOf = (group: string, name: string) => `${group}#${name}`
 export const toolRole = (preset: string | undefined): ToolRole | undefined => (Object.keys(TOOL_ROLES) as ToolRole[]).find(role => TOOL_ROLES[role] === preset)
 

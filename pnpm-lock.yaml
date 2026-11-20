@@ -14,6 +14,9 @@ importers:
       '@lai/application-config':
         specifier: workspace:*
         version: link:config
+      '@lai/credentials':
+        specifier: workspace:*
+        version: link:plugins/credentials
       '@lai/dsh-web-host':
         specifier: workspace:*
         version: link:plugins/web-host
@@ -134,6 +137,31 @@ importers:
         specifier: 0.2.2-rc.1
         version: 0.2.2-rc.1(41d62e63d4cfb839733aee42208415b2)
 
+  plugins/credentials:
+    dependencies:
+      '@deepseek-ai/schemastery':
+        specifier: 3.19.0
+        version: 3.19.0
+    devDependencies:
+      '@deepseek-ai/cordis':
+        specifier: 4.1.0
+        version: 4.1.0(@deepseek-ai/cordis-plugin-include@1.1.0)(@deepseek-ai/cordis-plugin-loader@1.1.0)
+      '@deepseek-ai/dsh-client-connection':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+      '@deepseek-ai/dsh-host-webserver':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)
+      '@deepseek-ai/dsh-settings':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(a36d0088b82fbb61bf41830a69b6d121)
+      '@deepseek-ai/dsh-skill':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(@deepseek-ai/cordis@4.1.0)(@deepseek-ai/dsh-llm@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))(@deepseek-ai/dsh-scope@0.2.2-rc.1(@deepseek-ai/cordis@4.1.0))
+      '@deepseek-ai/dsh-tools':
+        specifier: 0.2.2-rc.1
+        version: 0.2.2-rc.1(71e9b8099add9aaf7bb42662f07c41a3)
+
   plugins/feishu-tools:
     dependencies:
       '@deepseek-ai/schemastery':
@@ -224,6 +252,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: 3.19.0
         version: 3.19.0
+      '@lai/credentials':
+        specifier: workspace:*
+        version: link:../credentials
       '@lai/dsh-adapter':
         specifier: workspace:*
         version: link:../../packages/dsh-adapter

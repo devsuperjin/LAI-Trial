@@ -4,6 +4,14 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Bundled plugins": "随应用构建的插件",
+  "Plugin versions included in this build.": "此构建包含的插件版本。",
+  "Web host": "Web 服务",
+
+  "LAI Agents": "LAI Agents",
+  "credentials_list lists authorized credential names; credentials_get retrieves plaintext by name. Configure credential authorization separately from agent tool selection.": "credentials_list 只列出已授权凭证；credentials_get 按名称读取明文。凭证授权与 Agent 工具权限独立控制。",
+  "Configure credentials for the standalone Feishu tool plugin. Select tools per role in LAI Agents; Superagent incoming Feishu sources are configured separately.": "配置独立飞书工具插件的凭证。工具权限在 LAI Agents 中按角色选择；Superagent 飞书事件来源单独配置。",
+
   "Apply to the page draft, then save configuration.": "应用到页面草稿后，请保存配置。",
   "Agent configuration": "Agent 配置",
   "Model and tool changes apply to new subagents.": "模型和工具修改对新建子 Agent 生效。",
@@ -171,6 +179,7 @@ const ZH: Record<string, string> = {
   'Feishu tools': '飞书工具', 'Plugin / Feishu tools': '插件 / 飞书工具',
   'Worker runs only': '仅显示 Worker', 'Showing Worker runs. Click to show all runs.': '当前仅显示 Worker，点击显示全部。', 'Showing all runs. Click to show Worker runs only.': '当前显示全部，点击仅显示 Worker。',
   'Waiting for a Jenkins URL to be configured': '等待配置 Jenkins 地址', 'Feishu bot CLI is not configured': '尚未配置飞书机器人 CLI', 'Loading sources…': '正在加载来源…', 'Off': '已关闭', 'Starting': '启动中',
+  'Credentials': '凭证', 'Plugin / Credentials': '插件 / 凭证',
   'Unsaved changes': '有未保存的更改',
   'Select all': '一键全选', 'Clear selection': '取消全选',
   'Theme': '主题', 'Light': '浅色', 'Dark': '深色', 'System': '跟随系统', 'Language': '语言', 'Interface language': '界面语言',

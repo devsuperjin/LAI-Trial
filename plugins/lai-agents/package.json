@@ -1,7 +1,7 @@
 {
   "name": "@lai/lai-agents",
   "description": "LAI Worker coordinator and five native specialist agents with configurable prompts and model routes.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "license": "MIT",
   "exports": {
@@ -41,7 +41,8 @@
     "@deepseek-ai/dsh-tool-todo": "0.2.2-rc.1",
     "@deepseek-ai/dsh-tool-web": "0.2.2-rc.1",
     "@deepseek-ai/schemastery": "3.19.0",
-    "@lai/dsh-adapter": "workspace:*"
+    "@lai/dsh-adapter": "workspace:*",
+    "@lai/credentials": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "4.1.0",

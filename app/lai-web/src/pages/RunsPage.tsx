@@ -1,11 +1,11 @@
+import { PageHeader } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
-import { useCallback, useEffect, useState } from 'react'
-import type { PageResponse, SessionListEntry } from '../api/gateway.ts'
-import { pageSession, archiveRun, restoreRun } from '../api/gateway.ts'
-import { useInterval } from '../hooks/useInterval.ts'
-import { TaskDetail } from './TaskDetail.tsx'
+import { useEffect, useState } from 'react'
+import type { SessionListEntry } from '../api/gateway.ts'
+import { archiveRun, restoreRun } from '../api/gateway.ts'
+import { RunDetailLoader } from '../components/RunDetailLoader.tsx'
 import { rootRuns } from '../model/runs.ts'
-import { TaskList } from './TaskList.tsx'
+import { TaskList } from '../components/TaskList.tsx'
 
 export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: string | null; onRefresh: () => Promise<unknown> }) {
   const { t } = useLanguage()
@@ -53,6 +53,8 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
     finally { setDeleting(false) }
   }
   return (
+    <>
+    <PageHeader page="runs" />
     <div className="relative flex min-h-0 flex-1 flex-col gap-4 md:flex-row lg:gap-5">
       <TaskList workersOnly={workersOnly} onToggleWorkers={() => setWorkersOnly(current => !current)} entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />
       <section aria-label={t("Run details")} className={`min-h-0 min-w-0 flex-1 ${selectedId?.startsWith('worker-') ? 'fd-scroll overflow-y-auto' : 'overflow-hidden rounded-xl border border-fd-border bg-fd-card'}`}>
@@ -79,23 +81,6 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
         {undoId && <button type="button" disabled={deleting} className="font-medium text-fd-primary disabled:opacity-50" onClick={() => { void undo() }}>{t('Undo')}</button>}
       </div>}
     </div>
+    </>
   )
-}
-
-export function RunDetailLoader(props: { sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean; title?: string; hideResult?: boolean }) {
-  const [page, setPage] = useState<PageResponse | null>(null)
-  const load = useCallback(async (): Promise<void> => {
-    try {
-      setPage(await pageSession(props.sessionId, 200))
-    } catch {
-      // keep the previous page; list polling surfaces auth problems
-    }
-  }, [props.sessionId])
-  useEffect(() => { void load() }, [load])
-  useInterval(() => { void load() }, props.running ? 2000 : null)
-  // The final events land after the last running poll; refetch once when the task settles.
-  useEffect(() => {
-    if (!props.running) void load()
-  }, [props.running, load])
-  return <TaskDetail hideResult={props.hideResult} title={props.title} onDelete={props.onDelete} deleting={props.deleting} entries={props.entries} page={page} running={props.running} sessionId={props.sessionId} />
 }

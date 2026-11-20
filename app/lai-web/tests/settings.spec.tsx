@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { act, create } from 'react-test-renderer'
 import type { ReactTestRenderer } from 'react-test-renderer'
 import { validateProviderEndpoint } from '../src/model/providers.ts'
-import { SettingsPage } from '../src/components/SettingsPage.tsx'
+import { SettingsPage } from '../src/pages/SettingsPage.tsx'
 
 let view: ReactTestRenderer | undefined
 afterEach(() => { if (view) act(() => view?.unmount()); view = undefined; vi.unstubAllGlobals() })

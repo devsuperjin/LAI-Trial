@@ -1,7 +1,7 @@
-import { HelpTip } from './HelpTip.tsx'
+import { PageHeader } from '../layout/PageLayout.tsx'
 import { agentToolCatalog, defaultToolIds } from '@lai/dsh-adapter/agent-tools'
 import type { AgentToolCatalog } from '@lai/dsh-adapter/agent-tools'
-import { AgentConfigDialog, type AgentConfigTab } from './AgentConfigDialog.tsx'
+import { AgentConfigDialog, type AgentConfigTab } from '../components/AgentConfigDialog.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { SettingsNamespaceView, ModelCatalog } from '../api/gateway.ts'
@@ -16,7 +16,7 @@ const ROLES = [
 function routeKey(value: unknown): string { const route = record(value); return typeof route.provider === 'string' && typeof route.model === 'string' ? JSON.stringify({ provider: route.provider, model: route.model }) : '' }
 
 /** Edit the lai-agents plugin's prompts through ordinary DSH settings. */
-export function AgentPrompts() {
+export function LaiAgentsPage() {
   const { t } = useLanguage()
   const [editing, setEditing] = useState<{ role: string; title: string; tab: AgentConfigTab } | null>(null)
   const [namespace, setNamespace] = useState<SettingsNamespaceView | null>(null)
@@ -75,7 +75,7 @@ export function AgentPrompts() {
   const originalModels = record(namespace?.value.models)
   const dirty = ROLES.some(([id]) => draft[id] !== original[id] || id !== 'orchestrator' && ((routes[id] ?? '') !== routeKey(originalModels[id]) || JSON.stringify(tools[id] ?? null) !== JSON.stringify(record(namespace?.value.tools)[id] ?? null)))
   return <section className="min-w-0" aria-label={t("LAI agents")}>
-    <div className="flex items-center gap-2"><h2 className="text-base font-medium">{t("LAI agents")}</h2><HelpTip text={t("A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.")} /></div>
+    <PageHeader page="lai-agents" />
     {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">{t("The lai-agents plugin is not enabled in this profile.")}</p>}
     {namespace && <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{ROLES.map(([id, title], index) => {
       const selected = tools[id] ?? (toolCatalog ? defaultToolIds(toolCatalog, id) : [])

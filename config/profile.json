@@ -7,7 +7,8 @@
     "@lai/lai-agents": "workspace:*",
     "@lai/application-config": "workspace:*",
     "@lai/superagent": "workspace:*",
-    "@lai/feishu-tools": "workspace:*"
+    "@lai/feishu-tools": "workspace:*",
+    "@lai/credentials": "workspace:*"
   },
   "dsh": {
     "profile": {
@@ -16,6 +17,7 @@
         "@deepseek-ai/dsh-web-app",
         "@lai/lai-agents",
         "@lai/feishu-tools",
+        "@lai/credentials",
         "@lai/superagent",
         "@lai/application-config"
       ]

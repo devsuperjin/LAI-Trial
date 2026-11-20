@@ -1,4 +1,5 @@
-import { HelpTip } from './HelpTip.tsx'
+import { PageHeader, PagePanel, RefreshAction } from '../layout/PageLayout.tsx'
+import { HelpTip } from '../components/HelpTip.tsx'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useLanguage } from '../i18n.tsx'
@@ -17,7 +18,7 @@ function taskStatus(task: SuperagentTicket): string {
 }
 function Panel({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   const { t } = useLanguage()
-  return <section className="min-w-0 rounded-xl border border-fd-border bg-fd-card p-5"><div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-semibold">{t(title)}</h2>{action}</div>{children}</section>
+  return <PagePanel title={t(title)} actions={action}>{children}</PagePanel>
 }
 function Metric({ label, value, note, warning }: { label: string; value: string; note: string; warning?: boolean }) {
   const { t } = useLanguage()
@@ -61,8 +62,8 @@ export function DashboardPage({ entries, onOpenRun, onRouter, onRuns }: { entrie
   const maxTokens = Math.max(1, ...model.modelBreakdown.map(item => item.tokens))
   const count = (value: number | undefined) => value === undefined ? '—' : String(value)
   const openTask = (task: SuperagentTicket) => { if (task.sessionId && model.runs.some(run => run.sessionId === task.sessionId)) onOpenRun(task.sessionId); else onRouter() }
-  return <div className="mx-auto w-full max-w-7xl space-y-5">
-    <header className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-2"><h1 className="text-xl font-semibold">{t('Dashboard')}</h1><HelpTip text={t('Monitor intake, Worker execution and specialist activity.')} /></div></div><div className="flex flex-wrap items-center gap-2">{snapshot && <span className="mr-2 text-xs text-fd-muted-foreground">{t('Updated')} {new Date(snapshot.at).toLocaleTimeString([], { hour12: false })}</span>}<button type="button" aria-label={t(busy ? 'Refreshing…' : 'Refresh')} title={t('Refresh')} className="flex h-8 w-8 items-center justify-center rounded-lg text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground disabled:opacity-40" disabled={busy} onClick={() => { void load() }}><svg aria-hidden width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={busy ? 'animate-spin motion-reduce:animate-none' : ''}><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6.1 7a7 7 0 0 1 11.6-1L20 9M4 15l2.3 3A7 7 0 0 0 18 17" /></svg></button></div></header>
+  return <div className="space-y-5">
+    <PageHeader page="dashboard" actions={<>{snapshot && <span className="mr-2 text-xs text-fd-muted-foreground">{t('Updated')} {new Date(snapshot.at).toLocaleTimeString([], { hour12: false })}</span>}<RefreshAction busy={busy} onRefresh={() => { void load() }} /></>} />
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-fd-border bg-fd-card px-4 py-3 text-xs"><span className="flex items-center gap-2"><span className={`h-2 w-2 rounded-full ${state?.paused ? 'bg-fd-warning' : routerReady ? 'bg-fd-success' : 'bg-fd-muted-foreground'}`} />{t(state ? state.paused ? 'Paused' : routerReady ? 'Ready' : 'Setup required' : 'Connecting…')}</span>{sources ? sources.filter(source => source.installed && source.enabled).map(source => <span key={source.id} className="flex min-w-0 flex-wrap items-center gap-2"><span className="font-medium">{sourceLabel(source)}</span>{source.target && <span className="max-w-sm truncate font-mono text-fd-muted-foreground" title={source.target}>{source.target}</span>}<span className={source.state === 'error' ? 'text-fd-danger' : source.state === 'paused' || source.state === 'setup' ? 'text-fd-warning' : 'text-fd-muted-foreground'}>{sourceState(source)}</span></span>) : <span className="text-fd-muted-foreground">{t('Loading sources…')}</span>}<span className="ml-auto"><HelpTip text={`${t('Task metrics: Superagent')} · ${t('Usage: recorded runs')}`} /></span></div>
     {error && <p role="alert" className="rounded-lg border border-fd-warning/30 bg-fd-warning/5 p-3 text-sm text-fd-warning">{t(snapshot ? 'Refresh failed. Showing the last successful snapshot.' : 'Task metrics unavailable. Run activity remains available.')} <span className="text-xs">{error}</span></p>}
     <div className="grid grid-cols-2 gap-3 xl:grid-cols-5">

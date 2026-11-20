@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { act, create } from 'react-test-renderer'
 import { expect, it, vi } from 'vitest'
-import { RunsPage } from '../src/components/RunsPage.tsx'
+import { RunsPage } from '../src/pages/RunsPage.tsx'
 import { TaskList } from '../src/components/TaskList.tsx'
 import type { SessionListEntry } from '../src/api/gateway.ts'
 vi.mock('../src/components/TaskList.tsx', () => ({ TaskList: () => null }))

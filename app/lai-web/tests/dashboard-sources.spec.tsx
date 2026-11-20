@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import { act, create } from 'react-test-renderer'
 import { expect, it, vi } from 'vitest'
-import { DashboardPage } from '../src/components/DashboardPage.tsx'
+import { DashboardPage } from '../src/pages/DashboardPage.tsx'
 vi.mock('../src/api/gateway.ts', () => ({ sessionTurnCount: async () => 0 }))
 vi.mock('@lai/dsh-adapter/superagent', () => ({
   superagentState: async () => ({ masterId: 'router', paused: false, load: { running: 0, queued: 0, maxWorkers: 3 }, health: { runtime: { state: 'ready' } }, setup: { accounts: null } }),
