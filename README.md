@@ -4,7 +4,7 @@
 
 LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Worker delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
-The project targets CI- and GitHub-driven engineering work: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
+The project targets engineering work driven by GitHub, Jenkins CI and optional Feishu conversations: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
 
 ## Goals and design
 
@@ -19,20 +19,27 @@ The original requirements drew on six business roles in a CI validation workflow
 
 ```mermaid
 flowchart TD
-    Input["GitHub events / CI status"] --> Router["Monitor: Superagent Router"]
-    Router --> Decision{"Policy evaluation and routing"}
-    Decision -->|No execution| Record["Record decision"]
-    Decision -->|Execute| Task["Superagent Ticket: task and execution workspace"]
-    Task --> Worker["LAI Worker: execution coordinator"]
-    subgraph Pipeline["Five-stage subagent pipeline inside the Worker"]
+    GH["GitHub Source"] --> Intake["Superagent event intake / Trigger"]
+    FS["Feishu Source · optional"] --> Intake
+    JK["Jenkins Source"] --> Intake
+    Intake --> Gate{"Scope and admission checks"}
+    Gate -->|Filtered| Record["Record outcome · no Worker execution"]
+    Gate -->|Admitted| Router["Monitor: Superagent Router"]
+    Router --> Decision{"Policy / Eval decision and routing"}
+    Decision -->|No execution / observe| Record
+    Decision -->|Execute| Task["Superagent Ticket and Assignment"]
+    Task --> Worker["LAI Worker · iqe-orchestrator · native Run and workspace"]
+    subgraph Pipeline["Five native child-agent stages coordinated by Worker"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
-        Reproduce --> Ticket["3. Ticket"]
+        Reproduce --> Ticket["3. Ticket draft"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
     Worker --> Triage
-    Reporter --> Result["Superagent reports, task state and authorized external results"]
+    Reporter --> Result["Worker report → Superagent task state and authorized replies"]
 ```
+
+This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). Scope/admission checks and the Router's Policy/Eval decision are separate steps; receiving an event does not imply execution. The five stages are children of Worker: stage arrows show order, and Worker starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
 
 ### Roles
 

@@ -4,7 +4,7 @@
 
 LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Worker 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
 
-项目面向 CI / GitHub 驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
+项目面向 GitHub、Jenkins CI 和可选飞书对话驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
 
 ## 项目需求与设计
 
@@ -19,20 +19,27 @@ LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用�
 
 ```mermaid
 flowchart TD
-    Input["GitHub 事件 / CI 状态"] --> Router["Monitor：Superagent Router"]
-    Router --> Decision{"按 Policy 判断与路由"}
-    Decision -->|不执行| Record["记录判断结果"]
-    Decision -->|执行| Task["Superagent Ticket：任务与执行工作区"]
-    Task --> Worker["LAI Worker：执行协调会话"]
-    subgraph Pipeline["Worker 内部的五阶段子 Agent 流水线"]
+    GH["GitHub Source"] --> Intake["Superagent 事件接入 / Trigger"]
+    FS["Feishu Source · 可选"] --> Intake
+    JK["Jenkins Source"] --> Intake
+    Intake --> Gate{"范围检查与准入策略"}
+    Gate -->|过滤| Record["记录结果 · 不执行 Worker"]
+    Gate -->|准入| Router["Monitor：Superagent Router"]
+    Router --> Decision{"Policy / Eval 判断与路由"}
+    Decision -->|不执行 / observe| Record
+    Decision -->|执行| Task["Superagent Ticket 与 Assignment"]
+    Task --> Worker["LAI Worker · iqe-orchestrator · 原生 Run 与工作区"]
+    subgraph Pipeline["Worker 协调的五个原生子 Agent 阶段"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
-        Reproduce --> Ticket["3. Ticket"]
+        Reproduce --> Ticket["3. Ticket 工单草稿"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
     Worker --> Triage
-    Reporter --> Result["Superagent 报告、任务状态及获授权的外部结果"]
+    Reporter --> Result["Worker 报告 → Superagent 任务状态与授权回复"]
 ```
+
+本图与[设计文档](docs/design.zh-CN.md#2-总体结构)的总体结构图保持一致。范围／准入检查与 Router 的 Policy／Eval 判断是不同步骤，收到事件不等于执行。五个阶段都是 Worker 的子 Agent：连线只表示先后顺序，每个子 Agent 都由 Worker 在前一阶段结束后启动。Ticket 阶段产出工单草稿，Superagent Ticket 则是任务实体。回复不会自动回灌到接入流程，只有后续外部事件才可能成为新输入。
 
 ### 角色分工
 
