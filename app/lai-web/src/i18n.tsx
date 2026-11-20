@@ -170,6 +170,7 @@ const ZH: Record<string, string> = {
   'A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.': '一个 Worker 主 Agent 协调五个专业子 Agent。Monitor / Router 的提示词在插件 → Superagent 中配置，其余角色提示词保存在独立的 LAI Agents 插件中。',
   'Feishu tools': '飞书工具', 'Plugin / Feishu tools': '插件 / 飞书工具',
   'Worker runs only': '仅显示 Worker', 'Showing Worker runs. Click to show all runs.': '当前仅显示 Worker，点击显示全部。', 'Showing all runs. Click to show Worker runs only.': '当前显示全部，点击仅显示 Worker。',
+  'Waiting for a Jenkins URL to be configured': '等待配置 Jenkins 地址', 'Feishu bot CLI is not configured': '尚未配置飞书机器人 CLI', 'Loading sources…': '正在加载来源…', 'Off': '已关闭', 'Starting': '启动中',
   'Unsaved changes': '有未保存的更改',
   'Select all': '一键全选', 'Clear selection': '取消全选',
   'Theme': '主题', 'Light': '浅色', 'Dark': '深色', 'System': '跟随系统', 'Language': '语言', 'Interface language': '界面语言',

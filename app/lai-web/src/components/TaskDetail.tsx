@@ -1,3 +1,4 @@
+import { MarkdownContent } from './MarkdownContent.tsx'
 import { WorkerRunContext } from './WorkerRunContext.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { motion } from 'motion/react'
@@ -178,7 +179,7 @@ function ResultView(props: { events: PageResponse['records'][number]['event'][] 
     <div className="h-full overflow-y-auto p-4">
       <div className="rounded-lg border border-fd-border bg-fd-card p-4">
         <div className="mb-2 text-xs uppercase tracking-wide text-fd-muted-foreground">{t("Final answer")}</div>
-        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{textOf((data.message as { content?: unknown } | undefined)?.content) || '—'}</pre>
+        <MarkdownContent>{textOf((data.message as { content?: unknown } | undefined)?.content) || '—'}</MarkdownContent>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {usageEntries.map(([key, value]) => (

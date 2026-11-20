@@ -38,6 +38,17 @@ function sourceState(instance: SourceInstance & { installed: boolean }, parts: {
   if (parts.some(part => part.state === 'starting')) return 'starting'
   return parts.some(part => part.state === 'paused') ? 'paused' : 'ready'
 }
+/** Public source identity only: never expose credentials or URL query tokens. */
+export function sourceTarget(config: Record<string, unknown>): string | undefined {
+  if (typeof config.repository === 'string' && config.repository.trim()) return config.repository.trim()
+  if (typeof config.url !== 'string' || !config.url.trim()) return undefined
+  try {
+    const url = new URL(config.url)
+    url.username = ''; url.password = ''; url.search = ''; url.hash = ''
+    return url.toString()
+  } catch { return undefined }
+}
+
 export function sourcesStatus(host: ViewHost, health: HealthMap, setup: SetupState) {
   const { store, sources } = host
   const view = snapshot(host)
@@ -50,7 +61,8 @@ export function sourcesStatus(host: ViewHost, health: HealthMap, setup: SetupSta
   return sources.instances().map(instance => {
     const { health: parts, ...named } = sourceHealth(sources, instance, health)
     const problem = problemOf(instance.id, setup)
-    return { ...named, installed: instance.installed, enabled: instance.enabled, state: sourceState(instance, parts, setup), health: parts,
+    const target = sourceTarget(instance.config)
+    return { ...named, ...(target ? { target } : {}), installed: instance.installed, enabled: instance.enabled, state: sourceState(instance, parts, setup), health: parts,
       ...problem ? { problem } : {}, stats: stats[instance.id] ?? { received: 0, filtered: 0, lastAt: '' }, filtered: filtered(instance.id),
       dropped: dropped.filter(item => item.channel.source === instance.id) }
   })

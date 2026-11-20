@@ -186,3 +186,29 @@ body {
     animation: none;
   }
 }
+
+/* Model result Markdown, using the same light/dark palette as the workspace. */
+.lai-markdown { overflow-wrap: anywhere; }
+.lai-markdown > :first-child { margin-top: 0; }
+.lai-markdown > :last-child { margin-bottom: 0; }
+.lai-markdown p, .lai-markdown ul, .lai-markdown ol, .lai-markdown pre,
+.lai-markdown blockquote, .lai-markdown table { margin: .85em 0; }
+.lai-markdown h1, .lai-markdown h2, .lai-markdown h3,
+.lai-markdown h4, .lai-markdown h5, .lai-markdown h6 { margin: 1.2em 0 .5em; font-weight: 600; line-height: 1.4; }
+.lai-markdown h1 { font-size: 1.5em; }
+.lai-markdown h2 { font-size: 1.3em; }
+.lai-markdown h3 { font-size: 1.15em; }
+.lai-markdown ul { padding-left: 1.5em; list-style: disc; }
+.lai-markdown ol { padding-left: 1.5em; list-style: decimal; }
+.lai-markdown li + li { margin-top: .3em; }
+.lai-markdown li > p { margin: .35em 0; }
+.lai-markdown a { color: var(--color-fd-primary); text-decoration: underline; text-underline-offset: 3px; }
+.lai-markdown code { border-radius: 4px; background: var(--color-fd-secondary); padding: .15em .35em; font-size: .9em; }
+.lai-markdown pre { overflow-x: auto; border-radius: 8px; background: var(--color-fd-secondary); padding: 1em; white-space: pre; }
+.lai-markdown pre code { padding: 0; background: none; }
+.lai-markdown blockquote { border-left: 3px solid var(--color-fd-border); padding-left: 1em; color: var(--color-fd-muted-foreground); }
+.lai-markdown table { width: 100%; border-collapse: collapse; }
+.lai-markdown th, .lai-markdown td { border: 1px solid var(--color-fd-border); padding: .5em .75em; text-align: left; }
+.lai-markdown th { background: var(--color-fd-secondary); font-weight: 600; }
+.lai-markdown hr { border-color: var(--color-fd-border); margin: 1.2em 0; }
+.lai-markdown input[type=checkbox] { margin-right: .5em; }

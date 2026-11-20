@@ -10,7 +10,7 @@ import { githubKind } from '../src/sources/github.ts'
 import { snapshot, threadSummary, ticketSummary, triggerView } from '../src/app/views/records.ts'
 import { basisFacts, ticketDetail } from '../src/app/views/tickets.ts'
 import { threadDetail } from '../src/app/views/threads.ts'
-import { droppedReplies, sourcesStatus } from '../src/app/views/sources.ts'
+import { droppedReplies, sourcesStatus, sourceTarget } from '../src/app/views/sources.ts'
 import { overview } from '../src/app/views/overview.ts'
 import { markdown, plain } from '../src/app/views/text.ts'
 import { policyHistory } from '../src/app/settings-history.ts'
@@ -318,4 +318,10 @@ it('reads each ticket a page\'s follow-ups reached once, and nothing for a messa
   const records = { tickets: { get: vi.fn() }, threads: { get: vi.fn() }, triggers: store.triggers }
   expect(followupOwners(store.triggers.get('f3')!, records)).toEqual([])
   expect([records.tickets.get, records.threads.get].map(read => read.mock.calls.length)).toEqual([0, 0])
+})
+
+it('exposes source targets without URL credentials or query tokens', () => {
+  expect(sourceTarget({ url: 'https://user:secret@ci.example/team/?token=secret#fragment' })).toBe('https://ci.example/team/')
+  expect(sourceTarget({ url: '' })).toBeUndefined()
+  expect(sourceTarget({ repository: 'team/repo' })).toBe('team/repo')
 })

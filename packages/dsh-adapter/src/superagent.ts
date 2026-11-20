@@ -33,7 +33,7 @@ export const saveSuperagentPrompts = (config: unknown, baseRevision: number) => 
 
 /** Operator metrics come from the task engine, not inferred session completion. */
 export interface SuperagentOverview {
-  problems: { kind: string; detail?: string; name?: string; source?: { title: Localized; health: { detail: string } }; outgoing?: { error?: string } }[]
+  problems: { kind: string; detail?: string; name?: string; source?: { id: string; title: Localized; health: { detail: string } }; outgoing?: { error?: string } }[]
   person: SuperagentTicket[]
   executor: { running: number; queued: number; maxWorkers: number; idle: number }
   flow: { received: number; filtered: number; triggers: number; judged: number; accepted: number; evaluating: number; dropped: number }
@@ -86,3 +86,12 @@ export const superagentWorkerDetails = (runId: string) => {
   if (!runId.startsWith('worker-') || runId.length === 7) throw new Error('This Run is not a Superagent Worker')
   return superagentRequest<WorkerTicketDetails>(`tickets/${encodeURIComponent(runId.slice(7))}`)
 }
+
+/** Source identities and lifecycle states, without editable configuration or credentials. */
+export interface SuperagentSourceStatus {
+  id: string; title: Localized; target?: string; installed: boolean; enabled: boolean
+  state: 'missing' | 'off' | 'error' | 'setup' | 'starting' | 'paused' | 'ready'
+  health: { name: string; state: string; detail: string; code?: string }[]
+  problem?: { detail?: string; code?: string }
+}
+export const superagentSources = () => superagentRequest<SuperagentSourceStatus[]>('sources')

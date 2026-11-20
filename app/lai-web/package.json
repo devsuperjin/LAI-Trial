@@ -18,23 +18,25 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@lai/dsh-adapter": "workspace:*",
     "motion": "^12.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@lai/dsh-adapter": "workspace:*",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tailwindcss": "^4.1.0",
-    "typescript": "^6.0.3",
-    "vite": "^6.4.3",
+    "@types/node": "^24.0.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "@types/node": "^24.0.0",
+    "@types/react-test-renderer": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "react-test-renderer": "^18.3.1",
-    "@types/react-test-renderer": "^18.3.1"
+    "tailwindcss": "^4.1.0",
+    "typescript": "^6.0.3",
+    "vite": "^6.4.3"
   },
   "private": true
 }
