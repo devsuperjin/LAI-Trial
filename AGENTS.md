@@ -1,6 +1,6 @@
 # LAI development
 
-LAI stands for **Linux Agent Infra**.
+LAI stands for **Linux Agent Infra**. **LAI Superagent** means **Linux Agent Infra X Superagent**, the application built on DeepSeek Harness. Keep the acronym and application definitions distinct.
 
 This is an independent DSH application repository. Read `docs/architecture.md` and `config/dsh-baseline.json` before changing integration code. Current design is in `docs/design.md` (Chinese: `docs/design.zh-CN.md`).
 

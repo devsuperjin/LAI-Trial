@@ -4,7 +4,7 @@
 
 ## 项目介绍
 
-**LAI（Linux Agent Infra）** 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Orchestrator 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
+**LAI Superagent（Linux Agent Infra X Superagent）** 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Orchestrator 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
 
 项目面向 GitHub、Jenkins CI 和可选飞书对话驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
 
@@ -69,7 +69,8 @@ Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其�
 
 | 术语 | 含义 |
 | --- | --- |
-| LAI | Linux Agent Infra。 |
+| LAI | Linux Agent Infra 的简写。 |
+| LAI Superagent | Linux Agent Infra X Superagent，基于 DeepSeek Harness 构建的应用。 |
 | Superagent Router(Monitor) | 监控、准入、评估和任务路由角色。 |
 | LAI Orchestrator | 使用 `iqe-orchestrator` 协调五个原生子 Agent 的执行角色。 |
 | Ticket / Run | Ticket 是业务任务；Run 是原生会话的执行记录。 |

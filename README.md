@@ -4,7 +4,7 @@
 
 ## Introduction
 
-**LAI (Linux Agent Infra)** is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Orchestrator delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
+**LAI Superagent (Linux Agent Infra X Superagent)** is an application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Orchestrator delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
 The project targets engineering work driven by GitHub, Jenkins CI and optional Feishu conversations: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
 
@@ -70,6 +70,7 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 | Term | Meaning |
 | --- | --- |
 | LAI | Linux Agent Infra. |
+| LAI Superagent | Linux Agent Infra X Superagent, an application built on DeepSeek Harness. |
 | Superagent Router(Monitor) | The monitoring, admission, assessment and task-routing role. |
 | LAI Orchestrator | The execution coordinator using `iqe-orchestrator` to delegate to five native child agents. |
 | Ticket / Run | Ticket is a business task; Run is a native session execution record. |

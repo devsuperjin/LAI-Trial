@@ -8,7 +8,8 @@
 
 | Term | Meaning |
 | --- | --- |
-| LAI | Linux Agent Infra, the application built on DeepSeek Harness. |
+| LAI | Linux Agent Infra. |
+| LAI Superagent | Linux Agent Infra X Superagent, an application built on DeepSeek Harness. |
 | DSH / DeepSeek Harness | The underlying runtime for models, sessions, tools, native subagents and plugins. |
 | Superagent Router(Monitor) | The monitoring and routing role. It covers event intake, admission, assessment, task routing and follow-ups. Rule checks run in code; semantic decisions use its main model session. |
 | LAI Orchestrator | The execution coordinator for an accepted task, using the `iqe-orchestrator` preset. It delegates to five native child agents in order. |

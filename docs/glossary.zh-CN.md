@@ -8,7 +8,8 @@
 
 | 术语 | 含义 |
 | --- | --- |
-| LAI | Linux Agent Infra，基于 DeepSeek Harness 构建的应用。 |
+| LAI | Linux Agent Infra 的简写。 |
+| LAI Superagent | Linux Agent Infra X Superagent，基于 DeepSeek Harness 构建的应用。 |
 | DSH / DeepSeek Harness | 提供模型、会话、工具、原生子 Agent 和插件能力的底层运行时。 |
 | Superagent Router(Monitor) | 监控与路由角色，涵盖事件接入、准入、评估、任务路由和后续消息。规则检查由程序执行，语义判断使用其模型主会话。 |
 | LAI Orchestrator | 接单任务的执行协调者，使用 `iqe-orchestrator` 预设，按顺序委派五个原生子 Agent。 |
