@@ -1,8 +1,8 @@
 # LAI Configuration Guide
 
-**English** | [简体中文](Guide.zh-CN.md)
+**English** | [简体中文](guide.zh-CN.md)
 
-For startup commands and the project introduction, see the [README](README.md). Open the authenticated URL printed at startup; the default port is 3080.
+For startup commands and the project introduction, see the [README](../README.md). Open the authenticated URL printed at startup; the default port is 3080.
 
 ## Initial configuration
 

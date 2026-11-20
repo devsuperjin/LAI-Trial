@@ -2,7 +2,7 @@
 
 **English** | [简体中文](development.zh-CN.md)
 
-For maintainers and plugin authors. For user configuration see [Guide](../Guide.md), for system ownership see [architecture](architecture.md), and for repository rules see [AGENTS.md](../AGENTS.md).
+For maintainers and plugin authors. For user configuration see [Guide](guide.md), for system ownership see [architecture](architecture.md), and for repository rules see [AGENTS.md](../AGENTS.md).
 
 ## DSH application development conventions
 

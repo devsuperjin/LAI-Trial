@@ -1,8 +1,8 @@
 # LAI 配置手册
 
-[English](Guide.md) | **简体中文**
+[English](guide.md) | **简体中文**
 
-启动命令与系统介绍见 [README](README.zh-CN.md)。以下设置使用终端打印的鉴权地址打开，默认端口 3080。
+启动命令与系统介绍见 [README](../README.zh-CN.md)。以下设置使用终端打印的鉴权地址打开，默认端口 3080。
 
 ## 首次配置
 

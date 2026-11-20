@@ -2,7 +2,7 @@
 
 [English](development.md) | **简体中文**
 
-本文面向维护者和插件开发者。使用与配置见 [Guide](../Guide.zh-CN.md)，系统职责见[架构](architecture.zh.md)，协作规则见 [AGENTS.md](../AGENTS.md)。
+本文面向维护者和插件开发者。使用与配置见 [Guide](guide.zh-CN.md)，系统职责见[架构](architecture.zh.md)，协作规则见 [AGENTS.md](../AGENTS.md)。
 
 ## DSH 二次开发规范
 

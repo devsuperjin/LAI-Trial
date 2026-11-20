@@ -67,14 +67,18 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 
 ## Current capabilities and extensions
 
-The application integrates Superagent's GitHub source. Depending on configuration, it receives notifications, new Issues, PRs, comments and CI status changes, then applies admission policy. The Jenkins source receives failed CI builds directly from Jenkins' remote API. Accepted work runs through LAI's native subagent pipeline.
+| Capability | Current implementation |
+| --- | --- |
+| Event sources | GitHub repository events, Jenkins failed builds, and an optional Feishu conversation Source. Each source has its own configuration and intake scope. |
+| Monitoring and routing | Superagent Router(Monitor) receives events, applies admission policy, assesses candidates and manages task routing and follow-ups. |
+| Task execution | LAI Orchestrator coordinates five native child agents in order: Triage → Reproduction → Ticket draft → Reviewer → Reporting. Failed or cancelled stages block later stages. |
+| Tools and Skills | Per-specialist model/tool configuration, default Skill capability and on-demand Skill loading. Standalone Feishu tools provide separately configured operation capabilities. |
+| Service credentials | A dedicated Credentials plugin stores connection information and secrets with preset-based access grants and optional local credential updates. |
+| Execution visibility | Dashboard, task decisions, native Run timelines/DAGs/results and configuration pages share the same backend and execution history as the original DSH UI. |
 
-Current boundaries:
+Source availability, model configuration, tool selection and task authorization determine what can actually run. Receiving an event does not by itself authorize execution; a role or Skill does not grant access to an external service. Publishing replies, PRs or tickets requires the applicable authorization and working tools.
 
-- **Receiving an event does not automatically launch an LAI Orchestrator.** Source switches, allowed senders, admission rules and Eval mode determine what proceeds. The prototype's default rules mainly cover copy fixes and local visual fixes; CI analysis requires appropriate rules.
-- Role behavior depends on prompts and available tools. A role name does not mean Jarvis, LogDistiller or another external engineering tool is installed.
-- General Commit / Push triggers, Jira / Azure ticket-submission connectors and a shared knowledge base are not currently implemented. Future inputs should use Superagent's Source extension mechanism.
-- Tasks can produce ticket drafts and reports. Creating PRs, replying on GitHub or taking other external actions depends on authorization, configuration and available tools.
+Extend inputs through Superagent Sources and add capabilities through standard DSH tool/Skill plugins. Configuration steps and current access controls are covered in the [configuration guide](docs/guide.md); plugin development is covered in the [development guide](docs/development.md).
 
 ## Quick start
 
@@ -94,7 +98,7 @@ pnpm start
 
 `pnpm start` builds the workspace and starts the unified application. You do not need separate frontend and backend processes for normal use. Open the authenticated URL printed in the terminal. The default port is **3080**.
 
-For configuration steps and page details, see the [configuration guide](Guide.md).
+For configuration steps and page details, see the [configuration guide](docs/guide.md).
 
 ## Repository structure
 
@@ -161,7 +165,7 @@ The original Superagent panel remains accessible through `/dsh/`, sharing task s
 
 - [Development guide](docs/development.md): dependencies, composition, lifecycle, versions and checks.
 
-- [Configuration guide](Guide.md): initial setup, page reference, tools and credential authorization.
+- [Configuration guide](docs/guide.md): initial setup, page reference, tools and credential authorization.
 
 - [System design](docs/design.md) · [中文](docs/design.zh-CN.md)
 - [Architecture](docs/architecture.md) · [中文](docs/architecture.zh.md)

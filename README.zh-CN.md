@@ -67,14 +67,18 @@ Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其�
 
 ## 当前能力与扩展方向
 
-当前代码已接入 Superagent 的 GitHub 来源，可按配置接收通知、新 Issue、PR、评论及 CI 状态变化；Jenkins 来源直接通过 Jenkins 远程 API 接收失败构建。两者都通过准入策略决定后续处理。任务执行采用 LAI 原生子 Agent 流水线。
+| 能力 | 当前实现 |
+| --- | --- |
+| 事件来源 | GitHub 仓库事件、Jenkins 失败构建，以及可选飞书对话来源；每个来源分别配置接收范围。 |
+| 监控与路由 | Superagent Router(Monitor) 接收事件、执行准入策略、评估候选，并管理任务路由及后续消息。 |
+| 任务执行 | LAI Orchestrator 按顺序协调五个原生子 Agent：Triage → Reproduction → Ticket 工单草稿 → Reviewer → Reporting；失败或取消会阻止后续阶段。 |
+| 工具与 Skill | 专业角色可分别配置模型和工具，默认具备 Skill 能力并按需加载；独立飞书工具提供另行配置的操作能力。 |
+| 服务凭证 | 独立 Credentials 插件管理连接信息和密钥，按 preset 授权访问，并可显式允许更新本地凭证。 |
+| 执行可见性 | Dashboard、任务判断、原生 Run 时间线／DAG／结果及配置页面，与原版 DSH 共用后端和执行历史。 |
 
-需要注意当前实现的边界：
+实际执行能力取决于来源是否可用、模型配置、工具选择及任务授权。收到事件不等于获准执行，角色或 Skill 也不会自动授予外部服务权限。回复、PR 或工单发布仍需对应授权和可用工具。
 
-- **收到事件不等于启动 LAI Orchestrator**：来源开关、允许的发送者、准入规则和 Eval 模式共同决定是否执行。原型默认规则主要面向文案和局部视觉修复，使用 CI 分析场景时需要配置对应规则。
-- 五个角色的职责由 Prompt 和可用工具共同实现；角色名称本身不代表已经安装了 Jarvis、LogDistiller 或其他外部工程工具。
-- 当前没有实现通用 Commit / Push 触发器、Jira / Azure 工单提交连接器或共享知识库。后续来源应通过 Superagent 的 Source 扩展机制接入。
-- 工单草稿和报告可在任务中产生；是否创建 PR、回复 GitHub 或执行其他外部操作，取决于任务授权、配置及实际可用工具。
+新增输入通过 Superagent Source 扩展，新增能力通过标准 DSH 工具／Skill 插件扩展。配置步骤和访问控制见[配置手册](docs/guide.zh-CN.md)，插件开发见[开发手册](docs/development.zh-CN.md)。
 
 ## 快速启动
 
@@ -94,7 +98,7 @@ pnpm start
 
 `pnpm start` 会构建工作区并启动统一应用，无需分别启动前端和后端。打开终端打印的带认证信息的访问地址，默认端口为 **3080**。
 
-配置步骤与页面说明请查看[配置手册](Guide.zh-CN.md)。
+配置步骤与页面说明请查看[配置手册](docs/guide.zh-CN.md)。
 
 ## 项目结构
 
@@ -161,7 +165,7 @@ LAI-Trial/
 
 - [开发手册](docs/development.zh-CN.md)：依赖、插件组合、生命周期、版本及检查流程。
 
-- [配置手册](Guide.zh-CN.md)：首次配置、页面入口、工具与凭证授权。
+- [配置手册](docs/guide.zh-CN.md)：首次配置、页面入口、工具与凭证授权。
 
 - [系统设计](docs/design.zh-CN.md) · [English](docs/design.md)
 - [架构说明](docs/architecture.zh.md) · [English](docs/architecture.md)

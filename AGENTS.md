@@ -38,5 +38,5 @@ This is an independent DSH application repository. Read `docs/architecture.md` a
 ## Documentation terms and locations
 
 - Use exactly `LAI Orchestrator` and `Superagent Router(Monitor)` for application roles in maintained prose. Preserve actual code identifiers, package names, paths and quoted upstream contracts.
-- Keep README focused on introduction, overview, startup and documentation links. User setup/page reference belongs in root `Guide.md` (Chinese: `Guide.zh-CN.md`); development conventions and commands belong in `docs/development.md` (Chinese: `docs/development.zh-CN.md`).
+- Keep README focused on introduction, overview, startup and documentation links. User setup/page reference belongs in `docs/guide.md` (Chinese: `docs/guide.zh-CN.md`); development conventions and commands belong in `docs/development.md` (Chinese: `docs/development.zh-CN.md`).
 - Keep screenshots near the end of README, immediately before Documentation. Keep English/Chinese guides and overview diagrams synchronized.
