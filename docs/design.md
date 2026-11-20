@@ -222,7 +222,7 @@ The current DSH baseline is `0.2.2-rc.1`; `config/dsh-baseline.json` is authorit
 
 ### Branches and versions
 
-New plugins start on dedicated branches from current main and merge through PRs, never direct additions on main. Every component update, including docs, bumps that component's manifest: patch for compatible fixes/docs, minor for features, major for breaking changes unless explicitly specified. Application-wide changes also bump the root version. The official DSH baseline remains independent. Respect user limits on checks, tests and browser use; see [AGENTS.md](../AGENTS.md).
+New plugins start on dedicated branches from current main and merge through PRs, never direct additions on main. Every component update, including docs, bumps that component's manifest: patch increments only for ongoing UI, localization, docs, fixes and small iterations; the patch number can grow without limit (for example 0.3.9 → 0.3.10), and minor/major changes require an explicit user request. Application-wide changes also bump the root version. The official DSH baseline remains independent. Respect user limits on checks, tests and browser use; see [AGENTS.md](../AGENTS.md).
 
 ## 11. Current scope and extension opportunities
 

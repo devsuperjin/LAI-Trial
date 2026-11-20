@@ -222,7 +222,7 @@ Dashboard 的业务状态来自 Superagent；Token 用量来自各原生 Run 的
 
 ### 分支与版本
 
-新增插件从最新 main 新开独立分支，通过 PR 合并；不直接在 main 新增插件。每次更新组件（包括文档）同步 bump 对应 package.json，默认文档／兼容修复 patch、新功能 minor、不兼容变更 major；全应用修改同时 bump 根版本。官方 DSH 基线独立维护。遵守用户对测试、验证和浏览器的任务限制，详见 [AGENTS.md](../AGENTS.md)。
+新增插件从最新 main 新开独立分支，通过 PR 合并；不直接在 main 新增插件。每次更新组件（包括文档）同步 bump 对应 package.json，日常迭代只递增末尾 patch，数字可无限增加，不自动升 minor／major，除非用户明确指定；全应用修改同时 bump 根版本。官方 DSH 基线独立维护。遵守用户对测试、验证和浏览器的任务限制，详见 [AGENTS.md](../AGENTS.md)。
 
 ## 11. 当前范围与待扩展能力
 

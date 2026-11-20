@@ -65,7 +65,7 @@ Update the baseline record and retain the previous code, lockfile and matching d
 
 ## Branches and component versions
 
-Start new plugins on dedicated branches from current main and merge through PRs, never direct additions on main. Every component update, including docs, bumps its manifest in the same commit/PR: patch for compatible fixes/docs, minor for features, major for breaking changes unless explicitly specified. Application-wide changes also bump the root manifest; the official DSH baseline is independent.
+Start new plugins on dedicated branches from current main and merge through PRs, never direct additions on main. Every component update, including docs, bumps its manifest in the same commit/PR: patch increments only for ongoing UI, localization, docs, fixes and small iterations; the patch number can grow without limit (for example 0.3.9 → 0.3.10), and minor/major changes require an explicit user request. Application-wide changes also bump the root manifest; the official DSH baseline is independent.
 
 ## Web directories
 

@@ -65,7 +65,7 @@ pnpm check
 
 ## 分支与组件版本
 
-新增插件从最新 main 创建独立分支，通过 PR 合并；不直接在主分支新增插件。每次更新组件（包括文档）在同一提交／PR bump 对应 package.json。兼容修复和文档默认 patch，新能力 minor，不兼容修改 major，用户指定版本优先。全应用修改同时 bump 根 manifest；官方 DSH 基线独立维护。
+新增插件从最新 main 创建独立分支，通过 PR 合并；不直接在主分支新增插件。每次更新组件（包括文档）在同一提交／PR bump 对应 package.json。日常界面、汉化、文档、修复和小步迭代只递增末尾 patch，末尾数字可无限增加（例如 0.3.9 → 0.3.10），不自动升 minor／major，除非用户明确指定。全应用修改同时 bump 根 manifest；官方 DSH 基线独立维护。
 
 ## Web 目录
 

@@ -30,7 +30,7 @@ This is an independent DSH application repository. Read `docs/architecture.md` a
 ## Branches, versions and delivery
 
 - For every new plugin, start a dedicated branch from the latest `main` (default `codex/<plugin-name>` unless the user specifies another name). Implement and review through a PR targeting `main`, then merge the PR. Do not introduce new plugins directly on `main`.
-- Every component update must bump that component's `package.json` version in the same change, including its documentation updates. Use a patch bump for compatible fixes/docs, a minor bump for new capabilities, and a major bump for breaking changes unless the user specifies a version.
+- Every component update must bump that component's `package.json` version in the same change, including its documentation updates. Ongoing UI, localization, documentation, fixes and small feature iterations increment only the final patch number. It has no rollover limit (for example `0.3.9` → `0.3.10`). Do not increase minor/major automatically; do so only when the user explicitly requests a release/version change.
 - Bump each affected package independently, not just the root application version. Keep dependencies/lockfile consistent. Bump the root version for application-wide changes; do not change the official DSH baseline as part of an application release.
 - Version information reads application/plugin manifests at build time. Rebuild after a version bump; never hardcode displayed plugin versions.
 - Keep English/Chinese README, design and architecture documents consistent. Their overview should use a single `Superagent Router(Monitor)` node and one LAI Orchestrator group containing the five stages; implementation detail belongs in prose/reference sections.

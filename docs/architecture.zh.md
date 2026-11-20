@@ -58,6 +58,6 @@ Modal 支持 API endpoint、IP／主机名、端口和访问说明。普通设�
 
 ## 分支、版本与交付
 
-新增插件必须从最新 `main` 创建独立分支，提交 PR 到 `main` 并通过 PR 合并，不直接在 `main` 新增插件。每次修改组件（包括其文档）都要在同一改动中 bump 对应 package.json：兼容修复／文档默认 patch，新功能 minor，不兼容变更 major，用户指定版本优先。全应用改动也更新根版本；不要顺带修改官方 DSH 基线。
+新增插件必须从最新 `main` 创建独立分支，提交 PR 到 `main` 并通过 PR 合并，不直接在 `main` 新增插件。每次修改组件（包括其文档）都要在同一改动中 bump 对应 package.json：日常界面、汉化、文档、修复和小步迭代只递增末尾 patch，末尾数字可无限增加（例如 0.3.9 → 0.3.10），不自动升 minor／major，除非用户明确指定。全应用改动也更新根版本；不要顺带修改官方 DSH 基线。
 
 常规集成检查为 `pnpm check`，真实模型验证另行执行；用户明确禁止测试、验证或浏览器时遵守该限制并报告实际执行内容。完整协作约束见 [AGENTS.md](../AGENTS.md)，开发流程见[开发架构与上游同步参考](development-architecture-reference.zh.md)。
