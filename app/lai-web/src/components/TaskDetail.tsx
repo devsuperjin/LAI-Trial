@@ -1,3 +1,4 @@
+import { ExpandedView } from './ExpandedView.tsx'
 import { MarkdownContent } from './MarkdownContent.tsx'
 import { WorkerRunContext } from './WorkerRunContext.tsx'
 import { useLanguage } from '../i18n.tsx'
@@ -29,6 +30,7 @@ function textOf(value: unknown): string {
 export function TaskDetail(props: { page: PageResponse | null; sessionId: string; running: boolean; entries: SessionListEntry[]; onDelete?: () => void; deleting?: boolean; title?: string; hideResult?: boolean }) {
   const { t } = useLanguage()
   const [tab, setTab] = useState<Tab>('timeline')
+  const [dagExpanded, setDagExpanded] = useState(false)
   const [timelineView, setTimelineView] = useState<'waterfall' | 'list'>(() => { try { return localStorage.getItem('lai-web-timeline-view') === 'list' ? 'list' : 'waterfall' } catch { return 'waterfall' } })
   useEffect(() => { try { localStorage.setItem('lai-web-timeline-view', timelineView) } catch { /* Keep the current view when storage is unavailable. */ } }, [timelineView])
   const events = useMemo(() => props.page?.records.map(record => record.event) ?? [], [props.page])
@@ -72,7 +74,7 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
           <button
             className={`relative rounded-md px-3 py-1.5 text-sm transition-colors ${tab === candidate ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
             key={candidate}
-            onClick={() =>{  setTab(candidate) }}
+            onClick={() =>{  setDagExpanded(false); setTab(candidate) }}
             type="button"
           >
             {tab === candidate && (
@@ -81,13 +83,14 @@ export function TaskDetail(props: { page: PageResponse | null; sessionId: string
             <span className="relative capitalize">{t(candidate)}</span>
           </button>
         ))}
+        {tab === 'dag' && <button type="button" aria-label={t('Expand DAG')} title={t('Expand DAG')} onClick={() => setDagExpanded(true)} className="ml-auto flex h-8 w-8 items-center justify-center rounded-md text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-primary"><svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M3 3l6 6m12-6-6 6M3 21l6-6m12 6-6-6" /></svg></button>}
         {tab === 'timeline' && <div role="group" aria-label={t('Timeline view')} className="ml-auto flex gap-0.5 rounded-md border border-fd-border p-0.5">{(['waterfall', 'list'] as const).map(view => <button key={view} type="button" aria-pressed={timelineView === view} className={`rounded px-2.5 py-1 text-xs ${timelineView === view ? 'bg-fd-secondary font-medium text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`} onClick={() => setTimelineView(view)}>{t(view === 'waterfall' ? 'Waterfall' : 'List')}</button>)}</div>}
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">
         {/* Hidden documents pause animations; an exit-gated swap would never mount the next tab. */}
         <div className="h-full" key={tab}>
           {tab === 'timeline' && (timelineView === 'waterfall' ? <WaterfallView page={props.page} sessionId={props.sessionId} running={props.running} entries={props.entries} /> : <TimelineView events={events} />)}
-          {tab === 'dag' && <DagView entries={props.entries} page={props.page} running={props.running} sessionId={props.sessionId} />}
+          {tab === 'dag' && <ExpandedView expanded={dagExpanded} onClose={() => setDagExpanded(false)} title={`${t('dag')} · ${title}`}><DagView entries={props.entries} page={props.page} running={props.running} sessionId={props.sessionId} /></ExpandedView>}
           {tab === 'result' && <ResultView events={events} />}
         </div>
       </div>

@@ -57,3 +57,5 @@ Apply changes in a role modal only updates the page draft; save configuration af
 Settings → General displays application/plugin manifests captured at build time, not a live inventory of enabled plugins. Rebuild after version changes. Hash paths support browser history and direct links, for example `/#/plugins/credentials`.
 
 Terminology is defined in the [glossary](glossary.md), also available in Settings → Glossary.
+
+In Runs → DAG, use the expand icon at the top right to open a larger modal view. Node expansion, selection, pan/zoom and live data remain available; close with the top-right icon or Escape to return to the inline view.

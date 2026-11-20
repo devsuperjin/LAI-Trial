@@ -25,3 +25,5 @@ Plugin pages separately configure Superagent, LAI Agents, Feishu tools and Crede
 Settings → General shows application/DSH versions, build time, and every bundled `@lai` plugin's name, package and version collected from manifests by Vite. This is build metadata, not a live enabled-plugin inventory. The source link points to [IQE-SUZHOU/LAI-Superagent](https://github.com/IQE-SUZHOU/LAI-Superagent).
 
 Every update to this package, including docs, bumps its manifest version; rebuild to expose changed metadata. New plugins use dedicated branches and PR merge into main. Follow [AGENTS.md](../../AGENTS.md), including task-specific exclusions of tests and browser use.
+
+The Run DAG header provides an expand icon. `ExpandedView` moves a stable portal host into a native dialog, preserving DAG interaction state and the live child component instead of mounting a duplicate graph. Escape/Close restores the inline host.

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Expand DAG": "放大 DAG",
   "Router": "路由",
   "Open Runs": "打开运行记录",
   "Glossary": "术语表",

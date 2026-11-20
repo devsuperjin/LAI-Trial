@@ -57,3 +57,5 @@ Superagent 页面中的 **Prompts** 管理其 Superagent Router(Monitor) / LAI O
 Settings → General 展示构建时的应用和插件版本；修改 manifest 后需要重新构建，不表示插件实时启用状态。页面支持 Hash 地址及浏览器前进／后退，例如 `/#/plugins/credentials`。
 
 术语定义见[术语表](glossary.zh-CN.md)，应用内入口为 Settings → 术语表。
+
+在运行记录 → DAG 中点击右上角放大图标，可在大尺寸弹窗中查看。节点展开、选择、平移缩放和实时数据保持可用；点击关闭图标或按 Escape 返回原视图。
