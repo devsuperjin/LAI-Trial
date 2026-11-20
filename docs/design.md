@@ -21,14 +21,19 @@ The original six-role reference diagram describes business responsibilities. The
 
 ```mermaid
 flowchart TD
-    GH["GitHub Source"] --> Intake["Superagent event intake / Trigger"]
-    FS["Feishu Source · optional"] --> Intake
-    JK["Jenkins Source"] --> Intake
-    Intake --> Gate{"Scope and admission checks"}
-    Gate -->|Filtered| Record["Record outcome · no Worker execution"]
-    Gate -->|Admitted| Router["Monitor: Superagent Router"]
-    Router --> Decision{"Policy / Eval decision and routing"}
-    Decision -->|No execution / observe| Record
+    GH["GitHub Source"]
+    FS["Feishu Source · optional"]
+    JK["Jenkins Source"]
+    subgraph Monitor["Monitor / Router: Superagent business responsibility"]
+        Intake["Code: receive, deduplicate and record Trigger"] --> Gate{"Code: scope and admission rules"}
+        Gate -->|Filtered| Record["Record outcome · no Worker execution"]
+        Gate -->|Admitted| Router["Router main session: request routing / candidate assessment"]
+        Router --> Decision{"Policy / Eval decision and routing"}
+        Decision -->|No execution / observe| Record
+    end
+    GH --> Intake
+    FS --> Intake
+    JK --> Intake
     Decision -->|Execute| Task["Superagent Ticket and Assignment"]
     Task --> Worker["LAI Worker · iqe-orchestrator · native Run and workspace"]
     subgraph Pipeline["Five native child-agent stages coordinated by Worker"]
@@ -41,7 +46,9 @@ flowchart TD
     Reporter --> Result["Worker report → Superagent task state and authorized replies"]
 ```
 
-This overview is identical to the diagram in the [README](../README.md#goals-and-design). Scope/admission checks precede Router handling; Policy/Eval and routing determine whether admitted input leads to execution. Observe-only or filtered outcomes do not start a Worker.
+At the business-role level, event intake, scope/admission checks, request routing and candidate assessment all belong to Monitor / Router. The Code nodes inside that boundary run deterministic Superagent logic, not extra agents or model calls. Inputs requiring semantic judgment are handled by the Router main session; code validates and applies its decisions.
+
+This overview is identical to the diagram in the [README](../README.md#goals-and-design). Within Monitor / Router, deterministic scope/admission checks precede main-session handling; Policy/Eval and routing determine whether admitted input leads to execution. Observe-only or filtered outcomes do not start a Worker.
 
 All five specialists are native children of Worker. Edges between stages represent execution order, not one specialist creating another. Worker issues each delegation. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Results do not automatically loop back into intake; later external events enter through a Source.
 

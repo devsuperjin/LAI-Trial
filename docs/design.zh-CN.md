@@ -21,14 +21,19 @@ LAI-Superagent 将事件接入、任务判断和专业 Agent 执行组合起来�
 
 ```mermaid
 flowchart TD
-    GH["GitHub Source"] --> Intake["Superagent 事件接入 / Trigger"]
-    FS["Feishu Source · 可选"] --> Intake
-    JK["Jenkins Source"] --> Intake
-    Intake --> Gate{"范围检查与准入策略"}
-    Gate -->|过滤| Record["记录结果 · 不执行 Worker"]
-    Gate -->|准入| Router["Monitor：Superagent Router"]
-    Router --> Decision{"Policy / Eval 判断与路由"}
-    Decision -->|不执行 / observe| Record
+    GH["GitHub Source"]
+    FS["Feishu Source · 可选"]
+    JK["Jenkins Source"]
+    subgraph Monitor["Monitor / Router：Superagent 业务职责"]
+        Intake["程序：接收事件、去重、记录 Trigger"] --> Gate{"程序：范围与准入规则检查"}
+        Gate -->|过滤| Record["记录结果 · 不执行 Worker"]
+        Gate -->|准入| Router["Router 主会话：请求路由 / 候选评估"]
+        Router --> Decision{"Policy / Eval 判断与路由"}
+        Decision -->|不执行 / observe| Record
+    end
+    GH --> Intake
+    FS --> Intake
+    JK --> Intake
     Decision -->|执行| Task["Superagent Ticket 与 Assignment"]
     Task --> Worker["LAI Worker · iqe-orchestrator · 原生 Run 与工作区"]
     subgraph Pipeline["Worker 协调的五个原生子 Agent 阶段"]
@@ -41,7 +46,9 @@ flowchart TD
     Reporter --> Result["Worker 报告 → Superagent 任务状态与授权回复"]
 ```
 
-本图与 [README](../README.zh-CN.md#项目需求与设计) 的总体结构图保持一致。范围／准入检查先于 Router 处理，Policy／Eval 判断及路由决定准入后的输入是否进入执行；被过滤或仅观察的结果不启动 Worker。
+按业务角色划分，事件接入、范围／准入检查、请求路由与候选评估都属于 Monitor / Router。分组内部的“程序”节点由 Superagent 确定性代码执行，不代表额外的 Agent 或模型调用；需要语义判断的输入交给 Router 主会话处理，程序再校验并应用其决策。
+
+本图与 [README](../README.zh-CN.md#项目需求与设计) 的总体结构图保持一致。Monitor / Router 内部的确定性范围／准入检查先于主会话处理，Policy／Eval 判断及路由决定准入后的输入是否进入执行；被过滤或仅观察的结果不启动 Worker。
 
 图中的五个专业阶段均为 Worker 的原生子 Agent；阶段连线表示先后关系，不表示前一个子 Agent 创建下一个子 Agent。实际委派由 Worker 发起。 Ticket 阶段产出工单草稿，Superagent Ticket 则是任务实体。结果不会自动回灌接入流程，后续外部事件需要通过 Source 接收。
 

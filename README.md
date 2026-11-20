@@ -19,14 +19,19 @@ The original requirements drew on six business roles in a CI validation workflow
 
 ```mermaid
 flowchart TD
-    GH["GitHub Source"] --> Intake["Superagent event intake / Trigger"]
-    FS["Feishu Source · optional"] --> Intake
-    JK["Jenkins Source"] --> Intake
-    Intake --> Gate{"Scope and admission checks"}
-    Gate -->|Filtered| Record["Record outcome · no Worker execution"]
-    Gate -->|Admitted| Router["Monitor: Superagent Router"]
-    Router --> Decision{"Policy / Eval decision and routing"}
-    Decision -->|No execution / observe| Record
+    GH["GitHub Source"]
+    FS["Feishu Source · optional"]
+    JK["Jenkins Source"]
+    subgraph Monitor["Monitor / Router: Superagent business responsibility"]
+        Intake["Code: receive, deduplicate and record Trigger"] --> Gate{"Code: scope and admission rules"}
+        Gate -->|Filtered| Record["Record outcome · no Worker execution"]
+        Gate -->|Admitted| Router["Router main session: request routing / candidate assessment"]
+        Router --> Decision{"Policy / Eval decision and routing"}
+        Decision -->|No execution / observe| Record
+    end
+    GH --> Intake
+    FS --> Intake
+    JK --> Intake
     Decision -->|Execute| Task["Superagent Ticket and Assignment"]
     Task --> Worker["LAI Worker · iqe-orchestrator · native Run and workspace"]
     subgraph Pipeline["Five native child-agent stages coordinated by Worker"]
@@ -39,7 +44,9 @@ flowchart TD
     Reporter --> Result["Worker report → Superagent task state and authorized replies"]
 ```
 
-This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). Scope/admission checks and the Router's Policy/Eval decision are separate steps; receiving an event does not imply execution. The five stages are children of Worker: stage arrows show order, and Worker starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
+At the business-role level, event intake, scope/admission checks, request routing and candidate assessment all belong to Monitor / Router. The Code nodes inside that boundary run deterministic Superagent logic, not extra agents or model calls. Inputs requiring semantic judgment are handled by the Router main session; code validates and applies its decisions.
+
+This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). Scope/admission checks and the main session's Policy/Eval decision are internal steps of Monitor / Router; receiving an event does not imply execution. The five stages are children of Worker: stage arrows show order, and Worker starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
 
 ### Roles
 
