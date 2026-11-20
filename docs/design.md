@@ -1,4 +1,4 @@
-# LAI-Superagent System Design
+# LAI Superagent System Design
 
 **English** | [简体中文](design.zh-CN.md)
 

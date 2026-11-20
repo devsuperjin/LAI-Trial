@@ -1,4 +1,4 @@
-# LAI Development Guide
+# LAI Superagent Development Guide
 
 **English** | [简体中文](development.zh-CN.md)
 

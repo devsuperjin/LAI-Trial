@@ -1,4 +1,4 @@
-# LAI Trial
+# LAI Superagent
 
 [English](README.md) | **简体中文**
 

@@ -1,4 +1,4 @@
-# LAI 架构
+# LAI Superagent 架构
 
 [English](architecture.md) | **简体中文**
 

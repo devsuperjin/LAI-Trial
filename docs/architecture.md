@@ -1,4 +1,4 @@
-# LAI architecture
+# LAI Superagent architecture
 
 LAI Superagent (Linux Agent Infra X Superagent) is an independent DSH application using published packages pinned to `config/dsh-baseline.json`. No DSH framework source is copied or patched. `config/profile.json` composes official base/Web bundles, `@lai/lai-agents`, `@lai/superagent` and LAI application defaults. Writable settings and sessions remain in the isolated `.runtime/dsh` home.
 

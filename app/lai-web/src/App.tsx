@@ -104,7 +104,7 @@ function TokenGate(props: { error: string | null; onSubmit: (token: string) => v
         onSubmit={(event) => { event.preventDefault(); props.onSubmit(token.trim()) }}
       >
         <h1 className="mb-2 text-lg font-semibold">{t("Gateway token required")}</h1>
-        <p className="mb-4 text-sm text-fd-muted-foreground">{t("Paste the")}<code className="text-fd-foreground">{t("--token")}</code>{t("value printed by the dsh web server to authorize LAI Web.")}</p>
+        <p className="mb-4 text-sm text-fd-muted-foreground">{t("Paste the")}<code className="text-fd-foreground">{t("--token")}</code>{t("value printed by the dsh web server to authorize LAI Superagent.")}</p>
         <input
           autoFocus
           className="mb-3 w-full rounded-md border border-fd-border bg-fd-muted px-3 py-2 font-mono text-sm outline-none focus:border-fd-primary"

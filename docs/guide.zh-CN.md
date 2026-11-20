@@ -1,4 +1,4 @@
-# LAI 配置手册
+# LAI Superagent 配置手册
 
 [English](guide.md) | **简体中文**
 

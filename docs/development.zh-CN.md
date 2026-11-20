@@ -1,4 +1,4 @@
-# LAI 开发手册
+# LAI Superagent 开发手册
 
 [English](development.md) | **简体中文**
 

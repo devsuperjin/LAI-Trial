@@ -1,4 +1,4 @@
-# LAI 开发架构与上游同步参考
+# LAI Superagent 开发架构与上游同步参考
 
 本文是当前仓库的实施约定，不再提供 Fork Core、vendor 框架源码或旧 pipeline 的替代方案。系统职责见 [architecture.zh.md](architecture.zh.md)，业务设计见 [design.zh-CN.md](design.zh-CN.md)，Agent 执行规则见 [AGENTS.md](../AGENTS.md)。
 

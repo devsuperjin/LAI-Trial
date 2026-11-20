@@ -1,4 +1,4 @@
-# LAI-Superagent 设计文档
+# LAI Superagent 设计文档
 
 [English](design.md) | **简体中文**
 
