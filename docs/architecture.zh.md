@@ -2,7 +2,7 @@
 
 [English](architecture.md) | **简体中文**
 
-LAI 是独立的 DSH 应用仓库，使用已发布的包；官方依赖固定到 `config/dsh-baseline.json`，当前基线为 `0.2.2-rc.1`。不复制或修改官方框架源码。`config/profile.json` 组合官方 Bundle 与 `@lai` 应用插件，设置和会话保存在独立的 `.runtime/dsh`。
+LAI（Linux Agent Infra）是独立的 DSH 应用仓库，使用已发布的包；官方依赖固定到 `config/dsh-baseline.json`，当前基线为 `0.2.2-rc.1`。不复制或修改官方框架源码。`config/profile.json` 组合官方 Bundle 与 `@lai` 应用插件，设置和会话保存在独立的 `.runtime/dsh`。
 
 ## 执行与职责
 

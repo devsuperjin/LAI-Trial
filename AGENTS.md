@@ -1,5 +1,7 @@
 # LAI development
 
+LAI stands for **Linux Agent Infra**.
+
 This is an independent DSH application repository. Read `docs/architecture.md` and `config/dsh-baseline.json` before changing integration code. Current design is in `docs/design.md` (Chinese: `docs/design.zh-CN.md`).
 
 ## Ownership and integration

@@ -28,7 +28,7 @@ The minimum polling interval is 60 seconds; longer intervals requested by GitHub
 | Plugin → LAI Agents | LAI Orchestrator and specialist prompts, plus per-specialist model and tool selection |
 | Plugin → Feishu tools | Standalone Feishu app credentials or tenant access token |
 | Plugin → Credentials | Agent service connections, credentials, preset grants and local update permission |
-| Settings | General: appearance, language and version information; Model configuration: providers, credentials and the default model |
+| Settings | General: appearance, language and version information; Glossary: names and concepts; Model configuration: providers, credentials and the default model |
 
 The interface supports English and Chinese. The original DSH debugging UI remains available at **`/dsh/`**, sharing the same backend. Deleting a Run uses native DSH archiving with Undo; running sessions must be stopped first.
 
@@ -55,3 +55,5 @@ Configure App ID / App Secret or Tenant Access Token in **Plugin → Feishu tool
 Apply changes in a role modal only updates the page draft; save configuration afterward. Settings writes use revisions. On conflict, reload and reapply the intended edits rather than replacing the entire settings document, which can discard unrelated fields and credentials.
 
 Settings → General displays application/plugin manifests captured at build time, not a live inventory of enabled plugins. Rebuild after version changes. Hash paths support browser history and direct links, for example `/#/plugins/credentials`.
+
+Terminology is defined in the [glossary](glossary.md), also available in Settings → Glossary.

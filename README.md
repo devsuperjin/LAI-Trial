@@ -4,7 +4,7 @@
 
 ## Introduction
 
-LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Orchestrator delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
+**LAI (Linux Agent Infra)** is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Orchestrator delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
 The project targets engineering work driven by GitHub, Jenkins CI and optional Feishu conversations: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
 
@@ -64,6 +64,18 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 | Superagent | Sources, Policy, Superagent Router(Monitor), task state, LAI Orchestrator lifecycle, scheduling, retries and replies to sources |
 | LAI Agents | LAI Orchestrator coordination preset, five specialist roles, configurable prompts and sequential execution guards |
 | lai-web | Unified views for tasks, sessions, execution, configuration and results |
+
+## Terminology at a glance
+
+| Term | Meaning |
+| --- | --- |
+| LAI | Linux Agent Infra. |
+| Superagent Router(Monitor) | The monitoring, admission, assessment and task-routing role. |
+| LAI Orchestrator | The execution coordinator using `iqe-orchestrator` to delegate to five native child agents. |
+| Ticket / Run | Ticket is a business task; Run is a native session execution record. |
+| Tool / Skill | Tools execute capabilities; Skills provide on-demand instructions without granting permissions. |
+
+See the complete [glossary](docs/glossary.md), also available in **Settings → Glossary**.
 
 ## Current capabilities and extensions
 
@@ -162,6 +174,8 @@ The original Superagent panel remains accessible through `/dsh/`, sharing task s
 ![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
 
 ## Documentation
+
+- [Glossary](docs/glossary.md): canonical names and concepts.
 
 - [Development guide](docs/development.md): dependencies, composition, lifecycle, versions and checks.
 

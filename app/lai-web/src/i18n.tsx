@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Glossary": "术语表",
   "Bundled plugins": "随应用构建的插件",
   "Plugin versions included in this build.": "此构建包含的插件版本。",
   "Web host": "Web 服务",

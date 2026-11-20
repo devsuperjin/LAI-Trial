@@ -4,7 +4,7 @@
 
 ## 项目介绍
 
-LAI 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Orchestrator 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
+**LAI（Linux Agent Infra）** 是一个基于 **DeepSeek Harness（DSH）** 二次开发的 Agent 应用：由 **Superagent 负责监控、判断和任务管理**，由 **LAI Orchestrator 调用五个专业子 Agent**，按流水线完成分析、复现、工单整理、审核和报告。
 
 项目面向 GitHub、Jenkins CI 和可选飞书对话驱动的工程任务，希望把分散的失败日志、问题讨论和代码变更转化为有执行过程、有证据、有结果的任务记录。
 
@@ -64,6 +64,18 @@ Superagent 的 **Ticket 是任务管理实体**，LAI 的 **Ticket Agent 是其�
 | Superagent | Sources、Policy、Superagent Router(Monitor)、任务状态、LAI Orchestrator 生命周期、调度、重试和来源回复 |
 | LAI Agents | LAI Orchestrator 协调预设、五个专业角色、可配置 Prompt、串行执行约束 |
 | lai-web | 统一的任务、会话、执行过程、配置和结果查看界面 |
+
+## 术语速查
+
+| 术语 | 含义 |
+| --- | --- |
+| LAI | Linux Agent Infra。 |
+| Superagent Router(Monitor) | 监控、准入、评估和任务路由角色。 |
+| LAI Orchestrator | 使用 `iqe-orchestrator` 协调五个原生子 Agent 的执行角色。 |
+| Ticket / Run | Ticket 是业务任务；Run 是原生会话的执行记录。 |
+| Tool / Skill | Tool 提供可执行能力；Skill 提供按需加载的操作说明，不自动授予权限。 |
+
+完整定义见[术语表](docs/glossary.zh-CN.md)，应用内可在 **Settings → 术语表** 查看。
 
 ## 当前能力与扩展方向
 
@@ -162,6 +174,8 @@ LAI-Trial/
 ![原版 DSH 中的 Superagent](docs/images/native-superagent.jpg)
 
 ## 项目文档
+
+- [术语表](docs/glossary.zh-CN.md)：统一名称和概念。
 
 - [开发手册](docs/development.zh-CN.md)：依赖、插件组合、生命周期、版本及检查流程。
 

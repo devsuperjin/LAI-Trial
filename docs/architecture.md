@@ -1,6 +1,6 @@
 # LAI architecture
 
-LAI is an independent DSH application using published packages pinned to `config/dsh-baseline.json`. No DSH framework source is copied or patched. `config/profile.json` composes official base/Web bundles, `@lai/lai-agents`, `@lai/superagent` and LAI application defaults. Writable settings and sessions remain in the isolated `.runtime/dsh` home.
+LAI (Linux Agent Infra) is an independent DSH application using published packages pinned to `config/dsh-baseline.json`. No DSH framework source is copied or patched. `config/profile.json` composes official base/Web bundles, `@lai/lai-agents`, `@lai/superagent` and LAI application defaults. Writable settings and sessions remain in the isolated `.runtime/dsh` home.
 
 ## Execution ownership
 
