@@ -26,19 +26,16 @@ flowchart TD
     FS --> Router
     JK --> Router
     Router -->|No execution / observe| Record["Record outcome"]
-    Router -->|Execute| Task["Superagent Ticket and Assignment"]
-    Task --> Worker["LAI Worker · iqe-orchestrator · native Run and workspace"]
-    subgraph Pipeline["Five native child-agent stages coordinated by Worker"]
+    Router -->|Execute| Orchestrator
+    subgraph Orchestrator["LAI Orchestrator (Worker · iqe-orchestrator)"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
         Reproduce --> Ticket["3. Ticket draft"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
-    Worker --> Triage
-    Reporter --> Result["Worker report → Superagent task state and authorized replies"]
 ```
 
-Superagent Router(Monitor) represents event intake, admission checks, assessment and routing.
+Superagent Router(Monitor) represents event intake, admission checks, assessment and routing. LAI Orchestrator is the Worker coordinating its five child agents; task/assignment bookkeeping, workspace details and result handling are omitted from this overview.
 
 This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). The five stages are children of Worker: stage arrows show order, and Worker starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
 

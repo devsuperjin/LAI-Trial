@@ -28,19 +28,16 @@ flowchart TD
     FS --> Router
     JK --> Router
     Router -->|No execution / observe| Record["Record outcome"]
-    Router -->|Execute| Task["Superagent Ticket and Assignment"]
-    Task --> Worker["LAI Worker · iqe-orchestrator · native Run and workspace"]
-    subgraph Pipeline["Five native child-agent stages coordinated by Worker"]
+    Router -->|Execute| Orchestrator
+    subgraph Orchestrator["LAI Orchestrator (Worker · iqe-orchestrator)"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
         Reproduce --> Ticket["3. Ticket draft"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
-    Worker --> Triage
-    Reporter --> Result["Worker report → Superagent task state and authorized replies"]
 ```
 
-Superagent Router(Monitor) represents event intake, admission checks, assessment and routing.
+Superagent Router(Monitor) represents event intake, admission checks, assessment and routing. LAI Orchestrator is the Worker coordinating its five child agents; task/assignment bookkeeping, workspace details and result handling are omitted from this overview.
 
 This overview is identical to the diagram in the [README](../README.md#goals-and-design). Receiving an event does not imply execution; observe-only or filtered outcomes do not start a Worker.
 

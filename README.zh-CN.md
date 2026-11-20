@@ -26,19 +26,16 @@ flowchart TD
     FS --> Router
     JK --> Router
     Router -->|不执行 / observe| Record["记录结果"]
-    Router -->|执行| Task["Superagent Ticket 与 Assignment"]
-    Task --> Worker["LAI Worker · iqe-orchestrator · 原生 Run 与工作区"]
-    subgraph Pipeline["Worker 协调的五个原生子 Agent 阶段"]
+    Router -->|执行| Orchestrator
+    subgraph Orchestrator["LAI Orchestrator (Worker · iqe-orchestrator)"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
         Reproduce --> Ticket["3. Ticket 工单草稿"]
         Ticket --> Review["4. Reviewer"]
         Review --> Reporter["5. Reporting"]
     end
-    Worker --> Triage
-    Reporter --> Result["Worker 报告 → Superagent 任务状态与授权回复"]
 ```
 
-Superagent Router(Monitor) 统一表示事件接入、准入检查、评估与路由职责。
+Superagent Router(Monitor) 统一表示事件接入、准入检查、评估与路由职责。 LAI Orchestrator 是协调五个子 Agent 的 Worker；本图省略任务／派工记录、工作区及结果处理细节。
 
 本图与[设计文档](docs/design.zh-CN.md#2-总体结构)的总体结构图保持一致。五个阶段都是 Worker 的子 Agent：连线只表示先后顺序，每个子 Agent 都由 Worker 在前一阶段结束后启动。Ticket 阶段产出工单草稿，Superagent Ticket 则是任务实体。回复不会自动回灌到接入流程，只有后续外部事件才可能成为新输入。
 
