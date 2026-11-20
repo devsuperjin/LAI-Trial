@@ -96,7 +96,7 @@ The current lai-web basic Source form handles text, switches, numbers and select
 
 ### Jenkins
 
-The Jenkins Source reads Jenkins' own remote API directly (default `http://127.0.0.1:8080`), with an optional user and API token for instances that do not allow anonymous read. It discovers jobs, including folders and multibranch projects, reads each job's recent builds, and receives each finished, non-replay `FAILURE` build once with its branch, commit, failed stage and native rerun count, optionally attaching the end of the build's console text. A `jobs` list limits the scan to named jobs. The Source plugin is enabled by default and needs no account CLI; turn it off when no Jenkins is reachable.
+The Jenkins Source reads Jenkins' own remote API directly (URL must be explicitly configured), with an optional user and API token for instances that do not allow anonymous read. It discovers jobs, including folders and multibranch projects, reads each job's recent builds, and receives each finished, non-replay `FAILURE` build once with its branch, commit, failed stage and native rerun count, optionally attaching the end of the build's console text. A `jobs` list limits the scan to named jobs. The Source plugin needs no account CLI. Without a configured URL it stays paused and makes no requests; explicitly configured unreachable servers report polling failures.
 
 Failures are senderless machine events. Their only admission cell is the failures row's unlisted, unaddressed cell, which a fresh installation admits as an inferred candidate. With the default Eval mode, observe, accepted work is recorded as `would_accept` rather than a Ticket.
 

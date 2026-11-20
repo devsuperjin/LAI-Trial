@@ -5,7 +5,7 @@
 import { z } from 'zod'
 
 export const JenkinsConfigSchema = z.object({
-  url: z.string().url().default('http://127.0.0.1:8080'),
+  url: z.string().trim().pipe(z.union([z.literal(''), z.string().url()])).default(''),
   /** Basic-auth credentials; both empty reads Jenkins anonymously. */
   user: z.string().trim().max(200).default(''),
   token: z.string().max(4000).default(''),

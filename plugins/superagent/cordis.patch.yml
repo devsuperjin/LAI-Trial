@@ -10,7 +10,7 @@
     - id: dsh-superagent-feishu
       name: '@lai/superagent/feishu-watch'
       disabled: true
-    # Jenkins Source; reads the Jenkins remote API at http://127.0.0.1:8080 by default. Disable it when Jenkins is unreachable.
+    # Jenkins Source; stays paused until a Jenkins URL is explicitly configured.
     - id: dsh-superagent-jenkins
       name: '@lai/superagent/jenkins-watch'
     # Workers use the LAI iqe-orchestrator preset and its five native delegation tools.

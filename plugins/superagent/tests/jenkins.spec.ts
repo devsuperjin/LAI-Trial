@@ -36,7 +36,7 @@ function jenkins(handler: (request: { url: URL; accept: string; authorization: s
 function makeHost(options: { configured?: boolean; config?: Record<string, unknown> | false; ready?: Promise<void> } = {}) {
   const directory = mkdtempSync(join(tmpdir(), 'jenkins-'))
   const store = new Store(join(directory, 'db.sqlite'))
-  const jenkins = options.config === false ? { enabled: false, config: {} } : { enabled: true, config: options.config ?? {} }
+  const jenkins = options.config === false ? { enabled: false, config: {} } : { enabled: true, config: { url: 'http://127.0.0.1:8080', ...options.config } }
   store.saveSettings(SettingsSchema.parse({ sources: { jenkins } }))
   const board = new HealthBoard()
   const sources = new SourceRegistry(() => store.settings(), board)
@@ -80,7 +80,7 @@ const cursorAtOf = (at: string): string => new Date(Date.parse(at) - 5000).toISO
 describe('jenkins remote API client', () => {
   it('fills the polling defaults and rejects unknown settings', () => {
     expect(JenkinsConfigSchema.parse({})).toEqual({
-      url: 'http://127.0.0.1:8080', user: '', token: '', jobs: [], pollSeconds: 15, scanBuilds: 200, maxFailures: 20,
+      url: '', user: '', token: '', jobs: [], pollSeconds: 15, scanBuilds: 200, maxFailures: 20,
       failuresBeforeError: 3, logTailChars: 4000,
     })
     expect(() => JenkinsConfigSchema.parse({ pollSeconds: 1 })).toThrow()
@@ -133,17 +133,17 @@ describe('jenkins remote API client', () => {
   })
   it('authenticates with a user and API token, and names Jenkins errors', async () => {
     const requests = jenkins(() => Response.json({ jobs: [] }))
-    const client = new JenkinsClient(JenkinsConfigSchema.parse({ user: 'ci', token: 'secret' }))
+    const client = new JenkinsClient(JenkinsConfigSchema.parse({ url: 'http://127.0.0.1:8080', user: 'ci', token: 'secret' }))
     expect(await client.jobs()).toEqual([])
     expect(requests[0]!.authorization).toBe(`Basic ${Buffer.from('ci:secret').toString('base64')}`)
 
     const unauthorized = jenkins(() => Response.json({ error: 'unauthorized' }, { status: 401 }))
-    await expect(new JenkinsClient(JenkinsConfigSchema.parse({})).jobs())
+    await expect(new JenkinsClient(JenkinsConfigSchema.parse({ url: 'http://127.0.0.1:8080' })).jobs())
       .rejects.toMatchObject({ name: 'JenkinsError', message: 'unauthorized', status: 401 })
     expect(unauthorized).toHaveLength(1)
 
     jenkins(request => request.url.pathname === '/api/json' ? jobList({ name: job }) : Response.json({ builds: [] }))
-    await expect(new JenkinsClient(JenkinsConfigSchema.parse({})).failures(new Date().toISOString(), { jobs: [{ id: 'missing' }], maxFailures: 20 }))
+    await expect(new JenkinsClient(JenkinsConfigSchema.parse({ url: 'http://127.0.0.1:8080' })).failures(new Date().toISOString(), { jobs: [{ id: 'missing' }], maxFailures: 20 }))
       .rejects.toMatchObject({ name: 'JenkinsError', message: 'Jenkins job not found: missing' })
   })
 })
@@ -169,7 +169,7 @@ describe('jenkins source', () => {
     expect(logTail('0123456789', 0)).toBe('0123456789')
   })
   it('settles CI failures as its failures row, for its own metadata only', () => {
-    const config = JenkinsConfigSchema.parse({})
+    const config = JenkinsConfigSchema.parse({ url: 'http://127.0.0.1:8080' })
     expect(jenkinsKind.scope!({ meta: { jenkins: true, event: 'ci_failure' } }, config)).toEqual({ listened: true, observed: true, row: 'failures' })
     expect(jenkinsKind.scope!({ meta: { jenkins: false, event: 'ci_failure' } }, config)).toEqual({ listened: false, reason: 'not_a_ci_failure' })
     expect(jenkinsKind.scope!({ meta: { jenkins: true, event: 'ci_success' } }, config)).toEqual({ listened: false, reason: 'not_a_ci_failure' })
@@ -233,7 +233,7 @@ describe('jenkins polling', () => {
   it('keeps the initial lookback when Jenkins reports no failures', async () => {
     jenkins(request => request.url.pathname === '/api/json' ? jobList({ name: job }) : Response.json({ builds: [] }))
     const host = makeHost()
-    expect(await pollRound(host.ctx, JenkinsConfigSchema.parse({}))).toBe(0)
+    expect(await pollRound(host.ctx, JenkinsConfigSchema.parse({ url: 'http://127.0.0.1:8080' }))).toBe(0)
     expect(host.store.get(KV.jenkins.since)).toBeUndefined()
   })
   it('reports polling errors only once the configured number of polls fail in a row', async () => {
@@ -244,6 +244,38 @@ describe('jenkins polling', () => {
 })
 
 describe('jenkins watch loop', () => {
+  it('pauses without requests until configured, and resets failures when the URL is cleared', async () => {
+    vi.useFakeTimers()
+    const host = makeHost()
+    const save = (config: Record<string, unknown>) => host.store.saveSettings(SettingsSchema.parse({ sources: { jenkins: { enabled: true, config } } }))
+    save({ pollSeconds: 5, failuresBeforeError: 2 })
+    const fetchMock = vi.fn(async () => { throw new Error('ECONNREFUSED') })
+    vi.stubGlobal('fetch', fetchMock)
+    const controller = new AbortController()
+    const running = watch(host.ctx, controller.signal)
+    const flush = async () => { for (let index = 0; index < 20; index++) await Promise.resolve() }
+    await flush()
+    expect(host.board.all.jenkins).toMatchObject({ state: 'paused', code: 'jenkinsUrlUnset' })
+    await vi.advanceTimersByTimeAsync(15000)
+    expect(fetchMock).not.toHaveBeenCalled()
+    save({ url: 'http://127.0.0.1:8080', pollSeconds: 5, failuresBeforeError: 2 })
+    await vi.advanceTimersByTimeAsync(10000)
+    await flush()
+    expect(host.board.all.jenkins).toMatchObject({ state: 'error', code: 'pollFailures', values: { count: '2' } })
+    save({ url: '   ', pollSeconds: 5, failuresBeforeError: 2 })
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(host.board.all.jenkins).toMatchObject({ state: 'paused', code: 'jenkinsUrlUnset' })
+    const calls = fetchMock.mock.calls.length
+    await vi.advanceTimersByTimeAsync(15000)
+    expect(fetchMock).toHaveBeenCalledTimes(calls)
+    save({ url: 'http://127.0.0.1:8080', pollSeconds: 5, failuresBeforeError: 2 })
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(host.board.all.jenkins).toMatchObject({ state: 'paused', code: 'jenkinsUrlUnset' })
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(host.board.all.jenkins).toMatchObject({ state: 'error', code: 'pollFailures', values: { count: '2' } })
+    controller.abort(); await running
+  })
+
   it('waits for setup, pauses while the Source is off, and reports ready after a round', async () => {
     const pending = makeHost({ configured: false })
     await watch(pending.ctx, new AbortController().signal)

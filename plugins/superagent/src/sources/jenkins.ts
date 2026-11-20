@@ -139,8 +139,9 @@ export async function watch(ctx: SourceContext, signal: AbortSignal): Promise<vo
     let count = 0
     let polled = false
     try {
-      if (config) { count = await pollRound(ctx, config, signal); polled = true }
-      else ctx.report('jenkins', health('paused', 'sourceOff'))
+      if (!config) ctx.report('jenkins', health('paused', 'sourceOff'))
+      else if (!config.url) ctx.report('jenkins', health('paused', 'jenkinsUrlUnset'))
+      else { count = await pollRound(ctx, config, signal); polled = true }
       failures = 0
     } catch (error) {
       if (signal.aborted) return
