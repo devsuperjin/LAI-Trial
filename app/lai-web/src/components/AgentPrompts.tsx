@@ -1,4 +1,4 @@
-import { FeishuToolsConfig } from './FeishuToolsConfig.tsx'
+import { HelpTip } from './HelpTip.tsx'
 import { agentToolCatalog, defaultToolIds } from '@lai/dsh-adapter/agent-tools'
 import type { AgentToolCatalog } from '@lai/dsh-adapter/agent-tools'
 import { AgentConfigDialog, type AgentConfigTab } from './AgentConfigDialog.tsx'
@@ -75,9 +75,7 @@ export function AgentPrompts() {
   const originalModels = record(namespace?.value.models)
   const dirty = ROLES.some(([id]) => draft[id] !== original[id] || id !== 'orchestrator' && ((routes[id] ?? '') !== routeKey(originalModels[id]) || JSON.stringify(tools[id] ?? null) !== JSON.stringify(record(namespace?.value.tools)[id] ?? null)))
   return <section className="min-w-0" aria-label={t("LAI agents")}>
-    <h2 className="text-base font-medium">{t("LAI agents")}</h2>
-    <p className="mt-1 text-sm text-fd-muted-foreground">{t("A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.")}</p>
-    <FeishuToolsConfig />
+    <div className="flex items-center gap-2"><h2 className="text-base font-medium">{t("LAI agents")}</h2><HelpTip text={t("A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.")} /></div>
     {!namespace && !busy && !error && <p className="mt-3 text-sm text-fd-warning">{t("The lai-agents plugin is not enabled in this profile.")}</p>}
     {namespace && <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{ROLES.map(([id, title], index) => {
       const selected = tools[id] ?? (toolCatalog ? defaultToolIds(toolCatalog, id) : [])
@@ -95,8 +93,9 @@ export function AgentPrompts() {
     {editing && <AgentConfigDialog key={editing.role} role={editing.role} title={editing.title} initialTab={editing.tab} value={{ prompt: draft[editing.role] ?? '', route: routes[editing.role] ?? '', tools: tools[editing.role] ?? null }} catalog={catalog} toolsCatalog={toolCatalog} disabled={busy || !writable} onClose={() => setEditing(null)} onApply={value => { setDraft(current => ({ ...current, [editing.role]: value.prompt })); if (editing.role !== 'orchestrator') { setRoutes(current => ({ ...current, [editing.role]: value.route })); setTools(current => ({ ...current, [editing.role]: value.tools })) } }} />}
     {error && <p className="mt-3 text-sm text-fd-danger" role="alert">{error}{t(" Discard the draft and reload if settings changed elsewhere.")}</p>}
     {notice && <p className="mt-3 text-sm text-fd-success" role="status">{notice}</p>}
-    <div className="mt-4 flex flex-wrap gap-2">
-      <button className="rounded-md bg-fd-primary px-4 py-2 text-sm text-white disabled:opacity-40" disabled={busy || !namespace || !writable || !dirty} onClick={() => { void save() }} type="button">{t(busy ? 'Loading…' : 'Save configuration')}</button>
+    <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-fd-border py-3">
+      <button className="rounded-md bg-fd-primary px-4 py-2 text-sm font-medium text-white shadow-sm disabled:bg-fd-secondary disabled:text-fd-muted-foreground disabled:shadow-none" disabled={busy || !namespace || !writable || !dirty} onClick={() => { void save() }} type="button">{t(busy ? 'Loading…' : 'Save configuration')}</button>
+      {dirty && <span role="status" className="text-xs text-fd-primary">{t('Unsaved changes')}</span>}
       <button className="rounded-md border border-fd-border px-3 py-2 text-sm disabled:opacity-40" disabled={busy} onClick={() => { setNotice(null); void load() }} type="button">{t("Discard draft and reload")}</button>
     </div>
   </section>

@@ -32,6 +32,8 @@ function formatTime(ms: number): string {
 }
 
 export function TaskList(props: {
+  workersOnly?: boolean
+  onToggleWorkers?: () => void
   entries: SessionListEntry[]
   selectedId: string | null
   onSelect: (sessionId: string) => void
@@ -56,6 +58,7 @@ export function TaskList(props: {
             <span className="relative">{t(candidate)}</span>
           </button>
         ))}
+        {props.onToggleWorkers && <button type="button" aria-label={t('Worker runs only')} title={t(props.workersOnly ? 'Showing Worker runs. Click to show all runs.' : 'Showing all runs. Click to show Worker runs only.')} aria-pressed={props.workersOnly} onClick={props.onToggleWorkers} className={`ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${props.workersOnly ? 'bg-fd-primary/10 text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary'}`}><svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h18l-7 8v7l-4 2v-9Z" /></svg></button>}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2">
         <AnimatePresence initial={false}>

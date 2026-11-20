@@ -1,3 +1,4 @@
+import { HelpTip } from './HelpTip.tsx'
 import { SuperagentPromptEditor } from './SuperagentPromptEditor.tsx'
 import { useCallback, useEffect, useState } from 'react'
 import { saveSuperagentSettings, superagentAction, superagentPrompts, superagentSettings, superagentState } from '@lai/dsh-adapter/superagent'
@@ -73,7 +74,7 @@ export function SuperagentPage() {
   useEffect(() => { void load().catch(e => setError(e.message)) }, [load])
   const act = (run: () => Promise<unknown>) => { void run().then(load).catch(e => setError(e.message)) }
   return <section className="space-y-5 p-4 md:p-6">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-base font-semibold">Superagent</h2><p className="mt-1 text-sm text-fd-muted-foreground">{t('Monitor / Router → Worker → five LAI subagents')}</p></div><button className={button} onClick={() => { void load().catch(e => setError(e.message)) }}>{t('Refresh')}</button></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><h2 className="text-base font-semibold">Superagent</h2><HelpTip text={t('Monitor / Router → Worker → five LAI subagents')} /></div><button className={button} onClick={() => { void load().catch(e => setError(e.message)) }}>{t('Refresh')}</button></div>
     {error && <p role="alert" className="text-sm text-fd-danger">{error}</p>}
     {settings && state && <><div className="flex flex-wrap items-center gap-3 text-sm"><span>{state.setup.accounts?.repository ?? t('Not configured')}</span><span className="text-fd-muted-foreground">{state.setup.accounts?.agent}</span><span>{state.load.running} {t('Running')} · {state.load.queued} {t('Queued')}</span><button className={button} onClick={() => act(() => superagentAction('executor/pause', { paused: !state.paused }))}>{t(state.paused ? 'Resume processing' : 'Pause processing')}</button></div>
       {state.setup.problem && <p className="text-sm text-fd-warning">{state.setup.problem.detail ?? state.setup.problem.code}</p>}

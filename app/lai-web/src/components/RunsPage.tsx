@@ -9,11 +9,13 @@ import { TaskList } from './TaskList.tsx'
 
 export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: string | null; onRefresh: () => Promise<unknown> }) {
   const { t } = useLanguage()
+  const [workersOnly, setWorkersOnly] = useState(true)
+  useEffect(() => { if (props.focusRunId && !props.focusRunId.startsWith('worker-')) setWorkersOnly(false) }, [props.focusRunId])
   const [removed, setRemoved] = useState<string[]>([])
   const [undoId, setUndoId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const taskEntries = rootRuns(props.entries).filter(entry => !removed.includes(entry.sessionId))
+  const taskEntries = rootRuns(props.entries).filter(entry => !removed.includes(entry.sessionId) && (!workersOnly || entry.sessionId.startsWith('worker-')))
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
   }
   return (
     <div className="relative flex min-h-0 flex-1 flex-col gap-4 md:flex-row lg:gap-5">
-      <TaskList entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />
+      <TaskList workersOnly={workersOnly} onToggleWorkers={() => setWorkersOnly(current => !current)} entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />
       <section aria-label={t("Run details")} className={`min-h-0 min-w-0 flex-1 ${selectedId?.startsWith('worker-') ? 'fd-scroll overflow-y-auto' : 'overflow-hidden rounded-xl border border-fd-border bg-fd-card'}`}>
         {selectedId === null ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-fd-muted-foreground">

@@ -16,6 +16,7 @@ const PAGE_TITLE: Record<Page, string> = {
   settings: 'Settings',
   superagent: 'Plugin / Superagent',
   'lai-agents': 'Plugin / LAI Agents',
+  'feishu-tools': 'Plugin / Feishu tools',
 }
 
 function ThemeToggle() {
@@ -68,7 +69,7 @@ export function TopBar(props: {
   return (
     <header className="flex h-16 shrink-0 items-center gap-4 border-b border-fd-border bg-fd-card px-4 md:px-5">
       <div className="flex w-8 shrink-0 items-center gap-3 md:w-[172px]">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-fd-primary text-base font-semibold text-white">{t("L")}</span>
+        <img src="/lai-icon.svg" alt="LAI" width="36" height="36" className="h-9 w-9 shrink-0 object-contain" />
         <div className="hidden min-w-0 md:block"><p className="text-sm font-semibold tracking-wide">{t("LAI")}</p><p className="text-[11px] text-fd-muted-foreground">{t("Agent workspace")}</p></div>
       </div>
       <div className="flex min-w-0 items-center gap-3 text-sm"><span className="hidden text-fd-border sm:inline" aria-hidden>/</span><span className="truncate font-medium">{t(PAGE_TITLE[props.page])}</span></div>

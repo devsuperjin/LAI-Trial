@@ -2,7 +2,7 @@ import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 
-export type Page = 'router' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents'
+export type Page = 'router' | 'runs' | 'dashboard' | 'settings' | 'superagent' | 'lai-agents' | 'feishu-tools'
 
 const ITEMS: { id: Page; label: string; hint: string; icon: (active: boolean) => ReactNode }[] = [
   {
@@ -67,11 +67,11 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
     try { localStorage.setItem(COLLAPSED_KEY, String(collapsed)) } catch { /* Keep the choice for this visit. */ }
   }, [collapsed])
   useEffect(() => {
-    if (props.page === 'superagent' || props.page === 'lai-agents') setPluginExpanded(true)
+    if (props.page === 'superagent' || props.page === 'lai-agents' || props.page === 'feishu-tools') setPluginExpanded(true)
   }, [props.page])
   const toggleLabel = t(collapsed ? 'Expand sidebar' : 'Collapse sidebar')
   const alignment = collapsed ? 'justify-center' : 'justify-start'
-  const pluginActive = props.page === 'superagent' || props.page === 'lai-agents'
+  const pluginActive = props.page === 'superagent' || props.page === 'lai-agents' || props.page === 'feishu-tools'
   return (
     <nav aria-label={t('Primary navigation')} className={`flex min-h-0 shrink-0 flex-col overflow-x-hidden border-r border-fd-border bg-fd-card py-4 transition-[width,padding] duration-200 motion-reduce:transition-none ${collapsed ? 'w-16 px-2' : 'w-52 px-4'}`}>
       <div id="lai-sidebar-menu" className="fd-scroll min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
@@ -84,6 +84,7 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
             {pluginExpanded && <div id="plugin-navigation" className={`mt-1 space-y-1 ${collapsed ? '' : 'ml-5 border-l border-fd-border pl-3'}`}>
               {renderPlugin('superagent', 'Superagent')}
               {renderPlugin('lai-agents', 'LAI Agents')}
+              {renderPlugin('feishu-tools', t('Feishu tools'))}
             </div>}
           </div>
         </div>
@@ -103,7 +104,7 @@ export function NavRail(props: { page: Page; onNavigate: (page: Page) => void; r
       {!collapsed && item.id === 'runs' && props.runningCount > 0 && <span className="ml-auto rounded bg-fd-secondary px-1.5 text-xs tabular-nums">{props.runningCount}</span>}
     </button>
   }
-  function renderPlugin(id: 'superagent' | 'lai-agents', label: string) {
+  function renderPlugin(id: 'superagent' | 'lai-agents' | 'feishu-tools', label: string) {
     const active = props.page === id
     return <button type="button" aria-label={label} title={label} aria-current={active ? 'page' : undefined} onClick={() => props.onNavigate(id)} className={`flex min-h-9 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment} ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
       {collapsed ? <svg aria-hidden className="shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{id === 'superagent' ? <><rect x="3" y="4" width="18" height="13" rx="2" /><path d="M8 21h8m-4-4v4M6 11h3l2-4 3 7 2-3h2" /></> : <><circle cx="12" cy="5" r="3" /><circle cx="5" cy="18" r="3" /><circle cx="19" cy="18" r="3" /><path d="m10 8-4 7m8-7 4 7M8 18h8" /></>}</svg> : <><span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /><span className="whitespace-nowrap">{label}</span></>}

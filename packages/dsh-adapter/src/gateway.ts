@@ -108,6 +108,27 @@ export function pageSession(sessionId: string, maxMessages: number): Promise<Pag
   })
 }
 
+/** Count durable Turn starts at one fixed log cut, including older history pages. */
+export async function sessionTurnCount(sessionId: string): Promise<number> {
+  const turns = new Set<number>()
+  let beforeSeq: number | undefined
+  let throughSeq: number | undefined
+  for (;;) {
+    const page = await rpc<PageResponse>('session/page', { request: {
+      address: { kind: 'session', sessionId }, maxMessages: 200,
+      ...(beforeSeq === undefined ? {} : { beforeSeq }),
+      ...(throughSeq === undefined ? {} : { throughSeq }),
+    } })
+    if (throughSeq === undefined && typeof page.cursor === 'number') throughSeq = page.cursor
+    const events = page.records.filter(record => record.type === 'event').map(record => record.event)
+    for (const event of events) if (event.type === 'turn/start') turns.add(event.seq)
+    if (!page.hasMore) return turns.size
+    const first = Math.min(...events.map(event => event.seq))
+    if (!Number.isFinite(first) || (beforeSeq !== undefined && first >= beforeSeq)) throw new Error('Router history pagination did not advance')
+    beforeSeq = first
+  }
+}
+
 /** Read one direct subagent child through its durable parent address. */
 export function pageSubagentSession(parentSessionId: string, childSessionId: string, maxMessages: number): Promise<PageResponse> {
   return rpc('session/page', {
