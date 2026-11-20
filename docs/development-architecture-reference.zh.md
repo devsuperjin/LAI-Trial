@@ -6,7 +6,7 @@
 
 - 官方 DSH：使用已发布公共导出，依赖固定到 `config/dsh-baseline.json`；不复制、patch 或修改框架源码。
 - 应用插件：`plugins/` 下独立 `@lai/*` 包，以 Bundle / Profile 组合。新增来源使用 Superagent Source 接口和 provider-neutral Trigger；新增工具使用标准 `ctx.tools.register`。
-- 编排：`Superagent Router(Monitor)` 负责监控与路由；LAI Orchestrator/Worker 依次调用五个原生子 Agent。不要新增第二套调度、MQ 或独立模拟 pipeline。
+- 编排：`Superagent Router(Monitor)` 负责监控与路由；LAI Orchestrator 依次调用五个原生子 Agent。不要新增第二套调度、MQ 或独立模拟 pipeline。
 - 浏览器与兼容层：协议和版本适配在 `packages/dsh-adapter`。`app/lai-web/src/router/routes.tsx` 唯一维护路由与菜单；布局在 `layout/`、页面在 `pages/`、复用组件在 `components/`。
 - 配置：仓库默认值、环境覆盖、用户运行时设置分开。真实凭证和历史留在 `.runtime/dsh`，不提交到 Git。
 
@@ -27,7 +27,7 @@ Settings 显示构建时从 manifest 收集的应用和插件版本，因此修�
 
 ## 生命周期与权限
 
-服务、工具、Skill、路由和监听器通过 Cordis effects 注册并释放。停止时先取消并等待执行、子 Agent、Worker 和持久化 effects，再释放依赖和状态锁。
+服务、工具、Skill、路由和监听器通过 Cordis effects 注册并释放。停止时先取消并等待执行、子 Agent、LAI Orchestrator 和持久化 effects，再释放依赖和状态锁。
 
 Credentials 工具从执行上下文取得调用 Agent 的 preset，实时检查 enabled、allowedPresets；更新再检查 allowUpdates。Skill 只传递操作说明，既不授予工具，也不授予凭证访问。角色工具选择在新 Run 留存快照，不能随配置变化悄悄改写既有执行权限。
 

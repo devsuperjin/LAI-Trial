@@ -4,7 +4,7 @@
 
 ## Introduction
 
-LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Worker delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
+LAI is an agent application built on **DeepSeek Harness (DSH)**. **Superagent handles monitoring, routing and task management**, while a **LAI Orchestrator delegates to five specialist subagents** to analyze, reproduce, document, review and report on a task.
 
 The project targets engineering work driven by GitHub, Jenkins CI and optional Feishu conversations: turning failure logs, discussions and code changes into tasks with a visible execution history, supporting evidence and recorded outcomes.
 
@@ -12,12 +12,12 @@ The project targets engineering work driven by GitHub, Jenkins CI and optional F
 
 The original requirements drew on six business roles in a CI validation workflow: **Monitor, Triage, Reproduction, Ticket, Reviewer and Reporting**. The current implementation combines these roles with Superagent and adjusts how they run:
 
-- **Monitor is the Superagent Router.** It receives events, decides whether work should proceed, routes tasks and handles follow-up discussions.
-- When work is accepted, Superagent creates a task with its own **Worker session and workspace**.
-- The Worker coordinates execution using LAI's `iqe-orchestrator` preset and invokes the five specialists in sequence.
+- **Monitor is the Superagent Router(Monitor).** It receives events, decides whether work should proceed, routes tasks and handles follow-up discussions.
+- When work is accepted, Superagent creates a task with its own **LAI Orchestrator session and workspace**.
+- The LAI Orchestrator coordinates execution using LAI's `iqe-orchestrator` preset and invokes the five specialists in sequence.
 - The specialists are native DSH child agents. Their calls, execution history and results are visible in both lai-web and the original DSH interface.
 
-“Six agents” describes the six business roles. The runtime also includes a Worker coordination session. Monitor / Router and Worker are separate sessions linked through a task; the five specialists are children of the Worker.
+“Six agents” describes the six business roles. The runtime also includes an LAI Orchestrator session. Superagent Router(Monitor) and LAI Orchestrator are separate sessions linked through a task; the five specialists are children of the LAI Orchestrator.
 
 ```mermaid
 flowchart TD
@@ -29,7 +29,7 @@ flowchart TD
     JK --> Router
     Router -->|No execution / observe| Record["Record outcome"]
     Router -->|Execute| Orchestrator
-    subgraph Orchestrator["LAI Orchestrator (Worker · iqe-orchestrator)"]
+    subgraph Orchestrator["LAI Orchestrator"]
         Triage["1. Triage"] --> Reproduce["2. Reproduction"]
         Reproduce --> Ticket["3. Ticket draft"]
         Ticket --> Review["4. Reviewer"]
@@ -37,22 +37,22 @@ flowchart TD
     end
 ```
 
-Superagent Router(Monitor) represents event intake, admission checks, assessment and routing. LAI Orchestrator is the Worker coordinating its five child agents; task/assignment bookkeeping, workspace details and result handling are omitted from this overview.
+Superagent Router(Monitor) represents event intake, admission checks, assessment and routing. LAI Orchestrator coordinates its five child agents; task/assignment bookkeeping, workspace details and result handling are omitted from this overview.
 
-This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). The five stages are children of Worker: stage arrows show order, and Worker starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
+This overview is identical to the diagram in [the design document](docs/design.md#2-overall-structure). The five stages are children of LAI Orchestrator: stage arrows show order, and LAI Orchestrator starts each child after the previous one finishes. The Ticket stage produces a draft; the Superagent Ticket is the task entity. Replies do not automatically re-enter intake; only a later external event can become new input.
 
 ### Roles
 
 | Business role | Implementation | Responsibilities |
 | --- | --- | --- |
-| Monitor | Superagent Router | Receive events, evaluate admission, associate tasks, dispatch Workers and handle follow-ups |
+| Monitor | Superagent Router(Monitor) | Receive events, evaluate admission, associate tasks, dispatch LAI Orchestrator instances and handle follow-ups |
 | Triage | `iqe-triage` / `triage` | Gather evidence, analyze failures and separate established facts from hypotheses |
 | Reproduction | `iqe-reproduction` / `reproduce` | Reproduce and validate issues; make necessary changes for explicitly authorized fixes |
 | Ticket | `iqe-ticket` / `ticket` | Organize the problem, root cause, reproduction steps and evidence into a ticket draft or change summary |
 | Reviewer | `iqe-reviewer` / `review` | Independently inspect the diagnosis, reproduction and changes, then provide a review decision |
 | Reporting | `iqe-reporting` / `reporter` | Consolidate results, evidence, review conclusions and unresolved questions |
 
-**Execution order is fixed: `triage → reproduce → ticket → review → reporter`.** Each stage waits for its child agent to actually finish. Runtime guards inspect native child-session history and prevent duplicate, out-of-order or concurrent stage launches. A failed or cancelled child blocks later stages. The Worker can report `ready` only after all five stages complete.
+**Execution order is fixed: `triage → reproduce → ticket → review → reporter`.** Each stage waits for its child agent to actually finish. Runtime guards inspect native child-session history and prevent duplicate, out-of-order or concurrent stage launches. A failed or cancelled child blocks later stages. The LAI Orchestrator can report `ready` only after all five stages complete.
 
 A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is one execution stage** within that task.
 
@@ -61,8 +61,8 @@ A Superagent **Ticket is a task-management entity**. The LAI **Ticket Agent is o
 | Component | Owns |
 | --- | --- |
 | DSH | Model integration, persistent sessions, tools, native subagents, permissions and the plugin runtime |
-| Superagent | Sources, Policy, Router, task state, Worker lifecycle, scheduling, retries and replies to sources |
-| LAI Agents | Worker coordination preset, five specialist roles, configurable prompts and sequential execution guards |
+| Superagent | Sources, Policy, Superagent Router(Monitor), task state, LAI Orchestrator lifecycle, scheduling, retries and replies to sources |
+| LAI Agents | LAI Orchestrator coordination preset, five specialist roles, configurable prompts and sequential execution guards |
 | lai-web | Unified views for tasks, sessions, execution, configuration and results |
 
 ## Current capabilities and extensions
@@ -71,7 +71,7 @@ The application integrates Superagent's GitHub source. Depending on configuratio
 
 Current boundaries:
 
-- **Receiving an event does not automatically launch a Worker.** Source switches, allowed senders, admission rules and Eval mode determine what proceeds. The prototype's default rules mainly cover copy fixes and local visual fixes; CI analysis requires appropriate rules.
+- **Receiving an event does not automatically launch an LAI Orchestrator.** Source switches, allowed senders, admission rules and Eval mode determine what proceeds. The prototype's default rules mainly cover copy fixes and local visual fixes; CI analysis requires appropriate rules.
 - Role behavior depends on prompts and available tools. A role name does not mean Jarvis, LogDistiller or another external engineering tool is installed.
 - General Commit / Push triggers, Jira / Azure ticket-submission connectors and a shared knowledge base are not currently implemented. Future inputs should use Superagent's Source extension mechanism.
 - Tasks can produce ticket drafts and reports. Creating PRs, replying on GitHub or taking other external actions depends on authorization, configuration and available tools.
@@ -94,33 +94,7 @@ pnpm start
 
 `pnpm start` builds the workspace and starts the unified application. You do not need separate frontend and backend processes for normal use. Open the authenticated URL printed in the terminal. The default port is **3080**.
 
-### Initial configuration
-
-1. In **Settings**, configure model providers, credentials and the default model. Configure LAI role prompts and specialist model overrides in **Plugin → LAI Agents**.
-2. Open **Plugin → Superagent → Sources** and configure the GitHub repository (`owner/repo`), GitHub CLI path and events to receive.
-3. In **Policy**, configure allowed senders, task scope and admission rules.
-4. In **Eval**, configure evaluation mode, timeout and the Router model. The default is `observe`; choose `auto` when the intended workflow should automatically accept inferred tasks under policy.
-5. In **Execution**, configure the Worker model, concurrency, working directory, workspace preparation command and command restrictions.
-6. Use **Router** to inspect accepted work and **Runs** to inspect Router, Worker and subagent execution.
-
-If one GitHub account both opens Issues and executes tasks, enable new-Issue intake and **Receive issues opened by the agent account**. Own comments and PRs remain filtered. This switch does not replay previously skipped Issues, and received Issues still pass through Policy.
-
-The minimum polling interval is 60 seconds; longer intervals requested by GitHub take precedence. Start with a small, clearly defined task to inspect routing behavior and model costs.
-
-## Pages and configuration
-
-| Page | Purpose |
-| --- | --- |
-| Dashboard | Superagent intake and task metrics, Router / Worker health, five-stage activity and recorded model usage |
-| Router | Superagent tasks with links to their Monitor / Router and Worker sessions |
-| Runs | Timeline with Waterfall / List views, grid-backed DAG, native subagents and execution results |
-| Plugin → Superagent | Dedicated management page for Sources, Policy, Eval, Execution, Prompts and Deployment |
-| Plugin → LAI Agents | Worker and specialist prompts, plus per-specialist model and tool selection |
-| Settings | General: appearance, language and version information; Model configuration: providers, credentials and the default model |
-
-The interface supports English and Chinese. The original DSH debugging UI remains available at **`/dsh/`**, sharing the same backend. Deleting a Run uses native DSH archiving with Undo; running sessions must be stopped first.
-
-**Prompts** on the Superagent page manages its Router / Worker instructions. **Plugin → LAI Agents** manages LAI role definitions and specialist model overrides. It is an independent DSH Bundle with its own sidebar and configuration entry in the original DSH interface. Unpinned specialists inherit the Worker model; pinned routes apply to new children without changing the global default. Source, policy and execution settings use revisions to detect concurrent changes. Advanced editors expose complete configuration fields beyond the basic forms.
+For configuration steps and page details, see the [configuration guide](Guide.md).
 
 ## Repository structure
 
@@ -135,9 +109,9 @@ LAI-Trial/
 ├── packages/
 │   └── dsh-adapter/              # Browser RPC, Superagent API and DSH compatibility
 ├── plugins/
-│   ├── superagent/               # @lai/superagent: intake, routing, tasks and Workers
+│   ├── superagent/               # @lai/superagent: intake, routing, tasks and LAI Orchestrator instances
 │   │   └── src/app/lai-worker.ts # Five-stage native subagent execution guards
-│   ├── lai-agents/               # @lai/lai-agents: Worker and five specialist presets
+│   ├── lai-agents/               # @lai/lai-agents: LAI Orchestrator and five specialist presets
 │   └── web-host/                 # Unified Web hosting, authentication and DSH debug UI
 ├── scripts/                      # Startup, Profile migration, version and architecture checks
 ├── tests/                        # Application contracts and composition migration tests
@@ -146,7 +120,7 @@ LAI-Trial/
 └── .runtime/                     # Local runtime data, excluded from Git
 ```
 
-`plugins/superagent` contains application business logic imported from the Superagent prototype, with its MIT license retained. The imported baseline is `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`. Local additions include DSH compatibility, own-Issue intake, management API authentication and the LAI Worker pipeline. This is an application plugin maintained in this repository; it does not modify official DSH framework source.
+`plugins/superagent` contains application business logic imported from the Superagent prototype, with its MIT license retained. The imported baseline is `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`. Local additions include DSH compatibility, own-Issue intake, management API authentication and the LAI Orchestrator pipeline. This is an application plugin maintained in this repository; it does not modify official DSH framework source.
 
 ### Runtime data
 
@@ -157,78 +131,19 @@ LAI-Trial/
 | `LAI_SUPERAGENT_STATE_DIR` | Optional absolute path overriding the Superagent state directory |
 | `.reference` | Ignored upstream source checkout for auditing; never used by builds, tests or runtime |
 
-## DSH application development conventions
-
-LAI maintains its extensions in an independent application repository. The current official DSH baseline is **`0.2.2-rc.1`**, recorded in [`config/dsh-baseline.json`](config/dsh-baseline.json).
-
-### Dependencies and plugin composition
-
-- Use the **`@lai`** namespace for application packages. Pin official DSH dependencies and peers to the baseline version.
-- Extend DSH through published exports, **Bundle / Profile composition and environment overlays**.
-- Do not copy or edit official DSH framework source or import private build paths.
-- Keep DSH version differences and the browser RPC protocol in **`packages/dsh-adapter`**.
-- Preserve Superagent's ownership of events, routing and task lifecycle. New CI / GitHub inputs should use its Source mechanism without adding a parallel trigger layer or MQ dependency.
-
-### Agents and lifecycle
-
-- Define specialist roles in `plugins/lai-agents`. Workers must invoke native child agents; independent root sessions do not replace parent–child relationships.
-- Enforce stage order through runtime guards rather than relying only on prompt instructions.
-- Own tool, event, prompt and service registrations through Cordis lifecycle effects and dispose them correctly.
-- On shutdown or unload, await task cancellation, child termination and Worker cleanup before releasing dependencies.
-- Preserve native sessions, tool calls, execution receipts and durable records so lai-web and the original DSH interface can inspect the same execution.
-
-### Configuration, data and credentials
-
-- Store application defaults in repository configuration and user overrides in the runtime Profile. Upgrades and migrations must preserve existing model settings, credentials and sessions.
-- Save configuration through settings interfaces with revision checks to avoid overwriting concurrent changes.
-- Manage credentials through DSH's credential interface. Keep them out of committed configuration, source and examples.
-- Keep `.runtime` separate from other user DSH data and excluded from Git.
-
-### Validation and upstream upgrades
-
-For integration changes, run:
-
-```sh
-pnpm check
-```
-
-This checks architecture, builds, types and local tests, including Superagent fixtures. Pipeline tests use deterministic drivers and local data. Real-model validation is separate and incurs actual API costs.
-
-Upgrade DSH on a separate integration branch. Select an exact release, update dependencies and the lockfile, review public interfaces and persistence formats, and complete compatibility checks before merging. The repository provides a version-update script:
-
-```sh
-node scripts/set-dsh-version.mjs <exact-version>
-pnpm install --no-frozen-lockfile
-pnpm check
-```
-
-Update the baseline record and retain the previous code, lockfile and matching data backups. When updating Superagent business logic, preserve LAI's Worker preset, sequential guards, management API authentication and own-Issue configuration.
-
-## Development commands
-
-| Command | Purpose |
-| --- | --- |
-| `pnpm start` | Build and start the unified application |
-| `pnpm build` | Build all workspace packages |
-| `pnpm start:backend` | Start the backend from existing builds without opening a browser |
-| `pnpm dev:web` | Start the frontend development server; requires a backend |
-| `pnpm config:dump` | Inspect the composed DSH configuration |
-| `pnpm check:architecture` | Check namespaces, dependency versions and import boundaries |
-| `pnpm check` | Run the complete local check suite |
-
 ## Screenshots
 
-### Router evaluation
+### Superagent Router(Monitor) evaluation
 
-Routing and admission are native Superagent capabilities. LAI provides a dedicated Router page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
+Routing and admission are native Superagent capabilities. LAI provides a dedicated Superagent Router(Monitor) page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
 
-![Superagent decisions in the dedicated LAI Router page](docs/images/router-evaluation.jpg)
+![Superagent decisions in the dedicated LAI Superagent Router(Monitor) page](docs/images/router-evaluation.jpg)
 
-### Worker DAG
+### LAI Orchestrator DAG
 
-Native Worker Turns, specialist delegation and execution status in Runs.
+Native LAI Orchestrator Turns, specialist delegation and execution status in Runs.
 
-![Worker DAG](docs/images/runs-dag.jpg)
+![LAI Orchestrator DAG](docs/images/runs-dag.jpg)
 
 ### Authorization details
 
@@ -243,6 +158,10 @@ The original Superagent panel remains accessible through `/dsh/`, sharing task s
 ![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
 
 ## Documentation
+
+- [Development guide](docs/development.md): dependencies, composition, lifecycle, versions and checks.
+
+- [Configuration guide](Guide.md): initial setup, page reference, tools and credential authorization.
 
 - [System design](docs/design.md) · [中文](docs/design.zh-CN.md)
 - [Architecture](docs/architecture.md) · [中文](docs/architecture.zh.md)

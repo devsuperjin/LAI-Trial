@@ -6,7 +6,7 @@ This is the developer guide to the implementation. It maps the concepts in [001 
 
 This is an implementation reference for the imported business plugin, not a competing overview diagram. The current application overview is maintained in the root [README](../../../README.md) and [design](../../../docs/design.md): Sources → `Superagent Router(Monitor)` → one LAI Orchestrator group containing five ordered child agents.
 
-Router ownership includes Intake, deterministic scope/admission rules, main-session assessment and routing. Not every input invokes a model. `MasterAssessor` delivers candidates to the Router main session; Engine/Policy validate and apply outcomes. `src/app/lai-worker.ts` enforces real native-child completion and stops later stages on failure/cancellation. Worker progress is scoped to each Assignment, not all historical child runs.
+Superagent Router(Monitor) ownership includes Intake, deterministic scope/admission rules, main-session assessment and routing. Not every input invokes a model. `MasterAssessor` delivers candidates to the Superagent Router(Monitor) main session; Engine/Policy validate and apply outcomes. `src/app/lai-worker.ts` enforces real native-child completion and stops later stages on failure/cancellation. LAI Orchestrator progress is scoped to each Assignment, not all historical child runs.
 
 `@lai/lai-agents` owns presets, tool snapshots, specialist model overrides and the short Skill discovery hint. `@lai/credentials/skill` registers credential instructions in specialist preset scopes; live credential grants and update permissions stay in the Credentials plugin. UI routing/layout is owned by `app/lai-web/src/router`, `layout` and `pages`, not this plugin's domain Engine.
 
@@ -210,7 +210,7 @@ That context supplies deployment and commands, setup readiness (`ready`, `config
 
 `prepare(ticket, outcome)` supplies the Engine's `prepareTicket` hook: short name, directory and `ticketExecution` assignment text. `workerSessionId(ticket.id)` derives the Session id.
 
-`WorkerSlots` reserves capacity before a launch or a delivery that wakes an idle worker. A human message can use one slot beyond `maxWorkers`, and wakes have priority over launches. `activeCount` supplies panel load.
+`WorkerSlots` reserves capacity before a launch or a delivery that wakes an idle worker. A human message can use one slot beyond `maxLAI Orchestrator instances`, and wakes have priority over launches. `activeCount` supplies panel load.
 
 Transient provider and network failures get three retries. Launches use effect backoff; failed turns receive continuation messages after 15, 30 and 60 seconds. `inputMessage` renders each Input from current Ticket state, and `mandateInstructions` adds the matched-rule limits for inferred work.
 
@@ -340,7 +340,7 @@ Some generic modules still refer directly to GitHub or Feishu:
 | `src/app/context.ts` | The built-in prompt text, read from `prompts/`, and the transcript entries Sessions read |
 | `src/app/skill-files.ts` | Packaged text: `promptFile`, which joins a file's one-sentence lines into paragraphs, and the bundled skills |
 | `src/app/sessions.ts` | Sessions |
-| `src/app/lai-worker.ts` | LAI native child ordering inside each Worker |
+| `src/app/lai-worker.ts` | LAI native child ordering inside each LAI Orchestrator |
 | `src/app/delivery.ts` | `AgentDelivery`: delivers a message to a DeepSeek Harness agent once per request id, also across a restored Session |
 | `src/app/retry-health.ts` | `RetryHealth`: which Sessions wait on a model budget retry, for the `models` health entry |
 | `src/app/role-models.ts` | Resolves the Eval and Executor models, and seeds a new Session with its role's model |
@@ -544,7 +544,7 @@ Each Executor has six application tools:
 
 A hand-back returns `queued: false` if another Ticket still owns the message, or this Ticket never owned it. For example, a bot message went to Eval independently.
 
-In LAI, the Worker preset is `iqe-orchestrator`, registered by `@lai/lai-agents` and selected through `WORKER_PRESET`. The Router preset remains defined in `cordis.patch.yml`. `WORK_TOOLS` in `src/app/sessions.ts` retains available file, search, shell, job, web, skill, todo and subagent tools. Workers do not receive tools for asking or presenting to a person, changing the profile, scheduling work outside worker slots, starting or messaging other Sessions, or editing external documents. Tool calls are refused after the Ticket ends.
+In LAI, the LAI Orchestrator preset is `iqe-orchestrator`, registered by `@lai/lai-agents` and selected through `WORKER_PRESET`. The Superagent Router(Monitor) preset remains defined in `cordis.patch.yml`. `WORK_TOOLS` in `src/app/sessions.ts` retains available file, search, shell, job, web, skill, todo and subagent tools. LAI Orchestrator instances do not receive tools for asking or presenting to a person, changing the profile, scheduling work outside worker slots, starting or messaging other Sessions, or editing external documents. Tool calls are refused after the Ticket ends.
 
 ### Result shapes and assessment context
 
@@ -606,7 +606,7 @@ These messages are steered into the main Session's turn:
 
 Other notices are injected without waking the main Session: `ticket_ended`, `settings_saved`, prompt saves, Trigger requeues, dropped Subscriptions and context follows. A settings notice names the block, changed paths and `read: settings/<block>`. The main Session receives no redundant notice for a save, requeue, unsubscribe or attach it performed itself.
 
-Workers receive assignments and Inputs inline. The first message includes the title, up to 1,500 characters of assignment text and the source Trigger card. Inputs carry a Trigger card with up to 600 characters and `replies_to`, or plain Input text. Read pointers appear only for truncated content.
+LAI Orchestrator instances receive assignments and Inputs inline. The first message includes the title, up to 1,500 characters of assignment text and the source Trigger card. Inputs carry a Trigger card with up to 600 characters and `replies_to`, or plain Input text. Read pointers appear only for truncated content.
 
 ### Panel-only actions
 

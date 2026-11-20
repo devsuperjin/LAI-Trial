@@ -1,7 +1,7 @@
 {
   "name": "@lai/lai-agents",
   "description": "LAI Worker coordinator and five native specialist agents with configurable prompts and model routes.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "license": "MIT",
   "exports": {

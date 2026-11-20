@@ -9,13 +9,13 @@ LAI 是独立的 DSH 应用仓库，使用已发布的包；官方依赖固定�
 ```text
 GitHub / 可选 Feishu / Jenkins Sources
   → Superagent Router(Monitor)
-  → LAI Orchestrator (Worker · iqe-orchestrator)
+  → LAI Orchestrator
       triage → reproduce → ticket → review → reporter
 ```
 
-Monitor / Router 是一个业务角色，统一负责接入、去重、范围／准入检查、评估及路由。确定性检查由程序执行，需要语义判断的请求／候选由 Router 主会话处理，程序校验并应用决策。图中不把这些实现步骤拆成额外 Agent。
+Superagent Router(Monitor) 是一个业务角色，统一负责接入、去重、范围／准入检查、评估及路由。确定性检查由程序执行，需要语义判断的请求／候选由 Superagent Router(Monitor) 主会话处理，程序校验并应用决策。图中不把这些实现步骤拆成额外 Agent。
 
-Router 和 Worker 是通过 Superagent Ticket 关联的独立会话。每个 Worker 使用 `iqe-orchestrator`，五个专业阶段是它的 DSH 原生子 Agent。阶段箭头表示顺序，不表示前一个子 Agent 创建后一个；委派均由 Worker 发起。
+Superagent Router(Monitor) 和 LAI Orchestrator 是通过 Superagent Ticket 关联的独立会话。每个 LAI Orchestrator 使用 `iqe-orchestrator`，五个专业阶段是它的 DSH 原生子 Agent。阶段箭头表示顺序，不表示前一个子 Agent 创建后一个；委派均由 LAI Orchestrator 发起。
 
 `plugins/superagent/src/app/lai-worker.ts` 检查真实子会话历史，一次只允许一个阶段。子 Agent 失败或取消后阻止后续阶段；全部完成后才允许 `ready`。每次 Assignment 按自身开始时间识别进度。Ticket 管理任务，Ticket 子 Agent 整理工单草稿，两者不同。
 
@@ -23,8 +23,8 @@ Router 和 Worker 是通过 Superagent Ticket 关联的独立会话。每个 Wor
 
 | 目录 | 职责 |
 | --- | --- |
-| `plugins/superagent` | Sources、Policy、Router、Ticket、Worker 调度、持久化、重试、回复；是导入并维护的业务插件，不是官方框架源码 |
-| `plugins/lai-agents` | Worker 和五个专业预设、Prompt、角色模型覆盖、工具选择、Skill 组合 |
+| `plugins/superagent` | Sources、Policy、Superagent Router(Monitor)、Ticket、LAI Orchestrator 调度、持久化、重试、回复；是导入并维护的业务插件，不是官方框架源码 |
+| `plugins/lai-agents` | LAI Orchestrator 和五个专业预设、Prompt、角色模型覆盖、工具选择、Skill 组合 |
 | `plugins/credentials` | 凭证配置、按预设授权的读取／更新工具、独立的 scoped Skill 入口 |
 | `plugins/feishu-tools` | 独立飞书操作工具；不是 Superagent 飞书输入来源，不另起监听器 |
 | `plugins/web-host` | 同源鉴权、静态界面、归档查询及 `/dsh/` 原版界面 |
@@ -32,7 +32,7 @@ Router 和 Worker 是通过 Superagent Ticket 关联的独立会话。每个 Wor
 | `app/lai-web` | 任务、运行、配置与结果界面 |
 | `config` | Profile / Bundle 和默认值；不保存真实凭证 |
 
-旧 `lai-pipeline`、`pipeline-simulator` 和来源注册接口已移除，不作为当前开发入口。不需要 MQ、broker 或共享知识服务。不同 Ticket 的并发由 Superagent Execution 管理；单个 Worker 内部严格串行。
+旧 `lai-pipeline`、`pipeline-simulator` 和来源注册接口已移除，不作为当前开发入口。不需要 MQ、broker 或共享知识服务。不同 Ticket 的并发由 Superagent Execution 管理；单个 LAI Orchestrator 内部严格串行。
 
 ## Web 布局
 
@@ -52,7 +52,7 @@ Modal 支持 API endpoint、IP／主机名、端口和访问说明。普通设�
 
 ## 生命周期与数据
 
-注册通过 Cordis effect 持有和释放；释放依赖前等待取消、子任务和 Worker 退出。现有设置和会话必须保留。DSH Home 默认为 `.runtime/dsh`，Superagent 状态默认为 `.runtime/dsh/superagent`，可通过 `LAI_SUPERAGENT_STATE_DIR` 显式覆盖；不得让两个进程共用活动状态目录。
+注册通过 Cordis effect 持有和释放；释放依赖前等待取消、子任务和 LAI Orchestrator 退出。现有设置和会话必须保留。DSH Home 默认为 `.runtime/dsh`，Superagent 状态默认为 `.runtime/dsh/superagent`，可通过 `LAI_SUPERAGENT_STATE_DIR` 显式覆盖；不得让两个进程共用活动状态目录。
 
 `pnpm install` 后用 `pnpm start` 构建并运行，或用 `pnpm build`、`pnpm start:backend` 分开执行；不打开浏览器使用 `--no-open`。默认端口 3080。默认 Eval 为 observe，接收事件不等于执行。`.reference` 仅用于迁移审计，不进入运行、构建、测试或 CI。
 
