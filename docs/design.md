@@ -64,6 +64,8 @@ Tickets and Runs represent different concerns: a Ticket tracks the business task
 | Official DSH | Models, sessions, tool execution, native subagents, permissions and plugin runtime | Use published interfaces without modifying framework source |
 | `plugins/superagent` | Sources, admission, Router, Tickets, Worker scheduling, retries and replies | Owns event and business task lifecycles |
 | `plugins/lai-agents` | Worker coordinator and five specialist presets, prompts and role model overrides | Does not implement separate event intake or scheduling |
+| `plugins/credentials` | Preset-authorized local credential tools, explicit update permission and scoped Skill | Separate from model-provider credentials; no automatic remote rotation |
+| `plugins/feishu-tools` | Standalone Feishu operation tools and credentials | Does not replace the Superagent Feishu input Source |
 | `packages/dsh-adapter` | Browser RPC, Superagent HTTP protocol and DSH compatibility reads | Keeps protocol and version differences out of individual UI components |
 | `plugins/web-host` | Frontend hosting, authentication, archive discovery and original DSH entry | Does not decide whether business tasks are complete |
 | `app/lai-web` | Dashboard, Router, Runs, plugin configuration, model and appearance settings | Presents actual state rather than replacing execution state |
@@ -143,6 +145,14 @@ Triage and Review disable direct file-writing tools but retain Shell access, so 
 
 New tools should use independent `@lai/tool-*` packages, mounted by the appropriate role Presets. Own registrations and disposal through Cordis effects, and honor cancellation signals for long-running work. A tool's configuration and configuration UI belong to the tool plugin; agents consume its capability through mounting.
 
+### Skills and Credentials
+
+All five specialists enable `skill` by default and mount `@lai/credentials/skill` within their own preset scopes. The `credentials-access` body loads on demand. Role prompts begin with a short hint to consult relevant Skills when context or an approach is missing, without reloading bodies already in context. The Worker coordinator does not automatically mount this Skill.
+
+Credentials is a separate plugin/page. Tool selection, enabled/allowedPresets grants and allowUpdates are independent controls. Every call checks the actual preset supplied by DSH execution context; instances of the same preset share a grant. Updates replace only username/token/password on an existing local entry; they do not rotate remote accounts, change grants or create entries.
+
+The compact modal supports endpoint, host/IP, port and notes. Ordinary settings reads are redacted, configured fields show mask dots, and eye icons explicitly reveal stored values. Blank edits preserve old secrets. Retrieved plaintext and update arguments can persist in Run history; revocation cannot retract prior disclosures.
+
 ## 7. Configuration and models
 
 | Owner | Configuration | UI entry |
@@ -180,6 +190,12 @@ Dashboard business metrics come from Superagent; token usage comes from each nat
 
 The original DSH debugging interface remains available at `/dsh/` on the same backend. Run deletion uses native archiving with Undo rather than deleting data files directly.
 
+### Shared page structure
+
+`app/lai-web/src/router/routes.tsx` is the single route/menu source: path, component, name, icon, order, group and hideInMenu. Navigation, breadcrumbs, page headings and rendering derive from it. Hash paths support reload and back/forward navigation.
+
+Shared layout lives in `src/layout`, business pages in `src/pages`, and reusable widgets in `src/components`, without page compatibility aliases. Page titles stay outside content cards. Settings plugin versions come from manifests captured at build time, not a live enabled-plugin inventory.
+
 ## 9. Protocols and persistence
 
 - Native DSH records provide execution facts for Runs, Turns, tool calls and parent–child agents.
@@ -203,6 +219,10 @@ The current DSH baseline is `0.2.2-rc.1`; `config/dsh-baseline.json` is authorit
 - On shutdown or unload, await cancellation and Worker disposal before releasing dependencies. Own registrations through Cordis effects.
 - `.reference` is migration-audit material only, not a build, runtime, test or CI dependency.
 - `pnpm check` is the standard integration check. Pipeline tests use deterministic drivers and local fixtures; real-model validation is separate.
+
+### Branches and versions
+
+New plugins start on dedicated branches from current main and merge through PRs, never direct additions on main. Every component update, including docs, bumps that component's manifest: patch for compatible fixes/docs, minor for features, major for breaking changes unless explicitly specified. Application-wide changes also bump the root version. The official DSH baseline remains independent. Respect user limits on checks, tests and browser use; see [AGENTS.md](../AGENTS.md).
 
 ## 11. Current scope and extension opportunities
 

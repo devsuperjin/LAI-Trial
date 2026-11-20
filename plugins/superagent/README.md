@@ -2,8 +2,16 @@
 > Imported from `deepseek-ai/dsh-superagent-prototype` at `8c32a9dc5d72c033816c6a8110b37f40cf94fba4`.
 > The upstream Router, Sources, Policy, Tickets, persistence, executor lifecycle and replies remain in use.
 > Workers select `iqe-orchestrator` from `@lai/lai-agents`; `src/app/lai-worker.ts` enforces the native five-child sequence.
-> The management API shares DSH browser authentication. Configure this integration through LAI Web Settings.
+> The management API shares DSH browser authentication. Configure Sources/Policy/Eval/Execution/Prompts/Deployment through LAI Web Plugin → Superagent (`/#/plugins/superagent`), not the general model settings page.
 > The original upstream documentation below describes the prototype; LAI composition and startup are documented in the repository root.
+
+## LAI ownership and maintenance
+
+The application overview represents event intake, deterministic scope/admission checks, main-session assessment and routing as one `Superagent Router(Monitor)` business role. Each accepted task gets a separate LAI Orchestrator/Worker, whose five native children execute `triage → reproduce → ticket → review → reporter`. The task's Superagent Ticket is not the Ticket drafting stage. Details are in [the LAI design](../../docs/design.md) and [local architecture notes](docs/007-architecture.md).
+
+The standalone `@lai/credentials` and `@lai/feishu-tools` plugins provide tools; they do not replace Source intake or bypass Ticket/role guards. Credential Skills are composed in specialist scopes by LAI Agents. No new broker or parallel pipeline is introduced.
+
+Changes to this package, including documentation, bump its package version. New plugins use a dedicated branch, PR and merge workflow; official DSH dependency versions remain pinned independently. Follow [AGENTS.md](../../AGENTS.md). The upstream research documentation below is retained for provenance; LAI startup and composition take precedence.
 
 # dsh-superagent
 

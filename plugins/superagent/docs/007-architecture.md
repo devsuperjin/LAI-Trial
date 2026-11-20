@@ -2,6 +2,16 @@
 
 This is the developer guide to the implementation. It maps the concepts in [001 Domain model](001-domain.md) through [006 Deployment](006-deployment.md) to classes, interfaces and files. Start with the runtime and Engine, then use the module and test tables as a code index.
 
+## LAI application composition
+
+This is an implementation reference for the imported business plugin, not a competing overview diagram. The current application overview is maintained in the root [README](../../../README.md) and [design](../../../docs/design.md): Sources → `Superagent Router(Monitor)` → one LAI Orchestrator group containing five ordered child agents.
+
+Router ownership includes Intake, deterministic scope/admission rules, main-session assessment and routing. Not every input invokes a model. `MasterAssessor` delivers candidates to the Router main session; Engine/Policy validate and apply outcomes. `src/app/lai-worker.ts` enforces real native-child completion and stops later stages on failure/cancellation. Worker progress is scoped to each Assignment, not all historical child runs.
+
+`@lai/lai-agents` owns presets, tool snapshots, specialist model overrides and the short Skill discovery hint. `@lai/credentials/skill` registers credential instructions in specialist preset scopes; live credential grants and update permissions stay in the Credentials plugin. UI routing/layout is owned by `app/lai-web/src/router`, `layout` and `pages`, not this plugin's domain Engine.
+
+New plugins require their own branch and PR merge into main. Every changed component, including documentation changes, bumps its own manifest version. See [AGENTS.md](../../../AGENTS.md).
+
 ## Core classes and glue
 
 Core classes own domain concepts and external boundaries behind small interfaces. Glue translates tool arguments, HTTP requests, Source payloads and DeepSeek Harness events into calls to those classes, then turns results into cards, views and messages.

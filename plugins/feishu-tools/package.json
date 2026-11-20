@@ -1,6 +1,6 @@
 {
   "name": "@lai/feishu-tools",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "license": "MIT",
   "description": "Feishu tools imported from LJH-snow/dsh-tool-feishu, selectable per LAI specialist.",

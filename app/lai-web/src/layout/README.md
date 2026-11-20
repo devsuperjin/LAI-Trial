@@ -11,3 +11,5 @@
 - `pages/`: business data, forms, actions and content. Shared Run loading lives in `components/RunDetailLoader.tsx`; pages do not import other pages.
 
 To add a page, implement it under `pages/`, add its ID and route record in `router/routes.tsx`, and use `PageHeader` and content panels. Do not add separate navigation items, title maps, App conditionals or page-specific outer padding/cards. Business-specific layouts such as the Runs split view remain inside the common page layout.
+
+Every update to this frontend component, including layout documentation, bumps `app/lai-web/package.json`. Shared repository rules for new plugin branches and PR merges live in [AGENTS.md](../../../../AGENTS.md).

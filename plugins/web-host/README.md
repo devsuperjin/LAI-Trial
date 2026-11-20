@@ -7,3 +7,9 @@ Serve the built LAI frontend and DSH APIs on one authenticated origin. The Profi
 From the repository root, `pnpm start` builds the application and launches the DSH `lai` Profile. The development-only `pnpm dev:web` server remains optional for frontend editing.
 
 The official installed DSH frontend is also available at `/dsh/`, linked from LAI's header. Both frontends share the same API, browser cookie and Profile. Official assets are served by `sirv` from the pinned frontend distribution; index requests pass DSH's existing browser authentication and receive the same boot injections. The debug entry does not launch another DSH process.
+
+## Frontend boundaries and maintenance
+
+The frontend owns its single static route/menu configuration in `app/lai-web/src/router/routes.tsx`; hash page paths need no host-side route copies. Shared chrome and page layout live in `src/layout`, business pages in `src/pages`, and reusable widgets in `src/components`. The host continues to serve the existing same-origin DSH RPC and application APIs; it does not implement a second page router.
+
+Settings versions are captured from package manifests at build time, so rebuild after a component version bump. New plugins require a dedicated branch, PR and merge; every change to this component, including docs, bumps its own version. See [AGENTS.md](../../AGENTS.md).

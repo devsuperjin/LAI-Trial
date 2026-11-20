@@ -64,6 +64,8 @@ Ticket 与 Run 含义不同：前者表达业务任务生命周期，后者表�
 | 官方 DSH | 模型、会话、工具执行、原生子 Agent、权限和插件运行时 | 使用发布接口，不修改官方源码 |
 | `plugins/superagent` | Sources、准入、Router、Ticket、Worker 调度、重试及回复 | 统一拥有事件和业务任务生命周期 |
 | `plugins/lai-agents` | Worker 协调者和五个专业 Preset、Prompt、角色模型覆盖 | 不自行实现另一套事件接收或调度 |
+| `plugins/credentials` | 按预设授权的本地凭证工具、显式更新权限、scoped Skill | 不替代模型提供方凭证，不自动轮换远端账号 |
+| `plugins/feishu-tools` | 独立飞书操作工具及凭证配置 | 不替代 Superagent 飞书输入 Source |
 | `packages/dsh-adapter` | 浏览器 RPC、Superagent HTTP 协议、DSH 兼容读取 | 界面不分散处理版本差异与协议细节 |
 | `plugins/web-host` | 前端托管、鉴权、归档查询、原版 DSH 入口 | 不负责判断业务任务是否完成 |
 | `app/lai-web` | Dashboard、Router、Runs、插件配置、模型与外观设置 | 展示真实状态，不以界面状态替代执行状态 |
@@ -143,6 +145,14 @@ LAI Agents 按已安装插件列出工具，支持专业角色逐项选择。新
 
 新增自有工具建议采用 `@lai/tool-*` 包：由对应角色的 Preset 加载，通过 Cordis effect 管理注册和释放；耗时操作响应取消信号。若有配置页面，配置由工具插件拥有，Agent 通过挂载引用该能力。
 
+### Skill 与 Credentials
+
+五个专业子 Agent 默认启用 `skill`，在各自 preset scope 挂载 `@lai/credentials/skill` 的 `credentials-access`。正文按需加载，角色 Prompt 只在开头加入简短的 Skill 发现指引：上下文不足或缺少思路时优先查找相关 Skill；不重复加载已有内容。Worker 协调者不自动挂载此 Skill。
+
+Credentials 是独立插件和配置页。工具选择、凭证 enabled/allowedPresets 和更新 allowUpdates 三者分离。插件从 DSH 执行上下文获取真实 preset 身份，每次调用重新检查授权；同一 preset 的多个实例共享授权。更新只修改已有本地记录的 username/token/password，不轮换远端账号、不修改授权、不创建新记录。
+
+Modal 使用紧凑布局，支持 endpoint、host/IP、port 和说明。普通设置读取脱敏，已配置字段显示圆点，眼睛图标显式读取原值；留空保留旧值。模型读到的明文和更新参数可能进入 Run 历史，撤权不收回已读内容。
+
 ## 7. 配置与模型
 
 | 配置归属 | 内容 | 界面入口 |
@@ -180,6 +190,12 @@ Dashboard 的业务状态来自 Superagent；Token 用量来自各原生 Run 的
 
 原版 DSH 调试入口保留在 `/dsh/`，与 lai-web 使用同一后端。Runs 删除使用原生归档并提供 Undo，不通过直接删除数据文件实现。
 
+### 统一页面结构
+
+`app/lai-web/src/router/routes.tsx` 是路由和菜单唯一数据源，包含 path、component、name、icon、order、group、hideInMenu 等。导航、面包屑、页面标题和渲染从它派生。Hash 地址支持刷新和前进／后退。
+
+公共布局在 `src/layout`，业务页面在 `src/pages`，复用组件在 `src/components`，不保留页面转发文件。标题统一放在内容 Card 外。Settings 的插件版本是构建时从 manifest 收集的版本，不代表实时启用状态。
+
 ## 9. 协议与持久化
 
 - DSH 原生记录提供 Run、Turn、工具调用与父子 Agent 的执行事实。
@@ -203,6 +219,10 @@ Dashboard 的业务状态来自 Superagent；Token 用量来自各原生 Run 的
 - 插件卸载或停止时，先等待运行取消和 Worker 释放，再释放依赖服务；注册归属通过 Cordis effect 管理。
 - `.reference` 只用于迁移审计，不作为构建、运行、测试或 CI 依赖。
 - 集成改动的标准检查命令为 `pnpm check`；流水线验证使用确定性驱动和本地 Fixture，真实模型验证单独执行。
+
+### 分支与版本
+
+新增插件从最新 main 新开独立分支，通过 PR 合并；不直接在 main 新增插件。每次更新组件（包括文档）同步 bump 对应 package.json，默认文档／兼容修复 patch、新功能 minor、不兼容变更 major；全应用修改同时 bump 根版本。官方 DSH 基线独立维护。遵守用户对测试、验证和浏览器的任务限制，详见 [AGENTS.md](../AGENTS.md)。
 
 ## 11. 当前范围与待扩展能力
 

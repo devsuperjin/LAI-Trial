@@ -35,8 +35,14 @@ Select discovered tools in LAI Agents → specialist → Tools → Registered DS
 
 ### Credentials Skill
 
-Each specialist preset composes `@lai/credentials/skill` and the standard DSH skill tool. This registers `credentials-access` within that preset scope rather than globally or in the role prompt. Enable `skill` and whichever `credentials_list`, `credentials_get`, and `credentials_update` tools the role needs in its saved tool selection. Credential entries separately grant preset access; updates additionally require the entry's explicit `allowUpdates` setting. Existing explicit tool selections are preserved.
+Each specialist preset composes `@lai/credentials/skill` and the standard DSH skill tool. This registers `credentials-access` within that preset scope rather than globally or in the role prompt. The standard `skill` tool is enabled by default; enable whichever `credentials_list`, `credentials_get`, and `credentials_update` tools the role needs in its saved tool selection. Credential entries separately grant preset access; updates additionally require the entry's explicit `allowUpdates` setting. Other explicit tool selections are preserved; the one-time migration below adds only the Skill capability.
 
 All five specialists enable the standard `skill` capability by default. A one-time versioned migration adds `skill` to existing explicit role tool selections without granting credential tools or changing other selected tools. Subsequent explicit opt-outs are respected. Existing Run snapshots remain unchanged; create a new subagent to use the updated selection.
 
 Specialist prompts begin with a short shared Skill discovery hint: when context or an investigation approach is missing, consult available descriptions and load a relevant Skill before speculative investigation. The hint is also applied to saved custom role prompts, deduplicated on assembly, and leaves the role instructions intact. It does not preload Skill bodies or expand permissions.
+
+## Maintenance
+
+Five specialists share a short Skill discovery hint at the start of their prompts; the Worker coordinator is not given a credentials Skill automatically. Keep role text and tool/preset authorization separate from Skill content. Configure this page at `/#/plugins/lai-agents`; its implementation is `app/lai-web/src/pages/LaiAgentsPage.tsx`, selected by the shared route configuration.
+
+Every change to this package, including its documentation, bumps its own manifest version. New plugins use a dedicated branch and a PR into `main`; follow [AGENTS.md](../../AGENTS.md) and [architecture](../../docs/architecture.md).
