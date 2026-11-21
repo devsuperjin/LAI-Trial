@@ -41,3 +41,5 @@ General settings fill the available content width and use the shared responsive 
 Settings → Plugins reads live DSH plugin/Bundle inventory and configuration namespaces. It provides schema/value-based field editing with minimal revision-checked writes, optional Bundle switches, runtime entry switches, npm/Git/local installation with cancellation and final logs, and confirmed removal. DSH enforces read-only controls, compatibility and build-script permissions. This frontend does not install anything until a person submits the installation form.
 
 Runs uses the shared `ResizableSplitView`: drag or use arrow/Home/End keys on its separator, double-click to reset, and retain the pane ratio per browser. Narrow screens stack the panes. Container queries hide secondary Run-row metadata and compact the filters as the list pane narrows.
+
+Narrow Run panes use `CompactSelect`, a styled top-layer popover menu with selected checks, keyboard navigation and native light dismissal, instead of a browser select.

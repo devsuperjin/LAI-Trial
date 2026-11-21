@@ -1,3 +1,4 @@
+import { CompactSelect } from './CompactSelect.tsx'
 import { useAppearance } from '../appearance.tsx'
 import { SelectionGroup, SelectionIndicator } from './SelectionMotion.tsx'
 import { readableRunTitle } from '../model/runs.ts'
@@ -46,7 +47,7 @@ export function TaskList(props: {
 
   return (
     <aside aria-label={t("Runs list")} className="run-list flex max-h-48 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card md:max-h-none">
-      <div className="run-list-compact-filter hidden items-center gap-2 px-2 pt-2"><select aria-label={t('Run status filter')} value={filter} onChange={event => setFilter(event.target.value as Filter)} className="min-w-0 flex-1 rounded-md border border-fd-border bg-fd-card px-2 py-1.5 text-xs">{FILTERS.map(candidate => <option key={candidate} value={candidate}>{t(candidate)}</option>)}</select>{props.onToggleWorkers && <button type="button" aria-label={t('Worker runs only')} aria-pressed={props.workersOnly} onClick={props.onToggleWorkers} className={`rounded-md p-1.5 ${props.workersOnly ? 'bg-fd-primary/10 text-fd-primary' : 'text-fd-muted-foreground'}`}><svg aria-hidden width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 4h18l-7 8v7l-4 2v-9Z" /></svg></button>}</div>
+      <div className="run-list-compact-filter hidden items-center gap-2 px-2 pt-2"><CompactSelect label={t('Run status filter')} value={filter} onChange={setFilter} options={FILTERS.map(candidate => ({ value: candidate, label: t(candidate) }))} />{props.onToggleWorkers && <button type="button" aria-label={t('Worker runs only')} aria-pressed={props.workersOnly} onClick={props.onToggleWorkers} className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg outline-none focus-visible:ring-1 focus-visible:ring-fd-primary ${props.workersOnly ? 'bg-fd-primary/10 text-fd-primary' : 'text-fd-muted-foreground'}`}><svg aria-hidden width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 4h18l-7 8v7l-4 2v-9Z" /></svg></button>}</div>
       <SelectionGroup><div className="run-list-filters flex items-center gap-1 px-3 pt-3">
         {FILTERS.map(candidate => (
           <button
