@@ -168,12 +168,6 @@ Trigger, admission decision, requester, scope and policy version, with execution
 
 ![Authorization details](docs/images/runs-authorization.jpg)
 
-### Superagent in the original DSH interface
-
-The original Superagent panel remains accessible through `/dsh/`, sharing task state and execution records.
-
-![Superagent in the original DSH interface](docs/images/native-superagent.jpg)
-
 ## Documentation
 
 - [Glossary](docs/glossary.md): canonical names and concepts.
