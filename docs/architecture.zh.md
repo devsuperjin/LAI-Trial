@@ -4,6 +4,8 @@
 
 LAI Superagent（Linux Agent Infra X Superagent）是独立的 DSH 应用仓库，使用已发布的包；官方依赖固定到 `config/dsh-baseline.json`，当前基线为 `0.2.2-rc.1`。不复制或修改官方框架源码。`config/profile.json` 组合官方 Bundle 与 `@lai` 应用插件，设置和会话保存在独立的 `.runtime/dsh`。
 
+生成的独立 Profile 会将内置包的 `workspace:*` 依赖转换为本地 `link:` 路径，并使用独立的 `node_modules` 目录。准备过程仅解除旧的目录符号链接，不修改仓库依赖；保留第三方 Profile 依赖和用户配置覆盖。插件管理器安装不会再操作应用仓库的依赖目录。
+
 ## 执行与职责
 
 ```text

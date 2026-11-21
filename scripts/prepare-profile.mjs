@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, symlink, lstat, unlink, copyFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile, symlink, lstat, unlink, copyFile, realpath } from 'node:fs/promises'
 import { constants } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -78,9 +78,19 @@ export async function prepareProfile() {
       await writeFile(patch, document.toString())
     }
   }
+  // A standalone Profile cannot resolve repository-only workspace: specs. Link
+  // built-in packages without asking pnpm to install their workspace dependencies.
+  const localPackages = new Map()
+  const dependencies = { ...previous.dependencies, ...template.dependencies }
+  for (const [name, spec] of Object.entries(template.dependencies ?? {})) {
+    if (!spec.startsWith('workspace:')) continue
+    const target = await realpath(resolve(root, 'node_modules', name))
+    dependencies[name] = `link:${target}`
+    localPackages.set(name, target)
+  }
   const manifest = {
     ...previous, ...template,
-    dependencies: { ...previous.dependencies, ...template.dependencies },
+    dependencies,
     dsh: { ...previous.dsh, ...template.dsh, profile: {
       ...previous.dsh?.profile, ...template.dsh.profile,
       bundles: [...new Set([...template.dsh.profile.bundles, ...(previous.dsh?.profile?.bundles ?? []).filter(name => name !== retiredBundle)])],
@@ -91,9 +101,29 @@ export async function prepareProfile() {
   delete manifest.dependencies[retiredBundle]
   await writeFile(resolve(profile, 'package.json'), JSON.stringify(manifest, null, 2) + '\n')
   const modules = resolve(profile, 'node_modules')
-  try { await lstat(modules) } catch (error) {
-    if (error.code !== 'ENOENT') throw error
-    await symlink(resolve(root, 'node_modules'), modules, process.platform === 'win32' ? 'junction' : undefined)
+  // Detach only the legacy directory symlink; never touch its repository target.
+  try {
+    if ((await lstat(modules)).isSymbolicLink()) {
+      // Preserve installed third-party dependencies exposed by the old directory.
+      for (const name of Object.keys(previous.dependencies ?? {})) {
+        if (localPackages.has(name) || !manifest.dependencies[name]) continue
+        try { localPackages.set(name, await realpath(resolve(modules, name))) }
+        catch (error) { if (error.code !== 'ENOENT') throw error }
+      }
+      await unlink(modules)
+    }
+  } catch (error) { if (error.code !== 'ENOENT') throw error }
+  await mkdir(modules, { recursive: true })
+  for (const [name, target] of localPackages) {
+    const destination = resolve(modules, name)
+    await mkdir(dirname(destination), { recursive: true })
+    try {
+      const entry = await lstat(destination)
+      if (!entry.isSymbolicLink()) throw new Error(`Cannot replace non-link Profile package: ${name}`)
+      if (await realpath(destination).catch(() => undefined) === target) continue
+      await unlink(destination)
+    } catch (error) { if (error.code !== 'ENOENT') throw error }
+    await symlink(target, destination, process.platform === 'win32' ? 'junction' : undefined)
   }
   return { home, profile }
 }
