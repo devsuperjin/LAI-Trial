@@ -30,7 +30,7 @@
     {
       "source": "apps/console/src/components/DashboardPage.tsx",
       "decision": "migrated",
-      "target": "app/lai-web/src/components/DashboardPage.tsx"
+      "target": "app/lai-web/src/pages/DashboardPage.tsx"
     },
     {
       "source": "apps/console/src/components/NavRail.tsx",
@@ -40,12 +40,12 @@
     {
       "source": "apps/console/src/components/RunsPage.tsx",
       "decision": "migrated",
-      "target": "app/lai-web/src/components/RunsPage.tsx"
+      "target": "app/lai-web/src/pages/RunsPage.tsx"
     },
     {
       "source": "apps/console/src/components/SettingsPage.tsx",
       "decision": "migrated",
-      "target": "app/lai-web/src/components/SettingsPage.tsx"
+      "target": "app/lai-web/src/pages/SettingsPage.tsx"
     },
     {
       "source": "apps/console/src/components/TaskDetail.tsx",
