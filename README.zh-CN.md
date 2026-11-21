@@ -154,25 +154,25 @@ LAI-Trial/
 
 路由与准入判断是 Superagent 的原生能力，LAI 为其提供独立的 Superagent Router(Monitor) 展示页面。系统根据发送者授权、策略与评估配置，判断收到的事件是否需要接单、续做、停止或忽略；受理后可直接打开对应的 Runs。
 
-![LAI 独立 Superagent Router(Monitor) 页面中的 Superagent 决策记录](docs/images/router-evaluation.jpg)
+![LAI 独立 Superagent Router(Monitor) 页面中的 Superagent 决策记录](docs/images/router-evaluation.png)
 
 ### LAI Orchestrator DAG
 
 在 Runs 中查看 LAI Orchestrator 的原生 Turn、专业子 Agent 委派和执行状态。
 
-![LAI Orchestrator DAG](docs/images/runs-dag.jpg)
+![LAI Orchestrator DAG](docs/images/runs-dag.png)
 
 ### 授权详情
 
 展示任务触发、准入决定、发起人、授权范围和策略版本，下方可展开执行环境。
 
-![授权详情](docs/images/runs-authorization.jpg)
+![授权详情](docs/images/runs-authorization.png)
 
-### 原版 DSH 中的 Superagent
+### 子 Agent 配置
 
-通过 `/dsh/` 保留原版 Superagent 管理页面，与 lai-web 共享任务状态及执行记录。
+在 **插件 → LAI Agents** 中调整 LAI Orchestrator 与专业子 Agent 的提示词、模型和工具。工具按已安装插件分组，角色弹窗中的修改先应用到页面草稿，再保存配置；模型与工具选择对新建子 Agent 生效。
 
-![原版 DSH 中的 Superagent](docs/images/native-superagent.jpg)
+![专业子 Agent 的工具配置弹窗](docs/images/subagents-setting.png)
 
 ## 项目文档
 

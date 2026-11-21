@@ -154,19 +154,25 @@ LAI-Trial/
 
 Routing and admission are native Superagent capabilities. LAI provides a dedicated Superagent Router(Monitor) page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
 
-![Superagent decisions in the dedicated LAI Superagent Router(Monitor) page](docs/images/router-evaluation.jpg)
+![Superagent decisions in the dedicated LAI Superagent Router(Monitor) page](docs/images/router-evaluation.png)
 
 ### LAI Orchestrator DAG
 
 Native LAI Orchestrator Turns, specialist delegation and execution status in Runs.
 
-![LAI Orchestrator DAG](docs/images/runs-dag.jpg)
+![LAI Orchestrator DAG](docs/images/runs-dag.png)
 
 ### Authorization details
 
 Trigger, admission decision, requester, scope and policy version, with execution environment details available below.
 
-![Authorization details](docs/images/runs-authorization.jpg)
+![Authorization details](docs/images/runs-authorization.png)
+
+### Subagent configuration
+
+Configure prompts, models and tools for the LAI Orchestrator and specialist subagents in **Plugin → LAI Agents**. Tools are grouped by installed plugin. Apply changes in the role dialog to the page draft, then save configuration; model and tool selections apply to new subagents.
+
+![Specialist subagent tool configuration dialog](docs/images/subagents-setting.png)
 
 ## Documentation
 
