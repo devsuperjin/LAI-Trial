@@ -10,7 +10,7 @@ import type { ThemeMode } from '../appearance.tsx'
 export function GeneralSettings() {
   const { t, language, setLanguage } = useLanguage()
   const { mode, setMode, reduceMotion, setReduceMotion } = useAppearance()
-  return <div className="mx-auto max-w-4xl space-y-5">
+  return <div className="w-full space-y-5">
     <PagePanel title={t('Appearance')}>
       <p className="mt-1 text-sm text-fd-muted-foreground">{t('Personalize this browser. Changes apply immediately.')}</p>
       <div className="mt-5 divide-y divide-fd-border">
