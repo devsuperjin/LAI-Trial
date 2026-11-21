@@ -20,7 +20,7 @@ export function NavRail({ page, onNavigate, runningCount }: { page: Page; onNavi
   function renderPage(item: PageDefinition, nested = false) {
     const active = page === item.id
     return <button key={item.id} type="button" title={t(item.name)} aria-label={t(item.name)} aria-current={active ? 'page' : undefined} onClick={() => onNavigate(item.id)} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary ${alignment} ${active ? 'bg-fd-primary/10 font-medium text-fd-primary' : 'text-fd-muted-foreground hover:bg-fd-secondary hover:text-fd-foreground'}`}>
-      <span className="shrink-0">{nested && !collapsed ? <span aria-hidden className="block h-1.5 w-1.5 rounded-full bg-current" /> : item.icon(active)}</span>{!collapsed && <span className="truncate">{t(item.name)}</span>}
+      {!nested && <span className="shrink-0">{item.icon(active)}</span>}{!collapsed && <span className="truncate">{t(item.name)}</span>}
       {!collapsed && item.badge === 'running' && runningCount > 0 && <span className="ml-auto rounded bg-fd-secondary px-1.5 text-xs tabular-nums">{runningCount}</span>}
     </button>
   }
