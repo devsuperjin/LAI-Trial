@@ -1,7 +1,8 @@
+import { useAppearance } from '../appearance.tsx'
 import { SelectionGroup, SelectionIndicator } from './SelectionMotion.tsx'
 import { readableRunTitle } from '../model/runs.ts'
 import { useLanguage } from '../i18n.tsx'
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import type { SessionListEntry } from '../api/gateway.ts'
 import { useState } from 'react'
 
@@ -40,7 +41,7 @@ export function TaskList(props: {
   onSelect: (sessionId: string) => void
 }) {
   const { t } = useLanguage()
-  const reduced = useReducedMotion()
+  const { reduceMotion: reduced } = useAppearance()
   const [filter, setFilter] = useState<Filter>('All')
   const visible = props.entries.filter(entry => matches(filter, statusOf(entry)))
 

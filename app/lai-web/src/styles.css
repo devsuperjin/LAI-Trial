@@ -212,3 +212,11 @@ body {
 .lai-markdown th { background: var(--color-fd-secondary); font-weight: 600; }
 .lai-markdown hr { border-color: var(--color-fd-border); margin: 1.2em 0; }
 .lai-markdown input[type=checkbox] { margin-right: .5em; }
+
+:root[data-reduce-motion="true"] *,
+:root[data-reduce-motion="true"] *::before,
+:root[data-reduce-motion="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}

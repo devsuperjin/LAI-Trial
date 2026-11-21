@@ -31,3 +31,5 @@ The Run DAG header provides an expand icon. `ExpandedView` moves a stable portal
 Child tool rows create a compact connected `ToolCallDetails` node inside the DAG on click. Receipts are matched by call ID, with pending/error/empty states and arguments before results. No extra fetch or out-of-canvas tooltip is used. Nested lists, outputs and messages own their wheel scrolling, even at boundaries; only canvas regions use wheel zoom.
 
 Selection controls share scoped `SelectionGroup` / `SelectionIndicator` animations across tabs, menus, filters and Run rows. `AnimatedDisclosure` animates execution environment expansion. Both respect reduced-motion preferences.
+
+Sidebar navigation shares the selection animation and animates plugin group expansion. Settings → General → Reduce motion persists in this browser, defaults to the system preference, and controls Motion and CSS effects application-wide.
