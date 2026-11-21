@@ -59,3 +59,5 @@ Settings → General displays application/plugin manifests captured at build tim
 Terminology is defined in the [glossary](glossary.md), also available in Settings → Glossary.
 
 In Runs → DAG, use the expand icon at the top right to open a larger modal view. Node expansion, selection, pan/zoom and live data remain available; close with the top-right icon or Escape to return to the inline view.
+
+Click a tool call inside an expanded DAG subagent card to create a compact, connected detail node in the canvas, with arguments first and the result afterward. It shares canvas pan/zoom rather than floating outside the graph. Hover alone does not open it; leaving the call/detail node closes it after a brief transition delay, or use Close/Escape. Tool lists, output blocks and messages scroll independently rather than zooming the canvas, including at scroll boundaries. The same behavior applies in the enlarged DAG modal.

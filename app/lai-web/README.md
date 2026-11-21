@@ -27,3 +27,5 @@ Settings → General shows application/DSH versions, build time, and every bundl
 Every update to this package, including docs, bumps its manifest version; rebuild to expose changed metadata. New plugins use dedicated branches and PR merge into main. Follow [AGENTS.md](../../AGENTS.md), including task-specific exclusions of tests and browser use.
 
 The Run DAG header provides an expand icon. `ExpandedView` moves a stable portal host into a native dialog, preserving DAG interaction state and the live child component instead of mounting a duplicate graph. Escape/Close restores the inline host.
+
+Child tool rows create a compact connected `ToolCallDetails` node inside the DAG on click. Receipts are matched by call ID, with pending/error/empty states and arguments before results. No extra fetch or out-of-canvas tooltip is used. Nested lists, outputs and messages own their wheel scrolling, even at boundaries; only canvas regions use wheel zoom.

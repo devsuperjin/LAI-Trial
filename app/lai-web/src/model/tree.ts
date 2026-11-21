@@ -11,12 +11,17 @@ export const formatTokens = (value: number): string => value >= 1e6 ? `${(value 
 export const formatDuration = (ms: number): string => ms >= 60000 ? `${(ms / 60000).toFixed(1)}m` : `${(ms / 1000).toFixed(1)}s`
 export interface Delegation { id: string; seq: number; stage: number; hue: string; toolName: string; name: string; description: string; settled: string | null; receiptError: string | null }
 export interface TreeChild { sessionId: string; delegation: Delegation | null; stage: number; hue: string; running: boolean }
-export interface ChildModel { label: string | null; preset: string | null; status: 'running' | 'completed' | 'failed'; tools: { name: string; isError: boolean; time: number; preview: string }[]; toolErrors: number; tokens: number | null; durationMs: number | null; model: string | null; finalText: string }
+export interface ChildModel { label: string | null; preset: string | null; status: 'running' | 'completed' | 'failed'; tools: { id: string; name: string; isError: boolean; time: number; preview: string; result: string; pending: boolean }[]; toolErrors: number; tokens: number | null; durationMs: number | null; model: string | null; finalText: string }
 export function summarizeChild(events: WireEvent[], entry: SessionListEntry): ChildModel {
   const dag = deriveDag(events)
+  const receipts = new Map(events.filter(event => event.type === 'tool/result').map(event => [String(record(event.data.message).toolCallId ?? event.data.toolCallId ?? ''), event]))
   const tools = events.filter(e => e.type === 'tool/call').map(e => {
-    const result = events.find(r => r.type === 'tool/result' && record(r.data.message).toolCallId === (e.data.callId ?? e.data.id))
-    return { name: String(e.data.name ?? 'tool'), time: e.time, preview: JSON.stringify(e.data.arguments ?? {}), isError: record(result?.data.message).isError === true }
+    const id = String(e.data.callId ?? e.data.id ?? e.seq)
+    const receipt = receipts.get(id)
+    const message = record(receipt?.data.message)
+    const error = receipt?.data.error
+    const result = textOf(message.content) || (typeof error === 'string' ? error : error != null ? JSON.stringify(error, null, 2) : '')
+    return { id, name: String(e.data.name ?? 'tool'), time: e.time, preview: JSON.stringify(e.data.arguments ?? {}, null, 2), result, pending: !receipt, isError: message.isError === true || error != null }
   })
   const values = entry.projections?.values
   const usage = values?.tokenUsage

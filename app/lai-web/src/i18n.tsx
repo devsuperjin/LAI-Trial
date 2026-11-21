@@ -4,6 +4,13 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Tool call details": "工具调用详情",
+  "Arguments": "调用参数",
+  "Tool result": "返回结果",
+  "Tool failed": "调用失败",
+  "Pending result": "等待返回",
+  "Waiting for tool result…": "正在等待工具返回…",
+  "Tool returned no text.": "工具未返回文本。",
   "Expand DAG": "放大 DAG",
   "Router": "路由",
   "Open Runs": "打开运行记录",

@@ -1,3 +1,4 @@
+import { ToolCallDetails } from './ToolCallDetails.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react'
@@ -121,6 +122,11 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
   const [childPages, setChildPages] = useState<Record<string, ChildPage | undefined>>({})
   const [expanded, setExpanded] = useState<Record<string, boolean | undefined>>({})
   const [selected, setSelected] = useState<string | null>(null)
+  const [inspected, setInspected] = useState<{ childKey: string; callId: string; offset: number } | null>(null)
+  const inspectionTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const keepInspection = () => clearTimeout(inspectionTimer.current)
+  const leaveInspection = () => { keepInspection(); inspectionTimer.current = setTimeout(() => setInspected(null), 220) }
+  useEffect(() => () => clearTimeout(inspectionTimer.current), [])
   const [view, setView] = useState({ x: 28, y: 28, scale: 1 })
   const [autoFit, setAutoFit] = useState(true)
   const [viewportSize, setViewportSize] = useState({ w: 0, h: 0 })
@@ -286,12 +292,17 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
           edges.push({ id: child.key, d: edgePath(ax, ay, cx, cy, controls.edges, vertical), hue: child.hue, active })
         }
       }
-      const width = vertical
+      const baseWidth = vertical
         ? Math.max(rootW, maxChildExtent) + geo.pad * 2
         : rootW + geo.gap + geo.childW + geo.pad * 2
-      const height = vertical
+      const baseHeight = vertical
         ? rootH + geo.gap + maxChildExtent + geo.pad * 2
         : Math.max(rootH, maxChildExtent) + geo.pad * 2
+      const detail = boxes['tool-detail']
+      const width = Math.max(baseWidth, detail ? detail.x + detail.w + geo.pad : 0)
+      const height = Math.max(baseHeight, detail ? detail.y + detail.h + geo.pad : 0)
+      const origin = inspected ? boxes[inspected.childKey] : undefined
+      if (detail && origin) edges.push({ id: 'tool-detail', d: edgePath(origin.x + origin.w, origin.y + Math.min(inspected!.offset + 10, origin.h), detail.x, detail.y + 16, controls.edges, false), hue: 'var(--color-fd-border)', active: false })
       const next: LayoutState = { tops, boxes, edges, width, height, rootHeight: rootH }
       setLayout(prev => JSON.stringify(prev) === JSON.stringify(next) ? prev : next)
     }
@@ -300,7 +311,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
     observer.observe(content)
     observer.observe(rootCol)
     return () => { observer.disconnect() }
-  }, [renderChildren, geo, vertical, controls.edges, controls.showTools, controls.showPreviews, expanded, childPages, measureTick, page])
+  }, [renderChildren, geo, vertical, controls.edges, controls.showTools, controls.showPreviews, expanded, childPages, measureTick, page, inspected])
 
   // Auto-fit keeps the whole tree inside the viewport: refit whenever the graph
   // or the viewport changes size, until the user pans or zooms manually.
@@ -359,6 +370,14 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
     const viewport = viewportRef.current
     if (viewport === null) return
     const onWheel = (event: WheelEvent): void => {
+      // Nested lists, output blocks and message panes own scrolling, even at their edges.
+      // Inspect the actual DOM chain: React portals are not children of this viewport.
+      let target = event.target instanceof Element ? event.target : null
+      while (target && target !== viewport) {
+        const style = getComputedStyle(target)
+        if (/(auto|scroll|overlay)/.test(`${style.overflowY} ${style.overflowX}`)) return
+        target = target.parentElement
+      }
       event.preventDefault()
       const rect = viewport.getBoundingClientRect()
       zoomBy(Math.exp(-event.deltaY * 0.0016), event.clientX - rect.left, event.clientY - rect.top)
@@ -432,6 +451,20 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
     // Until the child page lands, only a fetch failure is knowable; otherwise show live progress.
     return child.sessionId !== null && childPages[child.sessionId]?.state === 'error' ? 'failed' : 'running'
   }
+
+  const inspectedChild = inspected ? renderChildren.find(child => child.key === inspected.childKey) : undefined
+  const inspectedTool = inspectedChild?.sessionId ? models[inspectedChild.sessionId]?.tools.find(tool => tool.id === inspected?.callId) : undefined
+  const originBox = inspected ? layout.boxes[inspected.childKey] : undefined
+  const detailLeft = (originBox?.x ?? geo.pad + geo.rootW + geo.gap) + geo.childW + 20
+  const detailTop = Math.max(geo.pad, (originBox?.y ?? geo.pad) + (inspected?.offset ?? 0))
+  useLayoutEffect(() => {
+    const node = nodeRefs.current.get('tool-detail'), viewport = viewportRef.current
+    if (!inspected || !node || !viewport) return
+    const box = node.getBoundingClientRect(), bounds = viewport.getBoundingClientRect()
+    const dx = box.right > bounds.right - 12 ? bounds.right - 12 - box.right : box.left < bounds.left + 12 ? bounds.left + 12 - box.left : 0
+    const dy = box.bottom > bounds.bottom - 12 ? bounds.bottom - 12 - box.bottom : box.top < bounds.top + 12 ? bounds.top + 12 - box.top : 0
+    if (dx || dy) setView(current => ({ ...current, x: current.x + dx, y: current.y + dy }))
+  }, [inspected])
 
   return (
     <div className="flex h-full flex-col">
@@ -555,8 +588,8 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                     <div className="mt-2 space-y-2">
                       {step.tools.map(tool => <details key={tool.id} className="rounded border border-fd-border bg-fd-muted p-2" onToggle={() => setMeasureTick(tick => tick + 1)}>
                         <summary className={`cursor-pointer break-all font-mono text-[11px] ${tool.isError ? 'text-fd-danger' : 'text-fd-foreground'}`}>{tool.isError ? '✕' : '›'} {tool.name}</summary>
-                        <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-all text-[10px] text-fd-muted-foreground">{tool.preview}</pre>
-                        {tool.result && <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all text-[10px]">{tool.result}</pre>}
+                        <pre className="mt-2 max-h-40 overflow-auto overscroll-contain whitespace-pre-wrap break-all text-[10px] text-fd-muted-foreground">{tool.preview}</pre>
+                        {tool.result && <pre className="mt-2 max-h-48 overflow-auto overscroll-contain whitespace-pre-wrap break-all text-[10px]">{tool.result}</pre>}
                       </details>)}
                       {step.preview && <p className="whitespace-pre-wrap break-words leading-relaxed text-fd-muted-foreground">{step.preview}</p>}
                     </div>
@@ -652,21 +685,18 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                 {isExpanded && model !== undefined && (
                   <div className="border-t border-fd-border px-2.5 pb-2.5 pt-2">
                     {model.model !== null && <div className="mb-1.5 truncate font-mono text-[10px] text-fd-muted-foreground">{model.model}</div>}
-                    <div className="fd-scroll max-h-44 space-y-1 overflow-y-auto pr-1">
-                      {model.tools.map((tool, index) => (
-                        <div className="rounded-md bg-fd-muted px-2 py-1" key={`${tool.name}-${index}`}>
-                          <div className="flex items-center gap-1.5">
-                            <span className={`text-[10px] ${tool.isError ? 'text-fd-danger' : 'text-fd-success'}`}>{tool.isError ? '✕' : '✓'}</span>
-                            <span className="min-w-0 flex-1 truncate font-mono text-[11px]">{tool.name}</span>
-                            <span className="shrink-0 font-mono text-[9px] text-fd-muted-foreground">{formatTime(tool.time)}</span>
-                          </div>
-                          {controls.showPreviews && tool.preview !== '' && <div className="mt-0.5 line-clamp-1 pl-4 text-[10px] text-fd-muted-foreground">{tool.preview}</div>}
-                        </div>
-                      ))}
+                    <div className="fd-scroll max-h-44 space-y-1 overflow-y-auto overscroll-contain pr-1">
+                      {model.tools.map(tool => <button key={tool.id} type="button" aria-label={`${tool.name} · ${t('Tool call details')}`} aria-pressed={inspected?.childKey === child.key && inspected.callId === tool.id} onMouseEnter={keepInspection} onMouseLeave={leaveInspection} onClick={event => {
+                        keepInspection()
+                        if (inspected?.childKey === child.key && inspected.callId === tool.id) { setInspected(null); return }
+                        const box = nodeRefs.current.get(child.key)!.getBoundingClientRect()
+                        const offset = (event.currentTarget.getBoundingClientRect().top - box.top) / view.scale
+                        setAutoFit(false); setInspected({ childKey: child.key, callId: tool.id, offset })
+                      }} className={`flex w-full items-center gap-1.5 rounded-md bg-fd-muted px-2 py-1 text-left hover:bg-fd-secondary focus-visible:outline-2 focus-visible:outline-fd-primary ${inspected?.childKey === child.key && inspected.callId === tool.id ? 'ring-1 ring-fd-primary' : ''}`}><span className={`text-[10px] ${tool.pending ? 'text-fd-muted-foreground' : tool.isError ? 'text-fd-danger' : 'text-fd-success'}`}>{tool.pending ? '…' : tool.isError ? '✕' : '✓'}</span><span className="min-w-0 flex-1 truncate font-mono text-[11px]">{tool.name}</span><span className="shrink-0 font-mono text-[9px] text-fd-muted-foreground">{formatTime(tool.time)}</span></button>)}
                       {model.tools.length === 0 && <div className="py-1 text-xs text-fd-muted-foreground">{t("no tool calls yet")}</div>}
                     </div>
                     {model.finalText !== '' && (
-                      <div className="fd-scroll mt-2 max-h-36 overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2">
+                      <div className="fd-scroll mt-2 max-h-36 overflow-y-auto overscroll-contain rounded-md border border-fd-border bg-fd-muted p-2">
                         <div className="mb-1 text-[9px] uppercase tracking-wider text-fd-muted-foreground">{t("final message")}</div>
                         <p className="whitespace-pre-wrap text-xs leading-relaxed">{model.finalText}</p>
                       </div>
@@ -681,6 +711,8 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
               </div>
             )
           })}
+
+          {inspected && inspectedTool && expanded[inspected.childKey] && <section data-node ref={registerNode('tool-detail')} aria-label={t('Tool call details')} onMouseEnter={keepInspection} onMouseLeave={leaveInspection} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setInspected(null) } }} className="fd-node absolute overflow-hidden rounded-lg border border-fd-primary/40 bg-fd-card shadow-sm" style={{ left: detailLeft, top: detailTop, width: geo.childW + 40 }}><ToolCallDetails tool={inspectedTool} onClose={() => { keepInspection(); setInspected(null) }} /></section>}
 
           {renderChildren.length === 0 && tree.delegations.length === 0 && (
             <div
