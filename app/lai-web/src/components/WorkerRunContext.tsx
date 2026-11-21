@@ -1,3 +1,4 @@
+import { AnimatedDisclosure } from './AnimatedDisclosure.tsx'
 import { useCallback, useEffect, useState } from 'react'
 import { routerReasonText, superagentWorkerDetails } from '@lai/dsh-adapter/superagent'
 import type { WorkerTicketDetails } from '@lai/dsh-adapter/superagent'
@@ -32,8 +33,8 @@ export function WorkerRunContext({ runId }: { runId: string }) {
     <h3 className="mb-3 text-sm font-semibold">{t('Authorization details')}</h3>
     <dl className="grid grid-cols-[6rem_minmax(0,1fr)] gap-x-4 gap-y-1.5">{rows.map(([label, value], index) => <div key={index} className="contents"><dt className="text-fd-muted-foreground">{label}</dt><dd className="whitespace-pre-wrap break-words">{value}</dd></div>)}</dl>
     {data.decision?.rules?.map(rule => <p key={rule.id} className="mt-2 text-fd-muted-foreground">{rule.matched ? '✓' : '○'} {rule.name} · {rule.reason}</p>)}
-    <details className="mt-4 border-t border-fd-border pt-3"><summary className="cursor-pointer text-sm font-semibold">{t('Execution environment')}</summary><div className="mt-2">
+    <AnimatedDisclosure title={t('Execution environment')} className="mt-4 border-t border-fd-border pt-3">
     {data.environment.length === 0 ? <p className="text-fd-muted-foreground">{t('Execution environment unavailable.')}</p> : <div className="divide-y divide-fd-border">{data.environment.map(variable => <div key={`${variable.owner}:${variable.key}`} className="grid min-w-0 gap-x-4 gap-y-1 py-2 sm:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]"><div className="min-w-0"><code className="break-all text-[11px] font-medium">{variable.key}</code><span className="ml-2 text-[10px] text-fd-muted-foreground">{variable.owner}</span></div><div className="min-w-0"><p className="whitespace-pre-wrap break-all font-mono text-xs">{variable.value || '—'}</p><p className="mt-0.5 text-[11px] leading-4 text-fd-muted-foreground">{variable.description[language] ?? variable.description.en}</p></div></div>)}</div>}
-    </div></details>
+    </AnimatedDisclosure>
   </div>
 }

@@ -1,3 +1,4 @@
+import { SelectionGroup, SelectionIndicator } from '../components/SelectionMotion.tsx'
 import type { ReactNode } from 'react'
 import { PAGES, type Page } from '../router/routes.tsx'
 import { useLanguage } from '../i18n.tsx'
@@ -21,7 +22,7 @@ export function PageLayout({ page, children }: { page: Page; children: ReactNode
 
 export function PageTabs<T extends string>({ id, label, items, value, onChange }: { id: string; label: string; items: readonly { id: T; name: string }[]; value: T; onChange: (value: T) => void }) {
   const { t } = useLanguage()
-  return <div role="tablist" aria-label={t(label)} className="flex flex-wrap gap-1 border-b border-fd-border pb-2">{items.map(item => <button key={item.id} id={`${id}-tab-${item.id}`} type="button" role="tab" aria-selected={value === item.id} aria-controls={`${id}-panel-${item.id}`} onClick={() => onChange(item.id)} className={`rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary ${value === item.id ? 'bg-fd-secondary font-medium' : 'text-fd-muted-foreground hover:bg-fd-secondary/50'}`}>{t(item.name)}</button>)}</div>
+  return <SelectionGroup><div role="tablist" aria-label={t(label)} className="flex flex-wrap gap-1 border-b border-fd-border pb-2">{items.map(item => <button key={item.id} id={`${id}-tab-${item.id}`} type="button" role="tab" aria-selected={value === item.id} aria-controls={`${id}-panel-${item.id}`} onClick={() => onChange(item.id)} className={`relative isolate rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary ${value === item.id ? 'font-medium' : 'text-fd-muted-foreground hover:bg-fd-secondary/50'}`}>{value === item.id && <SelectionIndicator />}<span className="relative">{t(item.name)}</span></button>)}</div></SelectionGroup>
 }
 
 export function RefreshAction({ onRefresh, busy = false }: { onRefresh: () => void; busy?: boolean }) {
