@@ -220,3 +220,16 @@ body {
   transition: none !important;
   scroll-behavior: auto !important;
 }
+
+/* Run rows respond to their pane width, independently of the viewport. */
+.run-list { container: run-list / inline-size; }
+@container run-list (max-width: 440px) {
+  .run-list-time { display: none; }
+}
+@container run-list (max-width: 320px) {
+  .run-list-status, .run-list-chevron { display: none; }
+}
+@container run-list (max-width: 270px) {
+  .run-list-filters { display: none; }
+  .run-list-compact-filter { display: flex; }
+}

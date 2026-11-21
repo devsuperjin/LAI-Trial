@@ -1,3 +1,4 @@
+import { ResizableSplitView } from '../layout/ResizableSplitView.tsx'
 import { PageHeader } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useEffect, useState } from 'react'
@@ -55,9 +56,8 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
   return (
     <>
     <PageHeader page="runs" />
-    <div className="relative flex min-h-0 flex-1 flex-col gap-4 md:flex-row lg:gap-5">
-      <TaskList workersOnly={workersOnly} onToggleWorkers={() => setWorkersOnly(current => !current)} entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />
-      <section aria-label={t("Run details")} className={`min-h-0 min-w-0 flex-1 ${selectedId?.startsWith('worker-') ? 'fd-scroll overflow-y-auto' : 'overflow-hidden rounded-xl border border-fd-border bg-fd-card'}`}>
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <ResizableSplitView storageKey="lai-runs-split-ratio" left={<TaskList workersOnly={workersOnly} onToggleWorkers={() => setWorkersOnly(current => !current)} entries={taskEntries} onSelect={setSelectedId} selectedId={selectedId} />} right={<section aria-label={t("Run details")} className={`min-h-0 min-w-0 flex-1 ${selectedId?.startsWith('worker-') ? 'fd-scroll overflow-y-auto' : 'overflow-hidden rounded-xl border border-fd-border bg-fd-card'}`}>
         {selectedId === null ? (
           <div className="flex h-full flex-col items-center justify-center gap-2 text-fd-muted-foreground">
             <svg aria-hidden className="opacity-40" fill="none" height="40" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" viewBox="0 0 24 24" width="40">
@@ -75,7 +75,7 @@ export function RunsPage(props: { entries: SessionListEntry[]; focusRunId: strin
             sessionId={selectedId}
           />
         )}
-      </section>
+      </section>} />
       {(undoId || error) && <div role="status" className="absolute bottom-4 right-4 z-20 flex max-w-sm items-center gap-4 rounded-lg border border-fd-border bg-fd-card px-4 py-3 text-sm shadow-lg">
         <span className={error ? 'text-fd-danger' : ''}>{error ?? t('Run removed.')}</span>
         {undoId && <button type="button" disabled={deleting} className="font-medium text-fd-primary disabled:opacity-50" onClick={() => { void undo() }}>{t('Undo')}</button>}

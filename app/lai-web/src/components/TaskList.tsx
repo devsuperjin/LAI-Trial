@@ -14,11 +14,10 @@ function statusOf(entry: SessionListEntry): TaskStatus {
   return 'done'
 }
 
-const STATUS_DOT: Record<TaskStatus, string> = {
-  running: 'bg-fd-primary',
-  queued: 'bg-fd-muted-foreground',
-  done: 'bg-fd-success',
+const STATUS_COLOR: Record<TaskStatus, string> = {
+  running: 'text-fd-primary', queued: 'text-fd-muted-foreground', done: 'text-fd-success',
 }
+const STATUS_LABEL: Record<TaskStatus, string> = { running: 'Running', queued: 'Queued', done: 'Completed' }
 
 const FILTERS = ['All', 'Running', 'Completed'] as const
 type Filter = (typeof FILTERS)[number]
@@ -46,12 +45,13 @@ export function TaskList(props: {
   const visible = props.entries.filter(entry => matches(filter, statusOf(entry)))
 
   return (
-    <aside aria-label={t("Runs list")} className="flex max-h-48 w-full shrink-0 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card md:max-h-none md:w-72 xl:w-80">
-      <SelectionGroup><div className="flex items-center gap-1 px-3 pt-3">
+    <aside aria-label={t("Runs list")} className="run-list flex max-h-48 w-full min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-fd-border bg-fd-card md:max-h-none">
+      <div className="run-list-compact-filter hidden items-center gap-2 px-2 pt-2"><select aria-label={t('Run status filter')} value={filter} onChange={event => setFilter(event.target.value as Filter)} className="min-w-0 flex-1 rounded-md border border-fd-border bg-fd-card px-2 py-1.5 text-xs">{FILTERS.map(candidate => <option key={candidate} value={candidate}>{t(candidate)}</option>)}</select>{props.onToggleWorkers && <button type="button" aria-label={t('Worker runs only')} aria-pressed={props.workersOnly} onClick={props.onToggleWorkers} className={`rounded-md p-1.5 ${props.workersOnly ? 'bg-fd-primary/10 text-fd-primary' : 'text-fd-muted-foreground'}`}><svg aria-hidden width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 4h18l-7 8v7l-4 2v-9Z" /></svg></button>}</div>
+      <SelectionGroup><div className="run-list-filters flex items-center gap-1 px-3 pt-3">
         {FILTERS.map(candidate => (
           <button
             aria-pressed={filter === candidate}
-            className={`relative isolate rounded-md px-2.5 py-1 text-xs transition-colors ${filter === candidate ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
+            className={`relative isolate rounded-md px-2 py-1.5 text-xs transition-colors ${filter === candidate ? 'text-fd-foreground' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}
             key={candidate}
             onClick={() =>{  setFilter(candidate) }}
             type="button"
@@ -67,11 +67,10 @@ export function TaskList(props: {
           {visible.map((entry) => {
             const status = statusOf(entry)
             const title = readableRunTitle(entry.projections?.values.title, entry.sessionId)
-            const tokens = entry.projections?.values.tokenUsage
             return (
               <motion.button
                 animate={{ opacity: 1, y: 0 }}
-                className={`relative isolate mb-1 block w-full rounded-lg border border-transparent px-3 py-2 text-left transition-colors ${props.selectedId === entry.sessionId ? '' : 'hover:bg-fd-secondary/50'}`}
+                className={`relative isolate mb-2 block w-full rounded-lg border border-fd-border px-3 py-3 text-left transition-colors ${props.selectedId === entry.sessionId ? '' : 'hover:bg-fd-secondary/50'}`}
                 exit={{ opacity: 0 }}
                 initial={reduced ? false : { opacity: 0, y: 4 }}
                 key={entry.sessionId}
@@ -81,17 +80,15 @@ export function TaskList(props: {
                 onClick={() =>{  props.onSelect(entry.sessionId) }}
                 type="button"
               >
-                {props.selectedId === entry.sessionId && <SelectionIndicator className="rounded-lg border border-fd-primary/40 bg-fd-secondary" />}
-                <div className="relative flex items-center gap-2">
-                  <span className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT[status]} ${status === 'running' ? 'animate-pulse motion-reduce:animate-none' : ''}`} />
-                  <span className="min-w-0 flex-1 truncate text-sm">{title}</span>
-                  <span className="shrink-0 text-xs text-fd-muted-foreground">{formatTime(entry.updatedAt)}</span>
-                </div>
-                <div className="relative mt-1 flex items-center gap-2 pl-4 text-xs text-fd-muted-foreground">
-                  <span className="truncate font-mono">{entry.sessionId}</span>
-                  {tokens !== undefined && (
-                    <span className="shrink-0">{(tokens.outputTokens + tokens.cacheReadTokens + tokens.cacheWriteTokens + tokens.uncachedInputTokens).toLocaleString()}{t(" tok")}</span>
-                  )}
+                {props.selectedId === entry.sessionId && <SelectionIndicator className="rounded-lg ring-1 ring-fd-primary/60 bg-fd-primary/5" />}
+                <div className="relative flex min-w-0 items-center gap-2.5">
+                  <svg aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={`shrink-0 ${STATUS_COLOR[status]} ${status === 'running' ? 'animate-spin motion-reduce:animate-none' : ''}`}>
+                    {status === 'running' ? <path d="M21 12a9 9 0 1 1-9-9" /> : <><circle cx="12" cy="12" r="9" />{status === 'done' ? <path d="m8 12 3 3 5-6" /> : <path d="M12 7v5l3 2" />}</>}
+                  </svg>
+                  <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{title}</p><p className="mt-1 truncate text-xs text-fd-muted-foreground">{entry.sessionId}</p></div>
+                  <time className="run-list-time shrink-0 text-xs tabular-nums text-fd-muted-foreground">{formatTime(entry.updatedAt)}</time>
+                  <span className={`run-list-status shrink-0 rounded-full px-2 py-0.5 text-xs ${STATUS_COLOR[status]} ${status === 'done' ? 'bg-fd-success/10' : status === 'running' ? 'bg-fd-primary/10' : 'bg-fd-secondary'}`}>{t(STATUS_LABEL[status])}</span>
+                  <svg aria-hidden width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="run-list-chevron shrink-0 text-fd-muted-foreground"><path d="m9 5 7 7-7 7" /></svg>
                 </div>
               </motion.button>
             )

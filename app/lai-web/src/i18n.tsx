@@ -4,6 +4,8 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Resize run panels": "调整运行记录左右面板宽度",
+  "Run status filter": "运行状态筛选",
   "No matching plugins.": "没有匹配的插件。",
   "Appearance, versions, models and plugin management": "外观、版本、模型配置与插件管理",
   "Plugins": "插件",
