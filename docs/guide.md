@@ -63,3 +63,9 @@ In Runs → DAG, use the expand icon at the top right to open a larger modal vie
 Click a tool call inside an expanded DAG subagent card to create a compact, connected detail node in the canvas, with arguments first and the result afterward. It shares canvas pan/zoom rather than floating outside the graph. Hover alone does not open it; leaving the call/detail node closes it after a brief transition delay, or use Close/Escape. Tool lists, output blocks and messages scroll independently rather than zooming the canvas, including at scroll boundaries. The same behavior applies in the enlarged DAG modal.
 
 The source card, transparent gap bridge and detail node form one hover region, so crossing the gap does not close the result.
+
+## Plugin management
+
+Open **Settings → Plugins** to configure DSH plugin settings, inspect running entries, enable or disable plugins and manage installed Bundles in the current Profile. These are live DSH records, distinct from the build-version list under General. Settings forms save only edited paths with the namespace revision; blank password/token fields preserve existing secrets.
+
+Choose **Add plugin**, enter an npm package (optionally with an exact version), Git repository spec or a path on the server, then install. Installation uses DSH's existing plugin manager, registry configuration and compatibility checks. The modal shows the final output, exit code and failure details; cancellation is available while installing. Build scripts needing approval remain blocked and must be approved in the original DSH UI. A restart-required result means the change is saved but needs an application restart. Removing a removable Bundle requires a second confirmation; managed/read-only entries remain protected by DSH.

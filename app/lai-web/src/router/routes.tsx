@@ -88,7 +88,7 @@ export const ROUTES: readonly RouteDefinition[] = [
   { id: 'lai-agents', path: '/plugins/lai-agents', name: 'LAI Agents', hint: 'A Superagent Worker orchestrator with five specialist subagents. Monitor / Router prompts are configured in Plugin → Superagent. Prompts are stored in the independent lai-agents plugin.', icon: pluginIcon, order: 20, group: plugins, component: LaiAgentsPage },
   { id: 'feishu-tools', path: '/plugins/feishu-tools', name: 'Feishu tools', hint: 'Configure credentials for the standalone Feishu tool plugin. Select tools per role in LAI Agents; Superagent incoming Feishu sources are configured separately.', icon: pluginIcon, order: 30, group: plugins, component: FeishuToolsPage },
   { id: 'credentials', path: '/plugins/credentials', name: 'Credentials', hint: 'credentials_list lists authorized credential names; credentials_get retrieves plaintext by name. Configure credential authorization separately from agent tool selection.', icon: pluginIcon, order: 40, group: plugins, component: CredentialsPage },
-  { ...primary('settings'), id: 'settings', path: '/settings', name: 'Settings', hint: 'Appearance, versions and model configuration', order: 50, placement: 'footer', component: SettingsPage },
+  { ...primary('settings'), id: 'settings', path: '/settings', name: 'Settings', hint: 'Appearance, versions, models and plugin management', order: 50, placement: 'footer', component: SettingsPage },
 ]
 export const PAGES = Object.fromEntries(ROUTES.map(route => [route.id, route])) as Record<Page, RouteDefinition>
 const visible = ROUTES.filter(route => !route.hideInMenu).sort((a, b) => a.order - b.order)

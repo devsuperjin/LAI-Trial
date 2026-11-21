@@ -1,7 +1,7 @@
 {
   "name": "@lai/lai-web",
   "description": "LAI Web: independent frontend for LAI pipeline monitoring, dashboards, delegation graphs and model settings",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "type": "module",
   "exports": {
     "./dist/*": "./dist/*",

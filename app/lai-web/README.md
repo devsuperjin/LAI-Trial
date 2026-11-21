@@ -37,3 +37,5 @@ Sidebar navigation shares the selection animation and animates plugin group expa
 Boolean switches in General settings and Superagent sources share the accessible `Switch` widget, with primary-color checked state, keyboard focus and disabled state.
 
 General settings fill the available content width and use the shared responsive `SettingsRow` layout: descriptions on the left, aligned controls on the right, with stacked rows on small screens. Theme choices use the shared animated selection control.
+
+Settings → Plugins reads live DSH plugin/Bundle inventory and configuration namespaces. It provides schema/value-based field editing with minimal revision-checked writes, optional Bundle switches, runtime entry switches, npm/Git/local installation with cancellation and final logs, and confirmed removal. DSH enforces read-only controls, compatibility and build-script permissions. This frontend does not install anything until a person submits the installation form.

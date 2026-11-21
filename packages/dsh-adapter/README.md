@@ -13,3 +13,5 @@ The `./superagent` export owns the authenticated same-origin Superagent manageme
 The `./credentials` browser export owns authenticated human configured-state and explicit reveal calls to the Credentials plugin. It is distinct from DSH model-provider credential RPC and from agent-facing `credentials_list/get/update` tools. Ordinary settings reads remain redacted; human reveal is explicit and same-origin.
 
 Keep browser protocol work here, page implementations in `app/lai-web/src/pages` and shared UI in its `layout`/`components` directories. Every update to this component, including docs, bumps its manifest version. New plugins use dedicated branches and PR merge; see [AGENTS.md](../../AGENTS.md).
+
+The gateway also adapts DSH's public `pluginManager` inventory, Bundle installation/cancellation/removal and enablement methods. Management uses the current authenticated Profile; settings editors consume schema metadata and submit revision-checked path mutations. No plugin code is copied into the frontend.

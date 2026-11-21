@@ -1,3 +1,4 @@
+import { PluginSettingsPage } from './PluginSettingsPage.tsx'
 import { GlossaryPage } from './GlossaryPage.tsx'
 import { PageHeader, PageTabs } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
@@ -201,12 +202,13 @@ function ModelConfiguration() {
 
 
 export function SettingsPage() {
-  const [section, setSection] = useState<'general' | 'models' | 'glossary'>('general')
+  const [section, setSection] = useState<'general' | 'models' | 'plugins' | 'glossary'>('general')
   return <div className="space-y-5">
     <PageHeader page="settings" />
-    <PageTabs id="settings" label="Settings sections" items={[{ id: 'general', name: 'General' }, { id: 'models', name: 'Model configuration' }, { id: 'glossary', name: 'Glossary' }]} value={section} onChange={setSection} />
+    <PageTabs id="settings" label="Settings sections" items={[{ id: 'general', name: 'General' }, { id: 'models', name: 'Model configuration' }, { id: 'plugins', name: 'Plugins' }, { id: 'glossary', name: 'Glossary' }]} value={section} onChange={setSection} />
     <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={section !== 'general'}><GeneralSettings /></div>
     <div role="tabpanel" id="settings-panel-models" aria-labelledby="settings-tab-models" hidden={section !== 'models'}><ModelConfiguration /></div>
+    <div role="tabpanel" id="settings-panel-plugins" aria-labelledby="settings-tab-plugins" hidden={section !== 'plugins'}><PluginSettingsPage active={section === 'plugins'} /></div>
     <div role="tabpanel" id="settings-panel-glossary" aria-labelledby="settings-tab-glossary" hidden={section !== 'glossary'}><GlossaryPage /></div>
   </div>
 }

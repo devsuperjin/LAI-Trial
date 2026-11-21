@@ -196,6 +196,7 @@ export function readAgentPreset(agentPreset: string): Promise<AgentPresetDocumen
 }
 
 export interface SettingsNamespaceView {
+  schema?: unknown
   secrets?: { path: string[]; set: boolean }[]
   ns: string
   autoGenerate: boolean
@@ -271,3 +272,52 @@ export function archiveRun(sessionId: string): Promise<{ archivedSessionIds: str
 export function restoreRun(sessionId: string): Promise<{ archivedSessionIds: string[] }> {
   return rpc('workspace/unarchiveSession', { request: { sessionId } })
 }
+
+/** DSH 0.2.2 public pluginManager RPC records; keep browser protocol details here. */
+export interface PluginMeta {
+  title?: string | Record<string, string>
+  description?: string | Record<string, string>
+  icon?: string
+}
+export interface ManagedPlugin {
+  entryId: string
+  moduleName: string
+  meta?: PluginMeta
+  enabled: boolean
+  fiberPhase: string | null
+  diagnostic?: string
+  patchId?: string
+  readOnlyReason?: string
+}
+export interface ManagedBundle {
+  name: string
+  version?: string
+  description?: string
+  meta?: PluginMeta
+  enabled: boolean
+  installed: boolean
+  optional: boolean
+  official: boolean
+  removable: boolean
+  availability: 'installation' | 'profile' | 'missing'
+  installTarget?: { spec: string; version: string }
+  readOnlyReason?: string
+  error?: { code: string; diagnostic?: string }
+}
+export interface PluginChange {
+  changed: boolean
+  application: 'applied' | 'restart-required' | 'overridden' | 'failed' | 'cancelled'
+  stage: 'install' | 'enable' | 'remove'
+  target: string
+  error?: { code: string; diagnostic?: string }
+  warnings?: string[]
+  packageResult?: { exitCode: number; output: string; truncated: boolean; logPath: string; kind?: string }
+  pendingBuilds?: string[]
+}
+export const listManagedPlugins = () => rpc<ManagedPlugin[]>('pluginManager/listPlugins', {})
+export const listManagedBundles = () => rpc<ManagedBundle[]>('pluginManager/listBundles', {})
+export const setPluginEnabled = (id: string, enabled: boolean) => rpc<PluginChange>('pluginManager/setPluginEnabled', { id, enabled })
+export const setBundleEnabled = (name: string, enabled: boolean) => rpc<PluginChange>('pluginManager/setBundleEnabled', { name, enabled })
+export const installPluginBundle = (spec: string, requestId: string) => rpc<PluginChange>('pluginManager/installBundle', { spec, options: { enabled: true, saveExact: true, requestId } })
+export const cancelPluginInstall = (requestId: string) => rpc<{ status: string }>('pluginManager/cancelInstall', { requestId })
+export const removePluginBundle = (name: string) => rpc<PluginChange>('pluginManager/removeBundle', { name })
