@@ -4,13 +4,13 @@ This is the developer guide to the implementation. It maps the concepts in [001 
 
 ## LAI application composition
 
-This is an implementation reference for the imported business plugin, not a competing overview diagram. The current application overview is maintained in the root [README](../../../README.md) and [design](../../../docs/design.md): Sources → `Superagent Router(Monitor)` → one LAI Orchestrator group containing five ordered child agents.
+This is an implementation reference for the imported business plugin, not a competing overview diagram. The current application overview is maintained in the repository-root `README.md` and `docs/design.md`: Sources → `Superagent Router(Monitor)` → one LAI Orchestrator group containing five ordered child agents.
 
 Superagent Router(Monitor) ownership includes Intake, deterministic scope/admission rules, main-session assessment and routing. Not every input invokes a model. `MasterAssessor` delivers candidates to the Superagent Router(Monitor) main session; Engine/Policy validate and apply outcomes. `src/app/lai-worker.ts` enforces real native-child completion and stops later stages on failure/cancellation. LAI Orchestrator progress is scoped to each Assignment, not all historical child runs.
 
 `@lai/lai-agents` owns presets, tool snapshots, specialist model overrides and the short Skill discovery hint. `@lai/credentials/skill` registers credential instructions in specialist preset scopes; live credential grants and update permissions stay in the Credentials plugin. UI routing/layout is owned by `app/lai-web/src/router`, `layout` and `pages`, not this plugin's domain Engine.
 
-New plugins require their own branch and PR merge into main. Every changed component, including documentation changes, bumps its own manifest version. See [AGENTS.md](../../../AGENTS.md).
+New plugins require their own branch and PR merge into main. Every changed component, including documentation changes, bumps its own manifest version. See the repository-root `AGENTS.md`; application documentation links are collected in the plugin README.
 
 ## Core classes and glue
 
