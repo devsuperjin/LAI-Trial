@@ -1,3 +1,4 @@
+import { Switch } from './Switch.tsx'
 import { APPLICATION_NAME, WEB_COMPONENT_NAME } from '../brand.ts'
 import { PagePanel } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
@@ -13,7 +14,7 @@ export function GeneralSettings() {
       <div className="mt-5 space-y-5">
         <div><span id="appearance-theme-label" className="block text-sm font-medium">{t('Theme')}</span><div role="group" aria-labelledby="appearance-theme-label" className="mt-2 flex flex-wrap gap-2">{(['light', 'dark', 'system'] as const).map(value => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value as ThemeMode)} className={`rounded-lg border px-4 py-2 text-sm transition-colors ${mode === value ? 'border-fd-primary bg-fd-primary/10 font-medium text-fd-primary' : 'border-fd-border hover:bg-fd-secondary'}`}>{t(value === 'light' ? 'Light' : value === 'dark' ? 'Dark' : 'System')}</button>)}</div></div>
         <label className="block max-w-xs text-sm font-medium">{t('Language')}<select aria-label={t('Interface language')} value={language} onChange={event => setLanguage(event.target.value === 'zh' ? 'zh' : 'en')} className="mt-2 w-full rounded-md border border-fd-border bg-fd-muted px-3 py-2 text-sm"><option value="en">English</option><option value="zh">简体中文</option></select></label>
-        <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={reduceMotion} onChange={event => setReduceMotion(event.target.checked)} />{t('Reduce motion')}</label>
+        <div className="flex max-w-xs items-center justify-between gap-4"><span className="text-sm font-medium">{t('Reduce motion')}</span><Switch checked={reduceMotion} onChange={setReduceMotion} label={t('Reduce motion')} /></div>
       </div>
     </PagePanel>
     <PagePanel title={t('Version information')}>

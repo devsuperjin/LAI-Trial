@@ -1,3 +1,4 @@
+import { Switch as Toggle } from '../components/Switch.tsx'
 import { SelectionGroup, SelectionIndicator } from '../components/SelectionMotion.tsx'
 import { PageHeader, PagePanel, RefreshAction } from '../layout/PageLayout.tsx'
 import { SuperagentPromptEditor } from '../components/SuperagentPromptEditor.tsx'
@@ -9,9 +10,6 @@ import { useLanguage } from '../i18n.tsx'
 const input = 'w-full rounded-lg border border-fd-border bg-fd-background px-3 py-3 text-sm outline-none focus:border-fd-primary'
 const button = 'rounded-md border border-fd-border bg-fd-secondary px-3 py-2 text-sm disabled:opacity-40'
 
-function Toggle({ checked, disabled, onChange, label }: { checked: boolean; disabled?: boolean; onChange: (next: boolean) => void; label: string }) {
-  return <button type="button" role="switch" aria-checked={checked} aria-label={label} disabled={disabled} onClick={() => onChange(!checked)} className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-40 ${checked ? 'bg-fd-foreground' : 'bg-fd-muted-foreground/30'}`}><span className={`absolute top-0.5 h-5 w-5 rounded-full bg-fd-card shadow-sm transition-transform ${checked ? 'left-0.5 translate-x-5' : 'left-0.5'}`} /></button>
-}
 
 function JsonBlock({ title, block, save }: { title: string; block: ConfigBlock; save: (value: Record<string, unknown>) => Promise<void> }) {
   const { t } = useLanguage()
