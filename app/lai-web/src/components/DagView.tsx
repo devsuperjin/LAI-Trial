@@ -615,6 +615,8 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                 className="fd-node absolute rounded-lg border bg-fd-card transition-opacity duration-150"
                 data-node
                 key={child.key}
+                onMouseEnter={() => { if (inspected?.childKey === child.key) keepInspection() }}
+                onMouseLeave={() => { if (inspected?.childKey === child.key) leaveInspection() }}
                 ref={registerNode(child.key)}
                 style={{
                   borderColor: selected === child.key ? child.hue : `color-mix(in srgb, ${child.hue} 33%, transparent)`,
@@ -686,7 +688,7 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
                   <div className="border-t border-fd-border px-2.5 pb-2.5 pt-2">
                     {model.model !== null && <div className="mb-1.5 truncate font-mono text-[10px] text-fd-muted-foreground">{model.model}</div>}
                     <div className="fd-scroll max-h-44 space-y-1 overflow-y-auto overscroll-contain pr-1">
-                      {model.tools.map(tool => <button key={tool.id} type="button" aria-label={`${tool.name} · ${t('Tool call details')}`} aria-pressed={inspected?.childKey === child.key && inspected.callId === tool.id} onMouseEnter={keepInspection} onMouseLeave={leaveInspection} onClick={event => {
+                      {model.tools.map(tool => <button key={tool.id} type="button" aria-label={`${tool.name} · ${t('Tool call details')}`} aria-pressed={inspected?.childKey === child.key && inspected.callId === tool.id} onMouseEnter={keepInspection} onClick={event => {
                         keepInspection()
                         if (inspected?.childKey === child.key && inspected.callId === tool.id) { setInspected(null); return }
                         const box = nodeRefs.current.get(child.key)!.getBoundingClientRect()
@@ -712,7 +714,10 @@ export function DagView(props: { page: PageResponse; sessionId: string; running:
             )
           })}
 
-          {inspected && inspectedTool && expanded[inspected.childKey] && <section data-node ref={registerNode('tool-detail')} aria-label={t('Tool call details')} onMouseEnter={keepInspection} onMouseLeave={leaveInspection} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setInspected(null) } }} className="fd-node absolute overflow-hidden rounded-lg border border-fd-primary/40 bg-fd-card shadow-sm" style={{ left: detailLeft, top: detailTop, width: geo.childW + 40 }}><ToolCallDetails tool={inspectedTool} onClose={() => { keepInspection(); setInspected(null) }} /></section>}
+          {inspected && inspectedTool && expanded[inspected.childKey] && <div data-node onMouseEnter={keepInspection} onMouseLeave={leaveInspection} className="absolute pl-5" style={{ left: detailLeft - 20, top: detailTop, width: geo.childW + 60 }}>
+            {/* Transparent padding bridges the full gap without covering the source card's scrollbar. */}
+            <section data-node ref={registerNode('tool-detail')} aria-label={t('Tool call details')} onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); setInspected(null) } }} className="fd-node overflow-hidden rounded-lg border border-fd-primary/40 bg-fd-card shadow-sm"><ToolCallDetails tool={inspectedTool} onClose={() => { keepInspection(); setInspected(null) }} /></section>
+          </div>}
 
           {renderChildren.length === 0 && tree.delegations.length === 0 && (
             <div
