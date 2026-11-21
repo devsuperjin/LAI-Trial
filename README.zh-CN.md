@@ -150,6 +150,12 @@ LAI-Trial/
 
 ## 项目截图
 
+### Dashboard 概览
+
+集中查看来源健康状态、任务指标、Superagent Router(Monitor) 用量与 LAI Orchestrator 五阶段执行情况。
+
+![LAI Superagent 概览页面](docs/images/dashboard.png)
+
 ### Superagent Router(Monitor) 自动判断
 
 路由与准入判断是 Superagent 的原生能力，LAI 为其提供独立的 Superagent Router(Monitor) 展示页面。系统根据发送者授权、策略与评估配置，判断收到的事件是否需要接单、续做、停止或忽略；受理后可直接打开对应的 Runs。

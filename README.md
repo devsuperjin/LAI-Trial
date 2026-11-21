@@ -150,6 +150,12 @@ LAI-Trial/
 
 ## Screenshots
 
+### Dashboard
+
+Source health, task metrics, Superagent Router(Monitor) usage and the five-stage LAI Orchestrator activity at a glance.
+
+![LAI Superagent Dashboard](docs/images/dashboard.png)
+
 ### Superagent Router(Monitor) evaluation
 
 Routing and admission are native Superagent capabilities. LAI provides a dedicated Superagent Router(Monitor) page to show how incoming events are assessed against sender authorization, policy and evaluation settings to decide whether to accept, continue, stop or ignore work. Accepted work can be opened directly in Runs.
