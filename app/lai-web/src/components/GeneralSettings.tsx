@@ -1,4 +1,4 @@
-import { APPLICATION_NAME } from '../brand.ts'
+import { APPLICATION_NAME, WEB_COMPONENT_NAME } from '../brand.ts'
 import { PagePanel } from '../layout/PageLayout.tsx'
 import { useLanguage } from '../i18n.tsx'
 import { useAppearance } from '../appearance.tsx'
@@ -17,7 +17,7 @@ export function GeneralSettings() {
     </PagePanel>
     <PagePanel title={t('Version information')}>
       <dl className="divide-y divide-fd-border text-sm">{[
-        [APPLICATION_NAME, `v${__LAI_BUILD__.version}`], [`${APPLICATION_NAME} Web`, `v${__LAI_BUILD__.webVersion}`], ['DeepSeek Harness', __LAI_BUILD__.dshVersion], [t('Built at'), new Date(__LAI_BUILD__.builtAt).toLocaleString()],
+        [APPLICATION_NAME, `v${__LAI_BUILD__.version}`], [WEB_COMPONENT_NAME, `v${__LAI_BUILD__.webVersion}`], ['DeepSeek Harness', __LAI_BUILD__.dshVersion], [t('Built at'), new Date(__LAI_BUILD__.builtAt).toLocaleString()],
       ].map(([label, value]) => <div key={label} className="flex flex-wrap items-center justify-between gap-2 py-3"><dt className="text-fd-muted-foreground">{label}</dt><dd className="font-mono text-xs">{value}</dd></div>)}</dl>
       <div className="mt-5 border-t border-fd-border pt-4">
         <h3 className="text-sm font-medium">{t('Bundled plugins')}</h3>

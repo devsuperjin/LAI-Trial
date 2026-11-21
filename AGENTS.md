@@ -44,3 +44,5 @@ This is an independent DSH application repository. Read `docs/architecture.md` a
 - Keep screenshots near the end of README, immediately before Documentation. Keep English/Chinese guides and overview diagrams synchronized.
 
 - The user-facing application name is `LAI Superagent`. Use it for the header, browser title, README title and application version label; do not rename package IDs or paths just for branding.
+
+- In version information, the application is `LAI Superagent` and the frontend component is `LAI Web`; keep these labels distinct.
