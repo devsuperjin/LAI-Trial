@@ -1,3 +1,5 @@
+import { SettingsRow } from '../layout/SettingsRow.tsx'
+import { SelectionGroup, SelectionIndicator } from './SelectionMotion.tsx'
 import { Switch } from './Switch.tsx'
 import { APPLICATION_NAME, WEB_COMPONENT_NAME } from '../brand.ts'
 import { PagePanel } from '../layout/PageLayout.tsx'
@@ -8,13 +10,22 @@ import type { ThemeMode } from '../appearance.tsx'
 export function GeneralSettings() {
   const { t, language, setLanguage } = useLanguage()
   const { mode, setMode, reduceMotion, setReduceMotion } = useAppearance()
-  return <div className="space-y-5">
+  return <div className="mx-auto max-w-4xl space-y-5">
     <PagePanel title={t('Appearance')}>
       <p className="mt-1 text-sm text-fd-muted-foreground">{t('Personalize this browser. Changes apply immediately.')}</p>
-      <div className="mt-5 space-y-5">
-        <div><span id="appearance-theme-label" className="block text-sm font-medium">{t('Theme')}</span><div role="group" aria-labelledby="appearance-theme-label" className="mt-2 flex flex-wrap gap-2">{(['light', 'dark', 'system'] as const).map(value => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value as ThemeMode)} className={`rounded-lg border px-4 py-2 text-sm transition-colors ${mode === value ? 'border-fd-primary bg-fd-primary/10 font-medium text-fd-primary' : 'border-fd-border hover:bg-fd-secondary'}`}>{t(value === 'light' ? 'Light' : value === 'dark' ? 'Dark' : 'System')}</button>)}</div></div>
-        <label className="block max-w-xs text-sm font-medium">{t('Language')}<select aria-label={t('Interface language')} value={language} onChange={event => setLanguage(event.target.value === 'zh' ? 'zh' : 'en')} className="mt-2 w-full rounded-md border border-fd-border bg-fd-muted px-3 py-2 text-sm"><option value="en">English</option><option value="zh">简体中文</option></select></label>
-        <div className="flex max-w-xs items-center justify-between gap-4"><span className="text-sm font-medium">{t('Reduce motion')}</span><Switch checked={reduceMotion} onChange={setReduceMotion} label={t('Reduce motion')} /></div>
+      <div className="mt-5 divide-y divide-fd-border">
+        <SettingsRow label={t('Theme')} description={t('Choose a light or dark appearance, or follow your system.')}>
+          <SelectionGroup><div role="group" aria-label={t('Theme')} className="relative flex rounded-lg border border-fd-border bg-fd-muted/50 p-1">{(['light', 'dark', 'system'] as const).map(value => <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value as ThemeMode)} className={`relative isolate rounded-md px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-fd-primary ${mode === value ? 'font-medium text-fd-primary' : 'text-fd-muted-foreground hover:text-fd-foreground'}`}>
+            {mode === value && <SelectionIndicator className="rounded-md bg-fd-card shadow-sm ring-1 ring-fd-border" />}
+            <span className="relative">{t(value === 'light' ? 'Light' : value === 'dark' ? 'Dark' : 'System')}</span>
+          </button>)}</div></SelectionGroup>
+        </SettingsRow>
+        <SettingsRow label={t('Language')} description={t('Choose the language used throughout the interface.')}>
+          <select aria-label={t('Interface language')} value={language} onChange={event => setLanguage(event.target.value === 'zh' ? 'zh' : 'en')} className="w-48 rounded-lg border border-fd-border bg-fd-background px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-fd-primary"><option value="en">English</option><option value="zh">简体中文</option></select>
+        </SettingsRow>
+        <SettingsRow label={t('Reduce motion')} description={t('Minimize interface animations and transitions.')}>
+          <Switch checked={reduceMotion} onChange={setReduceMotion} label={t('Reduce motion')} />
+        </SettingsRow>
       </div>
     </PagePanel>
     <PagePanel title={t('Version information')}>

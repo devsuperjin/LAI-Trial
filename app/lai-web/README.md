@@ -35,3 +35,5 @@ Selection controls share scoped `SelectionGroup` / `SelectionIndicator` animatio
 Sidebar navigation shares the selection animation and animates plugin group expansion. Settings → General → Reduce motion persists in this browser, defaults to the system preference, and controls Motion and CSS effects application-wide.
 
 Boolean switches in General settings and Superagent sources share the accessible `Switch` widget, with primary-color checked state, keyboard focus and disabled state.
+
+General settings use a bounded content width and shared responsive `SettingsRow` layout: descriptions on the left, aligned controls on the right, with stacked rows on small screens. Theme choices use the shared animated selection control.

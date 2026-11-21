@@ -4,6 +4,9 @@ import type { ReactNode } from 'react'
 type Language = 'en' | 'zh'
 const KEY = 'lai-web-language'
 const ZH: Record<string, string> = {
+  "Choose a light or dark appearance, or follow your system.": "选择浅色、深色外观，或跟随系统设置。",
+  "Choose the language used throughout the interface.": "选择整个应用界面使用的语言。",
+  "Minimize interface animations and transitions.": "减少界面中的动画和过渡效果。",
   "Reduce motion": "减少动画",
   "Tool call details": "工具调用详情",
   "Arguments": "调用参数",
